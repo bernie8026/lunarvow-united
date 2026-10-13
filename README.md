@@ -1,31 +1,43 @@
-# 月下誓約檔案庫
+# 月下誓約 — 整合檔案庫
 
-Bernie's Honkai Realm：以月下誓約為主題的靜態網站，包含攻略、劇情、角色圖鑑和圖片收藏。
+Bernie’s Honkai Realm 嘅完整 GitHub 版本，包含新整合首頁同原站全部 9 個頁面、圖片、音樂、女武神與分支資料、三語介面及原有功能
 
-網站可直接部署到 GitHub Pages，無需建置。開發時請用本機 HTTP 伺服器預覽；角色圖鑑需要透過 HTTP 讀取 `data/characters.json`。
+## 檔案結構
 
-## 驗證網站
+- `docs/`：可直接由 GitHub Pages 發佈嘅完整網站
+- `public/`：新整合首頁與共用導覽嘅來源檔案
+- `source/lunarvow/`：原站完整 204 個原始檔案，保留素材來源、授權、測試與更新程式
+- `scripts/prepare-site.cjs`：重新生成 `docs/`，加入返回總覽入口並更新預載清單
 
-需要 Node.js 20 或更新版本：
+## 更新網站
+
+需要 Node.js 20 或以上
 
 ```sh
-npm install
-npx playwright install chromium
-npm test
+node scripts/prepare-site.cjs
 ```
 
-測試會啟動並關閉自己的本機伺服器，檢查所有頁面的手機及桌面排版、鍵盤導覽、減少動態效果模式、無 JavaScript 的導覽、完整女武神及分支搜尋、消息篩選及日期狀態、三語切換、儲存受限時的行為，以及音樂播放狀態。測試用的 Playwright 不會載入到正式網站。
+將更新後嘅 `docs/` 一併提交到 GitHub
 
-若電腦已有 Microsoft Edge，可設定 `BROWSER_CHANNEL=msedge` 使用它執行測試。
+## GitHub Pages
 
-載入畫面會預載全部頁面，包括最新消息頁，以及清單內的圖片、資料、樣式、程式和完整背景音樂。首次入站至少展示十秒，全部資源成功後才可 Skip 或自動進入。進度按成功完成的資源數計算（不是位元組百分比），並等待目前頁面及字型準備好才自動退場。圖片必須完成解碼，其他檔案必須完整讀取；單項下載超過 60 秒會列為失敗，提供重試。失敗項目不會計作成功，亦不會自動略過或由 Escape 關閉；只有全部成功才進入。減少動態效果模式保留相同載入檢查。
+到 repository 嘅 **Settings → Pages**
 
-預載涵蓋網站子頁，並非 Git 分支或外部參考文章。112 張圖鑑角色圖片及 OpenCC 繁簡轉換程式均隨網站儲存，無需 Fandom 圖片跳轉或 jsDelivr 連線。每個角色保留圖片快照來源及原 Wiki 參考連結；素材權利屬原權利持有人。繁簡轉換來源和授權見 assets/vendor/opencc/NOTICE.md。失敗清單會區分 HTTP 錯誤、下載逾時、圖片載入／解碼失敗和連線受阻。瀏覽器可重用 HTTP 快取，但預載不保證離線存取，也不會預先執行其他頁面的程式。
+1. Source 選 **Deploy from a branch**
+2. Branch 選實際預設分支（通常係 `main`）
+3. Folder 選 **/docs**，然後按 Save
+4. 等 GitHub 顯示發佈成功，再使用 Pages 頁提供嘅正式網址
 
-官方消息以 data/news.json 為來源，按台港澳／國際服／大陸服分開整理。更新後執行 npm run build:news，生成首頁重點、完整消息頁及三語資料；npm run check:news 會檢查靜態頁是否過期。人工核對日期及來源見 [data/NEWS_SOURCES.md](data/NEWS_SOURCES.md)。
+Pages 可用性及網站可見性以你嘅 GitHub 帳戶方案同 repository 設定為準
 
-新增／移除頁面或資源、修改角色圖片網址或音樂版本後，執行 `npm run build:preload` 並一併提交 `assets/preload-manifest.json`。`npm run check:preload`（亦包含於 `npm test`）會檢查清單是否過期。
+官方設定說明：https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
 
-音樂會在預載階段下載，但仍然只會在按播放後播放；音量及播放位置會在瀏覽器允許時儲存在本機。繁簡轉換設有內建後備字表，轉換程式意外失敗時仍可切換語言。
+## 來源與日期
 
-手機音樂播放器預設只顯示播放按鈕，取得焦點後展開曲名及音量控制；移開焦點後收起。頁尾保留播放器所需空間。
+原站：https://github.com/bernie8026/lunarvow
+
+原站來源 commit：`5fc97f5457e1651d67b20d3a4d67eb1b1ed26879`
+
+原站內容複製日期：2026-10-13；原有官方消息核對日期：2026-10-05
+
+本網站為非官方、非商業個人檔案庫；遊戲素材權利屬原權利持有人，各素材原有來源與授權紀錄均保留
