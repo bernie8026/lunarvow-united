@@ -22,6 +22,12 @@ light/dark theme; native expandable course notes; skill and project filters;
 project search; accessible project dialogs; print profile; validated contact
 message draft with copy and text download. The contact form does not send mail.
 Only language and theme preferences are saved in browser storage.
+The original cinematic arrival (orbits, particles and an iris reveal) has been
+adapted to the portfolio. First arrival lasts at least 10 seconds unless skipped.
+Use Replay intro in the footer to see it again. Completion is session-based,
+so ordinary navigation does not repeat the 10-second arrival. Scroll reveals,
+page transitions and hover effects respect reduced-motion preferences.
+Resource progress reflects actual downloads; offline ZIP previews preload images.
 
 EDITING
 HTML contains readable Traditional Chinese fallback content. Translations are

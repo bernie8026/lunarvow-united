@@ -2,8 +2,17 @@ const fs=require('node:fs');
 const path=require('node:path');
 const root=path.resolve(__dirname,'..');
 const dist=path.join(root,'docs');
+const publicRoot=path.join(root,'public');
+function filesIn(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
+  const file=path.join(dir,entry.name);
+  return entry.isDirectory()?filesIn(file):[file];
+});}
+const resources=filesIn(publicRoot).map(file=>path.relative(publicRoot,file).split(path.sep).join('/'))
+  .filter(file=>/\.(html|css|js|webp)$/.test(file)||file==='assets/brand.svg')
+  .map(url=>({url,type:/\.(webp|svg)$/.test(url)?'image':'file'}));
+fs.writeFileSync(path.join(publicRoot,'assets/preload-manifest.json'),JSON.stringify({resources},null,2)+'\n');
 fs.rmSync(dist,{recursive:true,force:true});
-fs.cpSync(path.join(root,'public'),dist,{recursive:true});
+fs.cpSync(publicRoot,dist,{recursive:true});
 // Preserve old links to the copied site while presenting portfolio content.
 // The original source snapshot is kept in source/lunarvow and is not published.
 const redirects={

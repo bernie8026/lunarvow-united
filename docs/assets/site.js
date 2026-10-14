@@ -63,6 +63,7 @@
       buttons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.filter === category)));
       if (status) status.textContent = text("results").replace("{shown}", shown).replace("{total}", items.length);
       if (empty) empty.hidden = shown > 0;
+      document.dispatchEvent(new CustomEvent("portfolio:filter", {detail:{items}}));
     }
     buttons.forEach(button => button.addEventListener("click", () => { category = button.dataset.filter; update(); }));
     input?.addEventListener("input", update);
@@ -99,6 +100,7 @@
     updateInternalLinks();
     zones.forEach(zone => zone.update());
     renderDraft();
+    document.dispatchEvent(new CustomEvent("portfolio:language"));
     try {
       const url = new URL(location.href);
       url.searchParams.set("lang", language);

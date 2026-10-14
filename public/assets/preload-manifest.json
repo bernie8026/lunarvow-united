@@ -1,0 +1,84 @@
+{
+  "resources": [
+    {
+      "url": "about.html",
+      "type": "file"
+    },
+    {
+      "url": "assets/arrival-cinematic.css",
+      "type": "file"
+    },
+    {
+      "url": "assets/brand.svg",
+      "type": "image"
+    },
+    {
+      "url": "assets/camera.webp",
+      "type": "image"
+    },
+    {
+      "url": "assets/content.js",
+      "type": "file"
+    },
+    {
+      "url": "assets/drone.webp",
+      "type": "image"
+    },
+    {
+      "url": "assets/identity.webp",
+      "type": "image"
+    },
+    {
+      "url": "assets/lunar-project.webp",
+      "type": "image"
+    },
+    {
+      "url": "assets/motion.css",
+      "type": "file"
+    },
+    {
+      "url": "assets/motion.js",
+      "type": "file"
+    },
+    {
+      "url": "assets/preloader.js",
+      "type": "file"
+    },
+    {
+      "url": "assets/site.css",
+      "type": "file"
+    },
+    {
+      "url": "assets/site.js",
+      "type": "file"
+    },
+    {
+      "url": "contact.html",
+      "type": "file"
+    },
+    {
+      "url": "education.html",
+      "type": "file"
+    },
+    {
+      "url": "experience.html",
+      "type": "file"
+    },
+    {
+      "url": "index.html",
+      "type": "file"
+    },
+    {
+      "url": "projects.html",
+      "type": "file"
+    },
+    {
+      "url": "sitemap.html",
+      "type": "file"
+    },
+    {
+      "url": "skills.html",
+      "type": "file"
+    }
+  ]
+}
