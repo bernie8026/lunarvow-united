@@ -1,43 +1,37 @@
-# 月下誓約 — 整合檔案庫
+# Bernie Leung 個人作品集
 
-Bernie’s Honkai Realm 嘅完整 GitHub 版本，包含新整合首頁同原站全部 9 個頁面、圖片、音樂、女武神與分支資料、三語介面及原有功能
+由月下整合版複製網站改建的八頁個人作品集，用於 CIS222 / CIS282 個人網站功課。
+保留深色、粉紅、網格及檔案庫視覺風格，內容改為自我介紹與求職作品集。
 
-## 檔案結構
+## 網站頁面
 
-- `docs/`：可直接由 GitHub Pages 發佈嘅完整網站
-- `public/`：新整合首頁與共用導覽嘅來源檔案
-- `source/lunarvow/`：原站完整 204 個原始檔案，保留素材來源、授權、測試與更新程式
-- `scripts/prepare-site.cjs`：重新生成 `docs/`，加入返回總覽入口並更新預載清單
+`index.html`、`about.html`、`experience.html`、`education.html`、`skills.html`、
+`projects.html`、`contact.html`、`sitemap.html`。
 
-## 更新網站
+支援香港繁體中文、英文、簡體中文；手機導覽、深淺主題、作品搜尋與分類、
+技能分類、項目詳情、可展開的學習記錄，以及聯絡訊息草稿。
+聯絡表格只整理、複製或下載訊息，不會直接發送。網站不需後端或外部依賴。
 
-需要 Node.js 20 或以上
+## 原始檔與發佈
+
+- `public/`：可直接開啟的完整個人作品集原始檔
+- `docs/`：GitHub Pages 發佈版本；包含舊版網址的導向頁面
+- `source/lunarvow/`：原月下網站的來源快照，供保留歷史；不會複製進新發佈網站
+- `scripts/prepare-site.cjs`：由 `public/` 產生 `docs/`
+
+更新 `public/` 後執行：
 
 ```sh
 node scripts/prepare-site.cjs
 ```
 
-將更新後嘅 `docs/` 一併提交到 GitHub
+GitHub Pages 保持 **main /docs**。可提交 ZIP 只需包含完整 `public/` 內容，
+放在同一個根資料夾；解壓後開啟 `index.html` 即可。
 
-## GitHub Pages
+## 內容與圖片
 
-到 repository 嘅 **Settings → Pages**
-
-1. Source 選 **Deploy from a branch**
-2. Branch 選實際預設分支（通常係 `main`）
-3. Folder 選 **/docs**，然後按 Save
-4. 等 GitHub 顯示發佈成功，再使用 Pages 頁提供嘅正式網址
-
-Pages 可用性及網站可見性以你嘅 GitHub 帳戶方案同 repository 設定為準
-
-官方設定說明：https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
-
-## 來源與日期
-
-原站：https://github.com/bernie8026/lunarvow
-
-原站來源 commit：`5fc97f5457e1651d67b20d3a4d67eb1b1ed26879`
-
-原站內容複製日期：2026-10-13；原有官方消息核對日期：2026-10-05
-
-本網站為非官方、非商業個人檔案庫；遊戲素材權利屬原權利持有人，各素材原有來源與授權紀錄均保留
+個人內容以已提供的學生、兼職、網站、攝影及 STEM 項目背景整理；
+未列未確認的工作日期、成績或證書。提交及求職前可再更新個人資料。
+自製向量示意圖不當作真人肖像、已完成產品或實拍攝影作品。
+月下項目所用遊戲插畫版權屬原權利持有人，原素材來源記錄保留於
+`public/assets/LUNAR-ART-CREDITS.md`。

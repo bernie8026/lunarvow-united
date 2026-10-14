@@ -1,0 +1,43 @@
+BERNIE LEUNG PERSONAL PORTFOLIO
+CIS222 Web Design and Development / CIS282 Web Development and Security
+
+OPEN THE WEBSITE
+Unzip the complete folder and open index.html in a modern browser.
+Keep all HTML files and the assets folder together. The site does not require
+a server, a build step, an account, or an external font/CDN.
+
+PAGES
+index.html       Home
+about.html       Personal information
+experience.html  Working experience
+education.html   Education background
+skills.html      Skills with categories and examples
+projects.html    Project portfolio with search, filters and details
+contact.html     Public GitHub profile and message organiser
+sitemap.html     Linked site map of all eight pages
+
+INTERACTIONS
+Traditional Chinese (Hong Kong), English and Simplified Chinese; mobile menu;
+light/dark theme; native expandable course notes; skill and project filters;
+project search; accessible project dialogs; print profile; validated contact
+message draft with copy and text download. The contact form does not send mail.
+Only language and theme preferences are saved in browser storage.
+
+EDITING
+HTML contains readable Traditional Chinese fallback content. Translations are
+in assets/content.js, styles in assets/site.css and behaviour in assets/site.js.
+Review the personal information before using this for a formal job application.
+No employment dates, academic grades or certifications have been invented.
+
+IMAGES AND CREDITS
+identity.svg, drone.svg, camera.svg and brand.svg are custom vector illustrations.
+The drone and camera illustrations are not product photos or original photography.
+lunar-project.webp is game artwork from the original Lunar Vow fan website.
+Game imagery remains the property of miHoYo / HoYoverse.
+See assets/LUNAR-ART-CREDITS.md for the retained original attribution.
+
+ASSIGNMENT COVERAGE
+Eight .html files; linked pages; personal information, working experience,
+education, skills and related projects; HTML site map; HTML/CSS/JavaScript;
+responsive layout; interactive components; local images. All website materials
+are included in this one root folder for ZIP submission.
