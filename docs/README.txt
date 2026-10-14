@@ -31,6 +31,7 @@ No employment dates, academic grades or certifications have been invented.
 
 IMAGES AND CREDITS
 identity.svg, drone.svg, camera.svg and brand.svg are custom vector illustrations.
+WebP copies provide consistent illustration colours in both website themes.
 The drone and camera illustrations are not product photos or original photography.
 lunar-project.webp is game artwork from the original Lunar Vow fan website.
 Game imagery remains the property of miHoYo / HoYoverse.
