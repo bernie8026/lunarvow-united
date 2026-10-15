@@ -5,15 +5,15 @@
       "type": "file"
     },
     {
-      "url": "assets/arrival-cinematic.css",
+      "url": "assets/arrival-cinematic.css?v=blue-violet-1",
       "type": "file"
     },
     {
-      "url": "assets/brand.svg",
+      "url": "assets/brand.svg?v=blue-violet-1",
       "type": "image"
     },
     {
-      "url": "assets/camera.webp",
+      "url": "assets/camera.webp?v=blue-violet-1",
       "type": "image"
     },
     {
@@ -21,11 +21,11 @@
       "type": "file"
     },
     {
-      "url": "assets/drone.webp",
+      "url": "assets/drone.webp?v=blue-violet-1",
       "type": "image"
     },
     {
-      "url": "assets/identity.webp",
+      "url": "assets/identity.webp?v=blue-violet-1",
       "type": "image"
     },
     {
@@ -33,11 +33,11 @@
       "type": "image"
     },
     {
-      "url": "assets/motion.css",
+      "url": "assets/motion.css?v=blue-violet-1",
       "type": "file"
     },
     {
-      "url": "assets/motion.js",
+      "url": "assets/motion.js?v=blue-violet-1",
       "type": "file"
     },
     {
@@ -45,7 +45,7 @@
       "type": "file"
     },
     {
-      "url": "assets/site.css",
+      "url": "assets/site.css?v=blue-violet-1",
       "type": "file"
     },
     {

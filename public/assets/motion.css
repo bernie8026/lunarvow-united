@@ -1,11 +1,11 @@
 /* Adapt the original Lunar Vow cinematic to the personal portfolio. */
-.boot-screen{--display:var(--mono);--paper:#fff2f5;--signal:#f1a0b9;position:fixed;inset:0;z-index:1000;overflow:hidden;color:#fff2f5;box-sizing:border-box;overscroll-behavior:contain}
+.boot-screen{--display:var(--mono);--paper:#f3f5ff;--signal:#a4b4ff;position:fixed;inset:0;z-index:1000;overflow:hidden;color:#f3f5ff;box-sizing:border-box;overscroll-behavior:contain}
 .boot-screen::before,.boot-screen::after{content:"";position:absolute;inset:0;pointer-events:none}
 body.is-booting{overflow:hidden}
 .boot-screen__bar>span{display:block;width:100%;height:100%;transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
 .boot-screen__actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.boot-screen__retry{margin-top:16px;padding:12px 18px;border:1px solid #f1a0b9;background:#f1a0b9;color:#281320;font:700 11px/1.6 var(--mono);cursor:pointer}
-.boot-screen button:focus-visible{outline:2px solid #fff2f5;outline-offset:5px}
+.boot-screen__retry{margin-top:16px;padding:12px 18px;border:1px solid #a4b4ff;background:#a4b4ff;color:#111932;font:700 11px/1.6 var(--mono);cursor:pointer}
+.boot-screen button:focus-visible{outline:2px solid #f3f5ff;outline-offset:5px}
 .boot-screen__visual .boot-screen__art{inset:auto;width:min(33vw,54vh);height:auto;aspect-ratio:1;object-fit:cover;border-radius:50%;mask-image:radial-gradient(circle,#000 57%,#000b 64%,transparent 72%)}
 .boot-screen__orbit--inner,.boot-screen__orbit--outer{z-index:2;pointer-events:none}
 .boot-screen__ring{z-index:3;pointer-events:none}
@@ -18,7 +18,7 @@ body.is-booting{overflow:hidden}
 .hero-art{overflow:hidden}
 .hero-art>img{transition:transform .8s cubic-bezier(.2,.7,.3,1)}
 .hero-art:hover>img{transform:scale(1.025)}
-.hero-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,#ffd7e212 49%,transparent 66%);transform:translateX(-115%);animation:portfolio-scan 9s 1.5s ease-in-out infinite}
+.hero-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,#d4ddff12 49%,transparent 66%);transform:translateX(-115%);animation:portfolio-scan 9s 1.5s ease-in-out infinite}
 .hero-meta i{animation:portfolio-beacon 3s ease-in-out infinite}
 .button,.navigation-row,.sitemap-entry,.feature-links>a,.archive-strip>div{transition:background .2s ease,color .2s ease,transform .25s ease,border-color .2s ease}
 .button:hover{transform:translateY(-3px)}
@@ -29,13 +29,13 @@ body.is-booting{overflow:hidden}
 .main-nav a{transition:color .2s ease}
 .main-nav a::before{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .25s ease}
 .main-nav a:hover::before{transform:scaleX(1)}
-.page-transition{position:fixed;inset:0;z-index:900;background:#140d13;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .16s ease,visibility .16s ease;display:grid;place-items:center}
-.page-transition::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#f1a0b914 1px,transparent 1px),linear-gradient(90deg,#f1a0b914 1px,transparent 1px);background-size:70px 70px}
-.page-transition__content{position:relative;text-align:center;color:#f8f0ef;padding:30px;max-width:100%}
-.page-transition__code{display:block;font:9px/1.7 var(--mono);letter-spacing:2px;color:#f1a0b9;margin-bottom:18px}
+.page-transition{position:fixed;inset:0;z-index:900;background:#0b1022;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .16s ease,visibility .16s ease;display:grid;place-items:center}
+.page-transition::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#a4b4ff14 1px,transparent 1px),linear-gradient(90deg,#a4b4ff14 1px,transparent 1px);background-size:70px 70px}
+.page-transition__content{position:relative;text-align:center;color:#f1f4ff;padding:30px;max-width:100%}
+.page-transition__code{display:block;font:9px/1.7 var(--mono);letter-spacing:2px;color:#a4b4ff;margin-bottom:18px}
 .page-transition__title{font:600 clamp(22px,4vw,48px)/1.4 var(--sans)}
-.page-transition__bar{height:2px;background:#f1a0b925;width:240px;max-width:65vw;margin:24px auto 0;overflow:hidden}
-.page-transition__bar i{display:block;width:100%;height:100%;background:#f1a0b9;transform:scaleX(0);transform-origin:left}
+.page-transition__bar{height:2px;background:#a4b4ff25;width:240px;max-width:65vw;margin:24px auto 0;overflow:hidden}
+.page-transition__bar i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#8cafff,#b69aff);transform:scaleX(0);transform-origin:left}
 body.is-page-leaving .page-transition{opacity:1;visibility:visible}
 body.is-page-leaving .page-transition__bar i{animation:portfolio-link .22s ease both}
 @keyframes portfolio-scan{0%,75%,100%{transform:translateX(-115%)}45%,60%{transform:translateX(115%)}}

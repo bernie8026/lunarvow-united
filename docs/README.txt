@@ -48,3 +48,7 @@ Eight .html files; linked pages; personal information, working experience,
 education, skills and related projects; HTML site map; HTML/CSS/JavaScript;
 responsive layout; interactive components; local images. All website materials
 are included in this one root folder for ZIP submission.
+
+配色 / Palette
+藍紫主題：深藍背景、藍紫漸變、冷色光環與插圖；淺色模式使用淡藍紫底色。
+Blue-violet theme with a navy background, blue-to-violet accents, matching intro and illustrations, and a pale light theme.
