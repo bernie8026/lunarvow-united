@@ -29,6 +29,14 @@
       "type": "image"
     },
     {
+      "url": "assets/immersive.css",
+      "type": "file"
+    },
+    {
+      "url": "assets/immersive.js",
+      "type": "file"
+    },
+    {
       "url": "assets/lunar-project.webp",
       "type": "image"
     },
@@ -42,6 +50,14 @@
     },
     {
       "url": "assets/preloader.js",
+      "type": "file"
+    },
+    {
+      "url": "assets/showcase.css",
+      "type": "file"
+    },
+    {
+      "url": "assets/showcase.js",
       "type": "file"
     },
     {

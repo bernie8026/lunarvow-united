@@ -38,7 +38,7 @@
     body.dataset.theme = theme;
     themeButton?.setAttribute("aria-pressed", String(theme === "light"));
     preference.set("theme", theme);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#fff8fa" : "#140d13");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f7f8ff" : "#0b1022");
   }
   setTheme(preference.get("theme") === "light" ? "light" : "dark");
   themeButton?.addEventListener("click", () => setTheme(body.dataset.theme === "light" ? "dark" : "light"));
