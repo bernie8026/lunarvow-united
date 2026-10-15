@@ -55,6 +55,7 @@
     });
     detail.addEventListener("toggle", () => {
       if (!course.animation) course.expanded = detail.open;
+      queueDraw();
     });
     return course;
   });
@@ -68,6 +69,7 @@
     course.detail.open = course.expanded;
     animation?.cancel();
     course.content.style.removeProperty("overflow");
+    queueDraw();
   }
 
   let queued = 0;
@@ -85,8 +87,15 @@
   }
   function sectionProgress(element) {
     const rect = element.getBoundingClientRect();
-    if (narrow.matches) return clamp((innerHeight * .7 - rect.top) / Math.max(1, rect.height));
-    return clamp((innerHeight * .83 - rect.top) / (innerHeight * .48 + rect.height * .2));
+    const scroller = document.scrollingElement || document.documentElement;
+    const scroll = Math.max(0, scroller.scrollTop);
+    const maxScroll = Math.max(0, scroller.scrollHeight - innerHeight);
+    // A section near the footer must finish within the scroll distance available.
+    if (maxScroll <= 1 || scroll >= maxScroll - 1) return 1;
+    const start = rect.top + scroll - innerHeight * (narrow.matches ? .7 : .83);
+    const duration = narrow.matches ? rect.height : innerHeight * .48 + rect.height * .2;
+    const end = Math.min(start + duration, maxScroll);
+    return clamp((scroll - start) / Math.max(1, end - start));
   }
   function draw() {
     queued = 0;
