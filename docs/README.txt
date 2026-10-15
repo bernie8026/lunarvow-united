@@ -25,9 +25,10 @@ Language, theme and ambient-motion preferences are saved in browser storage.
 The original cinematic arrival (orbits, particles and an iris reveal) has been
 adapted to the portfolio. First arrival lasts at least 10 seconds unless skipped.
 Use Replay intro in the footer to see it again. Completion is session-based,
-so ordinary navigation does not repeat the 10-second arrival. Motion is limited
-to the home title, campus photograph and camera photograph. Text, filtering and
-navigation respond immediately. All motion respects reduced-motion preferences.
+so ordinary navigation does not repeat the 10-second arrival. Motion includes
+orbital depth and shooting stars, education paths and parallax, distinct project
+transitions, interactive product photos, a local flash demo and skill filtering.
+The footer pauses animations. All motion respects reduced-motion preferences.
 Resource progress reflects actual downloads; offline ZIP previews preload images.
 
 EDITING
@@ -68,3 +69,9 @@ Education uses a campus image and connected timeline; projects use distinct imag
 spreads and open specifications. Experience follows a continuous journey, skills
 use typographic rows, and contact uses a letter-style form. assets/editorial.css
 contains page-specific layouts. Shared card reveals and page overlays are removed.
+
+ANIMATION CONTROLS
+Use the footer's Pause animations button to stop motion. Education has drawn
+timelines and native course transitions; project switches have individual scenes.
+The flash photo offers a single user-triggered light demonstration. Reduced
+motion and hidden-tab states stop or settle decorative movement.

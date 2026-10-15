@@ -8,7 +8,8 @@ function filesIn(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(en
   return entry.isDirectory()?filesIn(file):[file];
 });}
 const editorialAssets=new Set(['motion.css','immersive.css','showcase.css','education.css','equipment.css','editorial.css','motion.js','showcase.js'].map(file=>'assets/'+file));
-const versionFor=url=>editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'';
+const motionAssets=new Set(['motion.css','motion.js','immersive.css','immersive.js','showcase.css','showcase.js','interactions.css','interactions.js','education-motion.css','education-motion.js'].map(file=>'assets/'+file));
+const versionFor=url=>motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'';
 const resources=filesIn(publicRoot).map(file=>path.relative(publicRoot,file).split(path.sep).join('/'))
   .filter(file=>/\.(html|css|js|webp|png|jpe?g)$/.test(file)||file==='assets/brand.svg')
   .map(url=>({url:url+(versionFor(url)?'?v='+versionFor(url):''),type:/\.(webp|png|jpe?g|svg)$/.test(url)?'image':'file'}));

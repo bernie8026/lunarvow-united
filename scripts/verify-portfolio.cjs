@@ -76,9 +76,13 @@ const pages = ['index','about','experience','education','skills','projects','con
   assert.equal(await arrival.locator('main').evaluate(el=>el.inert),false);
   await arrival.locator('.ambient-toggle').click();
   await arrival.locator('.motion-replay').click();
+  await arrival.locator('.boot-screen').waitFor({state:'detached'});
+  assert.equal(await arrival.locator('main').evaluate(el=>el.inert),false,'paused intro returns to readable content');
+  await arrival.locator('.ambient-toggle').click();
+  await arrival.locator('.motion-replay').click();
   await arrival.locator('.boot-screen').waitFor();
   await arrival.waitForFunction(()=>Number(getComputedStyle(document.querySelector('.boot-screen__title')).opacity) > .9);
-  assert(await arrival.locator('.boot-screen__title').isVisible(),'pausing ambient motion must not freeze intro entrance');
+  assert(await arrival.locator('.boot-screen__title').isVisible(),'replay runs after resuming animations');
   await arrival.keyboard.press('Escape');
   await arrival.locator('.boot-screen').waitFor({state:'detached'});
   await arrival.locator('.menu-toggle').click();

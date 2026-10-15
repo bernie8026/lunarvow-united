@@ -19,6 +19,8 @@
   const assetBase = new URL("./", document.currentScript.src);
   const asset = filename => new URL(filename, assetBase).href;
   const number = index => String(index + 1).padStart(2, "0");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
 
   mounts.forEach((mount, instance) => {
     if (mount.dataset.showcaseReady === "true") return;
@@ -35,8 +37,12 @@
       <div class="showcase-stage" data-active-project="lunar">
         <div class="showcase-panels">
           ${projects.map((project, index) => `
-            <div class="showcase-panel${index === 0 ? " is-active" : ""}" id="${prefix}-panel-${index}" role="tabpanel" aria-labelledby="${prefix}-tab-${index}" tabindex="0"${index ? ' aria-hidden="true" inert' : ""}>
-              <div class="showcase-art"><img src="${asset(project.image)}" alt="" data-alt="${project.alt}" width="1080" height="608" loading="lazy" decoding="async" draggable="false"></div>
+            <div class="showcase-panel${index === 0 ? " is-active" : ""}" data-showcase-project="${project.id}" id="${prefix}-panel-${index}" role="tabpanel" aria-labelledby="${prefix}-tab-${index}" tabindex="0"${index ? ' aria-hidden="true" inert' : ""}>
+              <div class="showcase-art">
+                ${project.id === "aerovate" ? '<svg class="showcase-flight-trace" viewBox="0 0 640 570" fill="none" aria-hidden="true"><path d="M75 427C173 533 545 445 566 263C589 68 327 72 178 191"/></svg>' : ""}
+                <div class="showcase-depth"><div class="showcase-flight"><img src="${asset(project.image)}" alt="" data-alt="${project.alt}" width="1080" height="608" loading="lazy" decoding="async" draggable="false"></div></div>
+                ${project.id === "photography" ? '<span class="showcase-focus" aria-hidden="true"><i></i><i></i><i></i><i></i><b>+</b></span>' : ""}
+              </div>
               <span class="showcase-watermark" aria-hidden="true">${number(index)}</span>
               <div class="showcase-copy">
                 <p class="showcase-category"><span class="showcase-diamond" aria-hidden="true"></span><span data-i18n="${project.category}"></span></p>
@@ -76,6 +82,37 @@
     let active = 0;
     let gesture = null;
     let suppressClick = false;
+    let inView = true;
+    let pointerFrame = 0;
+    let pointerPoint = null;
+    let entranceTimer = 0;
+    let pausedByEvent = false;
+
+    const motionAllowed = () => !reducedMotion.matches && !pausedByEvent && !document.hidden && !document.body.classList.contains("motion-paused") && !document.body.classList.contains("is-booting") && inView;
+    function resetDepth() {
+      cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
+      pointerPoint = null;
+      stage.style.setProperty("--showcase-depth-x", "0px");
+      stage.style.setProperty("--showcase-depth-y", "0px");
+      stage.style.setProperty("--showcase-depth-turn", "0deg");
+    }
+    function syncMotion() {
+      const allowed = motionAllowed();
+      stage.classList.toggle("showcase-motion-off", !allowed);
+      if (!allowed) {
+        resetDepth();
+        clearTimeout(entranceTimer);
+        panels.forEach(panel => panel.classList.remove("is-entering"));
+      }
+    }
+    function animateSelection() {
+      clearTimeout(entranceTimer);
+      panels.forEach(panel => panel.classList.remove("is-entering"));
+      if (!motionAllowed()) return;
+      panels[active].classList.add("is-entering");
+      entranceTimer = setTimeout(() => panels.forEach(panel => panel.classList.remove("is-entering")), 1400);
+    }
 
     function positionText() {
       return labels[language()].position.replace("{current}", active + 1).replace("{total}", projects.length);
@@ -104,6 +141,8 @@
         panel.tabIndex = chosen ? 0 : -1;
       });
       stage.dataset.activeProject = projects[active].id;
+      resetDepth();
+      animateSelection();
       section.querySelector(".showcase-position strong").textContent = number(active);
       if (announce) status.textContent = `${projects[active].title} · ${positionText()}`;
       section.dispatchEvent(new CustomEvent("portfolio:showcase", {bubbles:true, detail:{id:projects[active].id, index:active}}));
@@ -141,6 +180,38 @@
     });
     previous.addEventListener("click", () => select(active - 1));
     next.addEventListener("click", () => select(active + 1));
+
+    // Only the technical object follows the pointer; copy stays still and readable.
+    stage.addEventListener("pointermove", event => {
+      if (event.pointerType !== "mouse" || active !== 1 || !finePointer.matches || !motionAllowed()) return;
+      pointerPoint = {x:event.clientX, y:event.clientY};
+      if (pointerFrame) return;
+      pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
+        if (!pointerPoint || !motionAllowed()) return;
+        const bounds = stage.getBoundingClientRect();
+        const x = Math.max(-1, Math.min(1, (pointerPoint.x - bounds.left) / bounds.width * 2 - 1));
+        const y = Math.max(-1, Math.min(1, (pointerPoint.y - bounds.top) / bounds.height * 2 - 1));
+        stage.style.setProperty("--showcase-depth-x", `${(x * 12).toFixed(2)}px`);
+        stage.style.setProperty("--showcase-depth-y", `${(y * 9).toFixed(2)}px`);
+        stage.style.setProperty("--showcase-depth-turn", `${(x * .8).toFixed(2)}deg`);
+      });
+    }, {passive:true});
+    stage.addEventListener("pointerleave", resetDepth, {passive:true});
+    document.addEventListener("visibilitychange", syncMotion);
+    document.addEventListener("portfolio:motion", event => {
+      pausedByEvent = Boolean(event.detail?.paused);
+      syncMotion();
+    });
+    reducedMotion.addEventListener("change", syncMotion);
+    new MutationObserver(syncMotion).observe(document.body, {attributes:true, attributeFilter:["class"]});
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(entries => {
+        inView = entries[0].isIntersecting;
+        syncMotion();
+      }, {rootMargin:"80px"}).observe(stage);
+    }
+    syncMotion();
 
     // Only horizontal, single-pointer touch gestures change the slide. Vertical
     // scrolling and pinch zoom remain native browser gestures.

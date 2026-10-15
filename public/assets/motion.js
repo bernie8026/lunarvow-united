@@ -27,7 +27,7 @@
     state.revealed = true;
     observer?.unobserve(element);
     element.dataset.motionState = "ready";
-    if (reduced.matches || typeof element.animate !== "function") return;
+    if (reduced.matches || body.classList.contains("motion-paused") || document.hidden || typeof element.animate !== "function") return;
     const scene = scenes[element.dataset.motion] || scenes.title;
     try {
       element.dataset.motionState = "revealing";
@@ -68,6 +68,13 @@
     elements.forEach(element => {const state=states.get(element);state.animation?.cancel();state.animation=null;state.revealed=true;element.dataset.motionState="ready";});
     activeArrival?.skip();
   });
+  function syncSceneMotion() {
+    if (!reduced.matches && !document.hidden && !body.classList.contains("motion-paused")) return;
+    elements.forEach(element => {const state=states.get(element);state.animation?.cancel();state.animation=null;element.dataset.motionState="ready";});
+    if (body.classList.contains("motion-paused")) activeArrival?.skip();
+  }
+  document.addEventListener("portfolio:motion", syncSceneMotion);
+  document.addEventListener("visibilitychange", syncSceneMotion);
   window.addEventListener("pageshow",event => {
     if(event.persisted){activeArrival?.skip();startPageMotion();}
   });
@@ -88,7 +95,7 @@
     background.forEach(element=>{element.inert=true;});
     body.append(screen);body.classList.add("is-booting");
     const started=performance.now();
-    const minimumMs=reduced.matches?0:10000;
+    const minimumMs=reduced.matches||body.classList.contains("motion-paused")?0:10000;
     screen.dataset.minimumMs=String(minimumMs);
     let progress={total:0,loaded:0,failed:[],running:true};
     let preloadReady=false,pageReady=false,leaving=false,finished=false;
@@ -130,7 +137,7 @@
       if(finished||leaving)return;
       if(!force && (!preloadReady||!pageReady||performance.now()-started<minimumMs))return;
       leaving=true;render();
-      if(reduced.matches){finish();return;}
+      if(reduced.matches||body.classList.contains("motion-paused")){finish();return;}
       screen.classList.add("is-unveiling");
       exitTimer=setTimeout(finish,1200);
     }

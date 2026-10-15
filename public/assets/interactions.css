@@ -1,0 +1,27 @@
+/* Interaction follows the content: reading line, journey, product and letter. */
+.reading-progress{position:fixed;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-secondary));transform:scaleX(var(--read,0));transform-origin:left;pointer-events:none;z-index:150}
+body[data-page=experience] .experience-entry:before{background:linear-gradient(var(--accent) 0 var(--journey,0%),var(--line) var(--journey,0%) 100%)}
+body[data-page=experience] .experience-entry.journey-current:after{animation:journey-pulse 2.8s ease-out infinite}
+@keyframes journey-pulse{0%,100%{box-shadow:0 0 0 5px var(--bg)}50%{box-shadow:0 0 0 5px var(--bg),0 0 0 10px color-mix(in srgb,var(--accent) 14%,transparent)}}
+.interactive-product>img{transition:transform .65s cubic-bezier(.2,.7,.3,1);transform-origin:50% 45%;will-change:auto}
+.interactive-product.is-engaged>img{transform:perspective(850px) rotateX(var(--product-y,0deg)) rotateY(var(--product-x,0deg)) scale(1.025)}
+.gear-product-image--camera.interactive-product{overflow:hidden;background:white}
+.flash-picture{position:relative;display:block;overflow:hidden}
+.flash-light{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 15%,white 15%,#d9e7ff 55%,transparent);opacity:0;pointer-events:none;mix-blend-mode:screen}
+.gear-flash-image figcaption{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px}
+.flash-demo{padding:6px 0;border:0;border-bottom:1px solid var(--line);color:var(--accent);background:none;font:11px/1.7 var(--sans);min-height:36px;white-space:nowrap}
+.flash-demo:hover{border-color:var(--accent)}
+.gear-spec-grid>div{position:relative}
+.gear-spec-grid>div:after{content:"";position:absolute;height:1px;left:0;right:0;bottom:-1px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.2,.7,.3,1)}
+.gear-spec-grid>div:hover:after{transform:scaleX(1)}
+body[data-page=contact] .contact-panel label{position:relative}
+body[data-page=contact] .contact-panel label:after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,var(--accent),var(--accent-secondary));transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.2,.7,.3,1);pointer-events:none}
+body[data-page=contact] .contact-panel label:focus-within:after{transform:scaleX(1)}
+dialog[open]{animation:dialog-arrive .3s cubic-bezier(.2,.7,.3,1)}
+@keyframes dialog-arrive{from{opacity:.45;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+.motion-paused .journey-current:after{animation:none!important}
+.motion-paused .interactive-product>img{transform:none!important;transition:none!important}
+.motion-paused .gear-spec-grid>div:after,.motion-paused .contact-panel label:after{transition:none!important}
+.motion-paused dialog[open]{animation:none}
+@media(prefers-reduced-motion:reduce){.reading-progress{display:none}.experience-entry:after,dialog[open]{animation:none!important}.interactive-product>img{transform:none!important;transition:none!important}.gear-spec-grid>div:after,.contact-panel label:after{transition:none!important}}
+@media print{.reading-progress,.flash-demo,.flash-light{display:none!important}.interactive-product>img{transform:none!important}.experience-entry:after{animation:none!important}}

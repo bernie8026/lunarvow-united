@@ -25,3 +25,5 @@ body.is-booting{overflow:hidden}
 @media(max-height:620px){.boot-screen__visual .boot-screen__art{width:min(30vw,47vh)}.boot-screen .boot-screen__poem{font-size:11px}.boot-screen .boot-screen__subtitle{letter-spacing:.14em}.boot-screen__console{padding-top:12px!important}.boot-screen__skip-animation,.boot-screen__retry{margin-top:9px}}
 @media(prefers-reduced-motion:reduce){.hero-art::after{display:none}.hero-meta i{animation:none}.hero-art:hover>img,.button:hover,.navigation-row:hover,.sitemap-entry:hover{transform:none}.motion-item{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}}
 @media print{.boot-screen,.motion-replay{display:none!important}.motion-item{opacity:1!important;transform:none!important;filter:none!important;clip-path:none!important}.hero-art::after{display:none}}
+
+.motion-paused .boot-screen *{animation-play-state:paused!important}

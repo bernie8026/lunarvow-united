@@ -37,6 +37,14 @@
       "type": "file"
     },
     {
+      "url": "assets/education-motion.css?v=motion-2",
+      "type": "file"
+    },
+    {
+      "url": "assets/education-motion.js?v=motion-2",
+      "type": "file"
+    },
+    {
       "url": "assets/education.css?v=editorial-1",
       "type": "file"
     },
@@ -65,11 +73,19 @@
       "type": "image"
     },
     {
-      "url": "assets/immersive.css?v=editorial-1",
+      "url": "assets/immersive.css?v=motion-2",
       "type": "file"
     },
     {
-      "url": "assets/immersive.js",
+      "url": "assets/immersive.js?v=motion-2",
+      "type": "file"
+    },
+    {
+      "url": "assets/interactions.css?v=motion-2",
+      "type": "file"
+    },
+    {
+      "url": "assets/interactions.js?v=motion-2",
       "type": "file"
     },
     {
@@ -77,11 +93,11 @@
       "type": "image"
     },
     {
-      "url": "assets/motion.css?v=editorial-1",
+      "url": "assets/motion.css?v=motion-2",
       "type": "file"
     },
     {
-      "url": "assets/motion.js?v=editorial-1",
+      "url": "assets/motion.js?v=motion-2",
       "type": "file"
     },
     {
@@ -89,11 +105,11 @@
       "type": "file"
     },
     {
-      "url": "assets/showcase.css?v=editorial-1",
+      "url": "assets/showcase.css?v=motion-2",
       "type": "file"
     },
     {
-      "url": "assets/showcase.js?v=editorial-1",
+      "url": "assets/showcase.js?v=motion-2",
       "type": "file"
     },
     {
