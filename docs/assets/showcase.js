@@ -33,7 +33,6 @@
         <p class="showcase-hint"></p>
       </div>
       <div class="showcase-stage" data-active-project="lunar">
-        <div class="showcase-orbit" aria-hidden="true"><i></i><i></i></div>
         <div class="showcase-panels">
           ${projects.map((project, index) => `
             <div class="showcase-panel${index === 0 ? " is-active" : ""}" id="${prefix}-panel-${index}" role="tabpanel" aria-labelledby="${prefix}-tab-${index}" tabindex="0"${index ? ' aria-hidden="true" inert' : ""}>

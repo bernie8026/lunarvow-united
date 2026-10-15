@@ -14,89 +14,61 @@
   let motionAllowed = false;
   const states = new WeakMap();
   const elements = new Set();
-  const selector = ".hero-copy > *, .hero-art, .page-heading > h1, .page-intro, .section-heading, .intro-layout > div, .principles > article, .experience-entry, .education-main > div, .course-list > details, .skill-item, .project-entry, .sitemap-entry, .navigation-row, .learning-cycle > li, .contact-layout > div";
-
-  function animateIn(element, force = false) {
+  // Animate only selected moments. Reading, filtering and navigation remain immediate.
+  const selector = "[data-motion], body[data-page=index] .hero-copy h1";
+  const scenes = {
+    "title": {frames:[{opacity:.35,transform:"translateY(18px)"},{opacity:1,transform:"none"}],duration:650},
+    "image-wipe": {frames:[{clipPath:"inset(0 12% 0 0)",opacity:.6},{clipPath:"inset(0 0 0 0)",opacity:1}],duration:950},
+    "photo-focus": {frames:[{opacity:.65,transform:"scale(.97)"},{opacity:1,transform:"scale(1)"}],duration:850}
+  };
+  function reveal(element) {
     const state = states.get(element);
-    if (!state || !motionAllowed || element.hidden || (!force && state.revealed)) return;
+    if (!state || !motionAllowed || state.revealed || element.hidden) return;
     state.revealed = true;
-    state.animation?.cancel();
-    element.style.opacity = "1";
+    observer?.unobserve(element);
     element.dataset.motionState = "ready";
     if (reduced.matches || typeof element.animate !== "function") return;
-    const sideways = element.matches(".sitemap-entry, .navigation-row, .skill-item, .project-entry");
-    const x = sideways ? (state.order % 2 ? 34 : -34) : 0;
-    const y = sideways ? 12 : 23;
-    const delay = force ? 0 : Math.min(state.order % 5,4)*65;
+    const scene = scenes[element.dataset.motion] || scenes.title;
     try {
       element.dataset.motionState = "revealing";
-      const animation = element.animate([
-        {opacity:0,transform:`translate3d(${x}px,${y}px,0) scale(.987)`,filter:"blur(2px)",clipPath:"inset(0 7% 0 0)"},
-        {opacity:1,transform:"translate3d(0,0,0) scale(1)",filter:"blur(0)",clipPath:"inset(0 0 0 0)"}
-      ],{duration:720,delay,easing:"cubic-bezier(.18,.82,.24,1)",fill:"both"});
+      const animation = element.animate(scene.frames,{duration:scene.duration,easing:"cubic-bezier(.2,.7,.3,1)"});
       state.animation = animation;
       animation.finished.catch(() => {}).then(() => {
         if (state.animation !== animation) return;
-        animation.cancel();
         state.animation = null;
         element.dataset.motionState = "ready";
-        element.style.opacity = "1";
       });
-    } catch {element.style.opacity="1";element.dataset.motionState="ready";}
+    } catch {element.dataset.motionState="ready";}
   }
   const observer = "IntersectionObserver" in window ? new IntersectionObserver(entries => {
-    entries.forEach(entry => {if(entry.isIntersecting) animateIn(entry.target);});
-  },{threshold:.05,rootMargin:"0px 0px -4% 0px"}) : null;
-  document.querySelectorAll(selector).forEach((element,index) => {
-    states.set(element,{order:index,revealed:false,animation:null});
+    entries.forEach(entry => {if(entry.isIntersecting) reveal(entry.target);});
+  },{threshold:.12}) : null;
+  document.querySelectorAll(selector).forEach(element => {
+    states.set(element,{revealed:false,animation:null});
     elements.add(element);
-    element.classList.add("motion-item");
-    if (!reduced.matches) {element.style.opacity="0";element.dataset.motionState="waiting";}
     observer?.observe(element);
   });
   function startPageMotion() {
     motionAllowed = true;
     elements.forEach(element => {
       const rect=element.getBoundingClientRect();
-      if(!observer || reduced.matches || (rect.bottom>0 && rect.top<innerHeight)) animateIn(element);
+      if(!observer || reduced.matches || (rect.bottom>0 && rect.top<innerHeight)) reveal(element);
     });
   }
   document.addEventListener("focusin",event => {
     let element=event.target;
-    while(element && element!==body){if(states.has(element)){states.get(element).animation?.cancel();element.style.opacity="1";states.get(element).revealed=true;element.dataset.motionState="ready";}element=element.parentElement;}
-  });
-  document.addEventListener("portfolio:filter",event => {
-    requestAnimationFrame(() => event.detail?.items?.forEach(element => {
-      const rect=element.getBoundingClientRect();
-      if(!element.hidden && rect.bottom>0 && rect.top<innerHeight) animateIn(element,true);
-    }));
+    while(element && element!==body){
+      const state=states.get(element);
+      if(state){state.animation?.cancel();state.animation=null;state.revealed=true;element.dataset.motionState="ready";}
+      element=element.parentElement;
+    }
   });
   reduced.addEventListener?.("change",() => {
     if(!reduced.matches)return;
-    elements.forEach(element => {const state=states.get(element);state.animation?.cancel();state.animation=null;state.revealed=true;element.style.opacity="1";element.dataset.motionState="ready";});
+    elements.forEach(element => {const state=states.get(element);state.animation?.cancel();state.animation=null;state.revealed=true;element.dataset.motionState="ready";});
     activeArrival?.skip();
   });
-
-  const transition = document.createElement("div");
-  transition.className="page-transition";
-  transition.setAttribute("aria-hidden","true");
-  transition.innerHTML='<div class="page-transition__content"><span class="page-transition__code">BL / PERSONAL ARCHIVE</span><strong class="page-transition__title"></strong><div class="page-transition__bar"><i></i></div></div>';
-  body.append(transition);
-  let navigationLocked=false;
-  document.addEventListener("click",event => {
-    const link=event.target.closest("a[data-internal]");
-    if(!link || event.defaultPrevented || event.button!==0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute("download") || (link.target && link.target!=="_self") || reduced.matches || activeArrival) return;
-    const url=new URL(link.href,location.href);
-    if(url.origin!==location.origin || (url.pathname===location.pathname && url.search===location.search))return;
-    event.preventDefault();
-    if(navigationLocked)return;
-    navigationLocked=true;
-    transition.querySelector("strong").textContent=text().access;
-    body.classList.add("is-page-leaving");
-    setTimeout(() => location.assign(url.href),180);
-  });
   window.addEventListener("pageshow",event => {
-    navigationLocked=false;body.classList.remove("is-page-leaving");
     if(event.persisted){activeArrival?.skip();startPageMotion();}
   });
 

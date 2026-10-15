@@ -25,8 +25,9 @@ Language, theme and ambient-motion preferences are saved in browser storage.
 The original cinematic arrival (orbits, particles and an iris reveal) has been
 adapted to the portfolio. First arrival lasts at least 10 seconds unless skipped.
 Use Replay intro in the footer to see it again. Completion is session-based,
-so ordinary navigation does not repeat the 10-second arrival. Scroll reveals,
-page transitions and hover effects respect reduced-motion preferences.
+so ordinary navigation does not repeat the 10-second arrival. Motion is limited
+to the home title, campus photograph and camera photograph. Text, filtering and
+navigation respond immediately. All motion respects reduced-motion preferences.
 Resource progress reflects actual downloads; offline ZIP previews preload images.
 
 EDITING
@@ -61,3 +62,9 @@ and Ryze Tello EDU as a four-rotor concept reference for Aerovate. Product pictu
 are official manufacturer images; the pictured Nikon lens is illustrative.
 See assets/education/asset-credits.md and assets/equipment/asset-credits.md.
 The interactive project stage now uses real camera and drone product images.
+
+VARIED PRESENTATION
+Education uses a campus image and connected timeline; projects use distinct image
+spreads and open specifications. Experience follows a continuous journey, skills
+use typographic rows, and contact uses a letter-style form. assets/editorial.css
+contains page-specific layouts. Shared card reveals and page overlays are removed.
