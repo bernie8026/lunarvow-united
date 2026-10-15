@@ -15,7 +15,7 @@ body.is-booting{overflow:hidden}
 .motion-replay{background:transparent;border:0;border-bottom:1px solid var(--line);padding:3px 0;color:var(--accent);font:11px/1.6 var(--sans);cursor:pointer}
 .motion-replay:hover{border-color:var(--accent)}
 .footer-links{flex-wrap:wrap}
-.hero-art{overflow:hidden}
+.hero-art{position:relative;overflow:hidden}
 .hero-art>img{transition:transform .8s cubic-bezier(.2,.7,.3,1)}
 .hero-art:hover>img{transform:scale(1.025)}
 .hero-art::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 30%,#d4ddff12 49%,transparent 66%);transform:translateX(-115%);animation:portfolio-scan 9s 1.5s ease-in-out infinite}
