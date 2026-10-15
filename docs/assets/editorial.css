@@ -93,11 +93,11 @@ body[data-page="skills"] .closing { text-align: center; padding-top: 35px; }
 body[data-page="skills"] .closing > p { margin-inline: auto; }
 
 /* CONTACT — an open letter, with quiet underlines where the user writes. */
-body[data-page="contact"] .page-heading { display: grid; grid-template-columns: minmax(220px,.75fr) minmax(0,1.25fr); gap: 0 clamp(40px,7vw,100px); padding-bottom: 6px; }
+body[data-page="contact"] .page-heading { display: grid; grid-template-columns: minmax(220px,.75fr) minmax(0,1.25fr); gap: 0 clamp(40px,7vw,100px); padding-bottom: 6px; max-width: 1536px; margin-inline: auto; }
 body[data-page="contact"] .heading-meta { grid-column: 1 / -1; padding-bottom: 50px; }
 body[data-page="contact"] .page-heading h1 { grid-column: 2; font-size: clamp(45px, 5.4vw, 76px); line-height: 1.2; font-weight: 400; }
 body[data-page="contact"] .page-intro { grid-column: 2; font-size: 14px; max-width: 550px; }
-body[data-page="contact"] .contact-layout { padding-top: 55px; padding-bottom: 100px; }
+body[data-page="contact"] .contact-layout { grid-template-columns: minmax(220px,.75fr) minmax(0,1.25fr); padding-top: 55px; padding-bottom: 100px; }
 body[data-page="contact"] .contact-layout > div:first-child { padding-top: 13px; }
 body[data-page="contact"] .contact-layout > div:first-child > h2 { font-family: Georgia,serif; font-size: 42px; font-weight: 400; }
 body[data-page="contact"] .contact-handle { font-size: clamp(19px,2.2vw,29px); gap: 16px; letter-spacing: -.8px; margin-block: 20px; }
@@ -133,6 +133,7 @@ body[data-page="sitemap"] .sitemap-entry h3 { font-size: 24px; font-weight: 400;
 body[data-page="sitemap"] .sitemap-entry p { margin: 0; font-size: 12px; }
 body[data-page="sitemap"] .sitemap-entry code { text-align: right; font-size: 10px; color: var(--accent); }
 body[data-page="sitemap"] .sitemap-entry .row-number { font-size: 11px; color: var(--muted); }
+body[data-page="sitemap"] .sitemap-entry > span:last-child { justify-self: end; font-size: 18px; line-height: 1; }
 body[data-page="sitemap"] .sitemap-entry:first-child { margin-bottom: 17px; padding-bottom: 30px; border-bottom: 1px solid var(--line); }
 body[data-page="sitemap"] main > .section:last-child { padding-top: 65px; }
 body[data-page="sitemap"] main > .section:last-child .intro-layout { gap: 65px; }
@@ -155,6 +156,15 @@ body[data-page="index"] #chapters .navigation-row > span:last-child { position: 
   body[data-page="contact"] .page-heading { grid-template-columns: minmax(220px,.75fr) minmax(0,1.25fr); gap: 0 30px; }
   body[data-page="sitemap"] .sitemap-entry > div { grid-template-columns: minmax(150px,.7fr) minmax(0,1fr); gap: 5px 20px; }
   body[data-page="sitemap"] .sitemap-entry code { grid-column: 2; text-align: left; }
+}
+@media (min-width: 761px) and (max-width: 1000px) {
+  body[data-page="contact"] .contact-layout { gap: 30px; }
+}
+@media (max-width: 900px) {
+  body[data-page="contact"] .page-heading { display: block; }
+  body[data-page="contact"] .contact-layout { grid-template-columns: 1fr; gap: 54px; padding-top: 35px; }
+  body[data-page="contact"] .contact-layout > div:first-child { padding-top: 0; }
+  body[data-page="contact"] .availability { max-width: 600px; margin-top: 25px; }
 }
 @media (max-width: 760px) {
   body:is([data-page="about"], [data-page="experience"], [data-page="skills"], [data-page="contact"], [data-page="sitemap"]) .page-heading { padding-top: 26px; }
@@ -245,6 +255,18 @@ body[data-page="index"] #chapters .navigation-row > span:last-child { position: 
   body[data-page="index"] #chapters .navigation-grid { gap: 8px 23px; }
   body[data-page="index"] #chapters .navigation-row h3 { font-size: 21px; padding-right: 10px; }
   body[data-page="index"] #chapters .navigation-row > span:last-child { right: -5px; font-size: 15px; }
+}
+@media (min-width: 481px) and (max-width: 620px) {
+  body[data-page="about"] .about-layout { display: flex; flex-direction: column; gap: 30px; }
+  body[data-page="about"] .profile-image { width: 62%; max-width: 290px; margin: 0 0 0 auto; }
+  body[data-page="about"] .profile-image img { max-height: none; }
+  body[data-page="about"] .details-grid { grid-template-columns: 1fr 1fr; }
+  body[data-page="skills"] .skill-item { grid-template-columns: 1fr; gap: 12px; }
+  body[data-page="skills"] .skill-item h2 { grid-row: 1; }
+  body[data-page="skills"] .skill-top { grid-column: 1; grid-row: 2; }
+  body[data-page="skills"] .skill-item > p { grid-column: 1; grid-row: 3; }
+  body[data-page="skills"] .skill-item > a { grid-column: 1; grid-row: 4; }
+  body[data-page="sitemap"] .sitemap-grid { grid-template-columns: 1fr; }
 }
 @media print {
   body[data-page="about"] .about-layout { display: block; }

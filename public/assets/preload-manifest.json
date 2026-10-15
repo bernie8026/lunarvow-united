@@ -25,7 +25,7 @@
       "type": "image"
     },
     {
-      "url": "assets/editorial.css?v=editorial-1",
+      "url": "assets/editorial.css?v=layout-1",
       "type": "file"
     },
     {
@@ -33,7 +33,7 @@
       "type": "image"
     },
     {
-      "url": "assets/education-content.js",
+      "url": "assets/education-content.js?v=education-1",
       "type": "file"
     },
     {
@@ -41,11 +41,11 @@
       "type": "file"
     },
     {
-      "url": "assets/education-motion.js?v=motion-3",
+      "url": "assets/education-motion.js?v=layout-1",
       "type": "file"
     },
     {
-      "url": "assets/education.css?v=editorial-1",
+      "url": "assets/education.css?v=layout-1",
       "type": "file"
     },
     {
@@ -61,7 +61,7 @@
       "type": "image"
     },
     {
-      "url": "assets/equipment-content.js",
+      "url": "assets/equipment-content.js?v=research-1",
       "type": "file"
     },
     {
@@ -73,11 +73,11 @@
       "type": "image"
     },
     {
-      "url": "assets/immersive.css?v=motion-2",
+      "url": "assets/immersive.css?v=layout-1",
       "type": "file"
     },
     {
-      "url": "assets/immersive.js?v=motion-2",
+      "url": "assets/immersive.js?v=layout-1",
       "type": "file"
     },
     {
@@ -85,7 +85,7 @@
       "type": "file"
     },
     {
-      "url": "assets/interactions.js?v=motion-2",
+      "url": "assets/interactions.js?v=layout-1",
       "type": "file"
     },
     {
@@ -105,7 +105,7 @@
       "type": "file"
     },
     {
-      "url": "assets/showcase.css?v=motion-2",
+      "url": "assets/showcase.css?v=layout-1",
       "type": "file"
     },
     {
@@ -113,11 +113,11 @@
       "type": "file"
     },
     {
-      "url": "assets/site.css?v=blue-violet-2",
+      "url": "assets/site.css?v=layout-1",
       "type": "file"
     },
     {
-      "url": "assets/site.js",
+      "url": "assets/site.js?v=layout-1",
       "type": "file"
     },
     {

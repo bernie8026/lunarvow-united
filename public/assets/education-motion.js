@@ -143,6 +143,7 @@
   }
   addEventListener("scroll", queueDraw, {passive:true});
   addEventListener("resize", queueDraw, {passive:true});
+  if ("ResizeObserver" in window) new ResizeObserver(queueDraw).observe(document.querySelector("main"));
   document.addEventListener("visibilitychange", stateChanged);
   document.addEventListener("portfolio:motion", event => {
     if (typeof event.detail?.paused === "boolean") eventPaused = event.detail.paused;

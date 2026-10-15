@@ -86,6 +86,12 @@ body[data-theme=light] .showcase-summary,body[data-theme=light] .showcase-title,
  .showcase-panel:nth-child(2),.showcase-panel:nth-child(3){padding-top:250px}
 }
 
+/* Keep both arrows and all three tabs inside even the narrowest phone stage. */
+@media(max-width:760px){
+ .showcase-tabs{min-width:0}
+ .showcase-tab{flex:1 1 0;min-width:0;max-width:126px}
+}
+
 /* Motion follows the subject: a curtain, a flight path and a camera iris. */
 .showcase-depth,.showcase-flight{width:100%;height:100%;position:relative}
 .showcase-depth{transform:translate3d(0,0,0)}

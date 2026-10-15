@@ -19,16 +19,23 @@
   progress.setAttribute("aria-hidden", "true");
   body.append(progress);
   const journeys = Array.from(document.querySelectorAll(".experience-entry"));
+  const clamp = value => Math.max(0, Math.min(1, value));
   let queued = false;
   function updateScroll() {
     queued = false;
     progress.hidden = !allowed();
     if (!allowed()) return;
-    const max = document.documentElement.scrollHeight - innerHeight;
-    progress.style.setProperty("--read", String(max > 0 ? Math.max(0, Math.min(1, scrollY / max)) : 0));
+    const scroller = document.scrollingElement || document.documentElement;
+    const scroll = Math.max(0, scroller.scrollTop);
+    const max = Math.max(0, scroller.scrollHeight - innerHeight);
+    const atEnd = max <= 1 || scroll >= max - 1;
+    progress.style.setProperty("--read", String(atEnd ? 1 : clamp(scroll / max)));
     journeys.forEach(entry => {
       const rect = entry.getBoundingClientRect();
-      const amount = Math.max(0, Math.min(1, (innerHeight * .65 - rect.top) / rect.height));
+      const start = rect.top + scroll - innerHeight * .65;
+      // The final entry must complete within the page's available scroll distance.
+      const end = Math.min(start + rect.height, max);
+      const amount = atEnd ? 1 : clamp((scroll - start) / Math.max(1, end - start));
       entry.style.setProperty("--journey", `${amount * 100}%`);
       entry.classList.toggle("journey-current", amount > 0 && amount < 1);
     });
@@ -36,6 +43,9 @@
   function queueScroll() {if (!queued) {queued = true; requestAnimationFrame(updateScroll);}}
   addEventListener("scroll", queueScroll, {passive:true});
   addEventListener("resize", queueScroll);
+  document.addEventListener("portfolio:language", queueScroll);
+  document.addEventListener("toggle", queueScroll, true);
+  if ("ResizeObserver" in window) new ResizeObserver(queueScroll).observe(body);
 
   // Move existing skill rows to their new positions when the visitor filters.
   const skillZone = document.querySelector('[data-filter-zone="skills"]');

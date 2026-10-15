@@ -27,10 +27,16 @@
       queued = false;
       let active = 0;
       sections.forEach((section, i) => { if (section && section.getBoundingClientRect().top <= innerHeight * .42) active = i; });
+      const scroller = document.scrollingElement || document.documentElement;
+      const maxScroll = Math.max(0, scroller.scrollHeight - innerHeight);
+      if (maxScroll > 1 && scroller.scrollTop >= maxScroll - 1) active = sections.length - 1;
       rail.querySelectorAll("a").forEach((link, i) => { if (i === active) link.setAttribute("aria-current", "true"); else link.removeAttribute("aria-current"); });
     }
-    addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(updateChapter); } }, {passive:true});
-    addEventListener("resize", updateChapter);
+    function queueChapter() { if (!queued) { queued = true; requestAnimationFrame(updateChapter); } }
+    addEventListener("scroll", queueChapter, {passive:true});
+    addEventListener("resize", queueChapter);
+    document.addEventListener("portfolio:language", queueChapter);
+    if ("ResizeObserver" in window) new ResizeObserver(queueChapter).observe(body);
     updateChapter();
   }
   function render() {

@@ -15,6 +15,14 @@
   const text = key => dictionary[key]?.[language] ?? dictionary[key]?.["zh-HK"] ?? key;
   body.classList.add("js");
 
+  const masthead = document.querySelector(".masthead");
+  function measureMasthead() {
+    if (masthead) document.documentElement.style.setProperty("--masthead-height", `${Math.ceil(masthead.getBoundingClientRect().height)}px`);
+  }
+  measureMasthead();
+  if (masthead && "ResizeObserver" in window) new ResizeObserver(measureMasthead).observe(masthead);
+  else addEventListener("resize", measureMasthead);
+
   const nav = document.getElementById("main-nav");
   const menu = document.querySelector(".menu-toggle");
   if (menu && nav) {
