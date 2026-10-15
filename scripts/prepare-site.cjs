@@ -8,8 +8,8 @@ function filesIn(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(en
   return entry.isDirectory()?filesIn(file):[file];
 });}
 const resources=filesIn(publicRoot).map(file=>path.relative(publicRoot,file).split(path.sep).join('/'))
-  .filter(file=>/\.(html|css|js|webp)$/.test(file)||file==='assets/brand.svg')
-  .map(url=>({url:url+(/assets\/(site\.css|arrival-cinematic\.css|motion\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp|motion\.js)$/.test(url)?'?v=blue-violet-2':''),type:/\.(webp|svg)$/.test(url)?'image':'file'}));
+  .filter(file=>/\.(html|css|js|webp|png|jpe?g)$/.test(file)||file==='assets/brand.svg')
+  .map(url=>({url:url+(/assets\/(site\.css|arrival-cinematic\.css|motion\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp|motion\.js)$/.test(url)?'?v=blue-violet-2':''),type:/\.(webp|png|jpe?g|svg)$/.test(url)?'image':'file'}));
 fs.writeFileSync(path.join(publicRoot,'assets/preload-manifest.json'),JSON.stringify({resources},null,2)+'\n');
 fs.rmSync(dist,{recursive:true,force:true});
 fs.cpSync(publicRoot,dist,{recursive:true});

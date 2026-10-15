@@ -21,7 +21,7 @@ Traditional Chinese (Hong Kong), English and Simplified Chinese; mobile menu;
 light/dark theme; native expandable course notes; skill and project filters;
 project search; accessible project dialogs; print profile; validated contact
 message draft with copy and text download. The contact form does not send mail.
-Only language and theme preferences are saved in browser storage.
+Language, theme and ambient-motion preferences are saved in browser storage.
 The original cinematic arrival (orbits, particles and an iris reveal) has been
 adapted to the portfolio. First arrival lasts at least 10 seconds unless skipped.
 Use Replay intro in the footer to see it again. Completion is session-based,
@@ -52,3 +52,12 @@ are included in this one root folder for ZIP submission.
 配色 / Palette
 藍紫主題：深藍背景、藍紫漸變、冷色光環與插圖；淺色模式使用淡藍紫底色。
 Blue-violet theme with a navy background, blue-to-violet accents, matching intro and illustrations, and a pale light theme.
+
+OFFICIAL RESEARCH / 15 OCTOBER 2026
+The education page includes a sourced SFU campus profile and a separately labelled
+HDAI-ICT programme reference. This does not establish a new personal qualification.
+The project page includes Nikon D5300 and Godox V480N equipment specifications,
+and Ryze Tello EDU as a four-rotor concept reference for Aerovate. Product pictures
+are official manufacturer images; the pictured Nikon lens is illustrative.
+See assets/education/asset-credits.md and assets/equipment/asset-credits.md.
+The interactive project stage now uses real camera and drone product images.

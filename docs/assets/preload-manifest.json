@@ -25,6 +25,38 @@
       "type": "image"
     },
     {
+      "url": "assets/education/sfu-campus.jpg",
+      "type": "image"
+    },
+    {
+      "url": "assets/education-content.js",
+      "type": "file"
+    },
+    {
+      "url": "assets/education.css",
+      "type": "file"
+    },
+    {
+      "url": "assets/equipment/drone-reference.png",
+      "type": "image"
+    },
+    {
+      "url": "assets/equipment/godox-v480.jpg",
+      "type": "image"
+    },
+    {
+      "url": "assets/equipment/nikon-d5300.jpg",
+      "type": "image"
+    },
+    {
+      "url": "assets/equipment-content.js",
+      "type": "file"
+    },
+    {
+      "url": "assets/equipment.css",
+      "type": "file"
+    },
+    {
       "url": "assets/identity.webp?v=blue-violet-2",
       "type": "image"
     },

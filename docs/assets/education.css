@@ -1,0 +1,37 @@
+/* Official university context, kept separate from the personal study record. */
+.edu-section{padding-top:48px}
+.edu-campus{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(0,1fr);border:1px solid var(--line);background:var(--panel)}
+.edu-campus-photo{position:relative;min-width:0;margin:0;display:flex;flex-direction:column;background:#111b31}
+.edu-campus-photo>img{width:100%;height:100%;min-height:340px;object-fit:cover;object-position:49% center;flex:1}
+.edu-campus-photo figcaption{display:flex;justify-content:space-between;gap:18px;padding:14px 18px;background:#101a30;color:#ced8f5;font-size:10px;line-height:1.65}
+.edu-campus-photo figcaption a{color:#b8c9ff;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
+.edu-campus-copy{padding:clamp(25px,3vw,46px);min-width:0}
+.edu-campus-copy h2{font-size:clamp(27px,3vw,40px);margin:9px 0 7px;letter-spacing:-.04em}
+.edu-campus-name{margin:0 0 22px;font:11px/1.7 var(--mono);letter-spacing:.7px;color:var(--accent)}
+.edu-campus-summary{font-size:14px;line-height:1.9;color:var(--muted);margin-bottom:26px}
+.edu-milestones{display:grid;grid-template-columns:1fr 1fr;gap:20px;border-block:1px solid var(--line);padding:19px 0;margin:0 0 23px}
+.edu-milestones>div+div{border-left:1px solid var(--line);padding-left:20px}
+.edu-milestones dt{font:34px/1.1 Georgia,"Times New Roman",serif;color:var(--accent);margin-bottom:8px}
+.edu-milestones dd{margin:0;font-size:12px;line-height:1.75;color:var(--muted)}
+.edu-address{font-style:normal;font-size:12px;line-height:1.8;margin-bottom:13px}
+.edu-address span{display:block}.edu-address span:last-child{font-size:11px;color:var(--muted);margin-top:4px}
+.edu-source-links{display:flex;flex-wrap:wrap;column-gap:20px;row-gap:6px;font-size:11px;color:var(--accent)}
+.edu-source-links a{padding:6px 0;border-bottom:1px solid var(--line)}
+.edu-source-links a:hover{border-color:var(--accent)}
+.edu-program{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:clamp(28px,4vw,66px);padding:clamp(25px,3vw,46px);margin-top:24px;border:1px solid var(--line);background:radial-gradient(ellipse at 0 0,#526bc51c,transparent 65%),radial-gradient(ellipse at 100% 100%,#8953be18,transparent 60%)}
+.edu-program .eyebrow{margin-bottom:13px}
+.edu-program h3{font-size:clamp(22px,2.3vw,29px);line-height:1.5;letter-spacing:-.025em;margin:0 0 14px}
+.edu-program-school{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:10px}
+.edu-program-note{font-size:11px;line-height:1.9;color:var(--muted);margin:0 0 17px;max-width:48em}
+.edu-program-facts{margin:0;align-self:center}
+.edu-program-facts>div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:20px;padding:15px 0;border-top:1px solid var(--line)}
+.edu-program-facts>div:last-child{border-bottom:1px solid var(--line)}
+.edu-program-facts dt{font-size:11px;color:var(--muted);align-self:center}
+.edu-program-facts dd{font-size:14px;margin:0;line-height:1.8}
+.edu-program-facts strong{font-weight:500;color:var(--accent)}
+.edu-program-facts small{display:block;color:var(--muted);font:10px/1.7 var(--mono);margin-top:3px}
+body[data-theme=light] .edu-campus-photo figcaption{background:#e7eaff;color:#424f73}
+body[data-theme=light] .edu-campus-photo figcaption a{color:#4655bb}
+@media(max-width:900px){.edu-campus{grid-template-columns:1fr}.edu-campus-photo>img{height:auto;min-height:0;aspect-ratio:16/8;object-position:center 47%}.edu-program{grid-template-columns:1fr;gap:25px}}
+@media(max-width:480px){.edu-section{padding-top:30px}.edu-campus-copy,.edu-program{padding:24px 20px}.edu-campus-photo>img{aspect-ratio:4/3}.edu-campus-photo figcaption{font-size:9px;padding:12px;gap:10px}.edu-campus-copy h2{font-size:28px}.edu-campus-summary{font-size:13px}.edu-program h3{font-size:23px}.edu-program-facts>div{grid-template-columns:85px minmax(0,1fr);gap:15px}.edu-program-facts dd{font-size:13px}.edu-milestones dt{font-size:31px}}
+@media print{.edu-campus,.edu-program{break-inside:avoid;background:none}.edu-campus{grid-template-columns:1fr 1fr}.edu-campus-copy,.edu-program{padding:20px}.edu-campus-photo>img{min-height:0;object-fit:contain}.edu-source-links{display:none}}

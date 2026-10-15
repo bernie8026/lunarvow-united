@@ -58,3 +58,11 @@ GitHub Pages 保持 **main /docs**。可提交 ZIP 只需包含完整 `public/` 
 `node scripts/verify-portfolio.cjs`。預設位址為 `http://127.0.0.1:8765/`，
 可用 `PORTFOLIO_BASE_URL` 覆寫。檢查八頁、三語、四種闊度、深淺主題、
 資源與連結、搜尋、對話框、聯絡草稿、入場動畫及手機選單。
+
+## 院校與器材資料（2026-10-15）
+
+教育頁加入聖方濟各大學官方校園圖片、歷程、地址交通及獨立標示的 HDAI-ICT 公開課程參考。
+作品頁加入 Nikon D5300 相機、Godox V480N 閃光燈及 Ryze Tello EDU 四旋翼無人機參考圖與規格。
+Tello EDU 只作 Aerovate 概念參考；相機圖中的鏡頭不代表使用者的鏡頭型號。
+來源連結及圖片署名隨頁面顯示，詳細記錄在 `public/assets/education/asset-credits.md`
+與 `public/assets/equipment/asset-credits.md`。新增內容支援三語及離線開啟。

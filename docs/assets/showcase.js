@@ -6,8 +6,8 @@
   const dictionary = window.PORTFOLIO_TEXT || {};
   const projects = [
     {id:"lunar", title:"Lunar Vow Archive", lines:["Lunar Vow", "Archive"], short:"Lunar Vow", image:"lunar-project.webp", category:"t150", summary:"t151", skills:"t152", alt:"t149", credit:"t155"},
-    {id:"aerovate", title:"Aerovate", lines:["Aerovate"], short:"Aerovate", image:"drone.webp", category:"t163", summary:"t164", skills:"t165", alt:"t162", credit:"t167"},
-    {id:"photography", title:"Cosplay Photography", lines:["Cosplay", "Photography"], short:"Photography", image:"camera.webp", category:"t175", summary:"t176", skills:"t177", alt:"t174", credit:"t179"}
+    {id:"aerovate", title:"Aerovate", lines:["Aerovate"], short:"Aerovate", image:"equipment/drone-reference.png", category:"t163", summary:"t164", skills:"t165", alt:"t162", credit:"t167"},
+    {id:"photography", title:"Cosplay Photography", lines:["Cosplay", "Photography"], short:"Photography", image:"equipment/nikon-d5300.jpg", category:"t175", summary:"t176", skills:"t177", alt:"t174", credit:"t179"}
   ];
   const labels = {
     "zh-HK": {choose:"選擇作品", previous:"上一個作品", next:"下一個作品", hint:"選擇作品，探索創作方向", details:"閱讀作品詳情", position:"第 {current} 個作品，共 {total} 個", title:"將興趣變成作品"},
