@@ -56,6 +56,7 @@ GitHub Pages 保持 **main /docs**。可提交 ZIP 只需包含完整 `public/` 
 
 ## 驗證
 
+執行 `node scripts/serve-preview.cjs` 可在本機 `http://127.0.0.1:8766/` 預覽。
 以靜態伺服器服務 `public/`，在有 Playwright 及 Chrome 的環境執行
 `node scripts/verify-portfolio.cjs`。預設位址為 `http://127.0.0.1:8765/`，
 可用 `PORTFOLIO_BASE_URL` 覆寫。檢查八頁、三語、四種闊度、深淺主題、
@@ -81,3 +82,33 @@ Tello EDU 只作 Aerovate 概念參考；相機圖中的鏡頭不代表使用者
 學習節點及課程展開動畫。三個作品分別以揭幕、飛行落位及光圈對焦轉場。器材照片
 支援滑鼠景深，閃光燈圖片旁有「試閃動畫」；技能篩選使用位置過渡，聯絡表單加入
 底線筆觸及草稿展開。全站暫停、系統減少動態及隱藏分頁均會停止相應動畫。
+
+## 網站改善報告套用（2026-10-17）
+
+以《網站改善報告.md》為參考，將適用建議套用到現行八頁作品集。原報告審查的
+舊月下新聞模組及 Python 抓取程式不在目前發佈版本內。
+
+- 八頁加入獨立描述、Open Graph、Twitter 分享資料、canonical 及三語 hreflang。
+  `assets/seo.js` 在瀏覽器切換語言時同步 metadata；不執行 JavaScript 的分享爬蟲
+  會讀取 HTML 內預設的香港繁體中文資料。
+- 原創 `assets/social-preview.png` 為 1200 × 630，使用絕對網址供分享服務讀取。
+  可用安裝了 Pillow 的 Python 執行 `scripts/create-social-preview.py` 重新產生。
+- `sitemap.xml` 列出八頁的三個語言網址，共 24 個 URL。`robots.txt` 包含 sitemap
+  位置；GitHub Pages 專案子路徑中的 robots.txt 不控制整個 github.io 網域，
+  如日後移到自訂網域，應將 robots.txt 放在該網域根目錄。
+- 保留現有圖片說明及 favicon，補齊非同步解碼與作品展示圖片的實際尺寸。
+  首屏圖片保持正常載入，其餘內容圖片使用懶載入。
+- 入站預載清單依當頁產生，只包含當頁程式、樣式、非懶載入圖片及入站主圖。
+  其他頁面、下方器材圖片和分享圖不會加入入站預載，10 秒動畫、跳過及失敗重試維持。
+- 補齊目前頁面的導覽標記；缺譯時保留可讀文字，重選同一語言不重繪，
+  搜尋文字快取，並為非 Element 事件目標及不完整篩選事件加入保護。
+
+完成產生發佈檔案後，可額外執行：
+
+```sh
+node scripts/verify-preloader.cjs
+node scripts/verify-report-improvements.cjs
+node scripts/verify-site-layout.cjs
+```
+
+瀏覽器驗證沿用 `PORTFOLIO_BASE_URL`；後兩項需要 Playwright 及 Chrome。

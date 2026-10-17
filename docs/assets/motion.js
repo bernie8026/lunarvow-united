@@ -156,7 +156,7 @@
     document.addEventListener("keydown",onKey);document.addEventListener("portfolio:language",render);
     screen.focus({preventScroll:true});render();
     async function runOffline() {
-      const paths=["identity.webp","lunar-project.webp","equipment/drone-reference.png","equipment/nikon-d5300.jpg","equipment/godox-v480.jpg","education/sfu-campus.jpg"];
+      const paths=["identity.webp"];
       progress={total:paths.length,loaded:0,failed:[],running:true};render();
       await Promise.all(paths.map(path=>new Promise(resolve=>{
         const image=new Image();let settled=false;

@@ -5,9 +5,9 @@
 
   const dictionary = window.PORTFOLIO_TEXT || {};
   const projects = [
-    {id:"lunar", title:"Lunar Vow Archive", lines:["Lunar Vow", "Archive"], short:"Lunar Vow", image:"lunar-project.webp", category:"t150", summary:"t151", skills:"t152", alt:"t149", credit:"t155"},
-    {id:"aerovate", title:"Aerovate", lines:["Aerovate"], short:"Aerovate", image:"equipment/drone-reference.png", category:"t163", summary:"t164", skills:"t165", alt:"t162", credit:"t167"},
-    {id:"photography", title:"Cosplay Photography", lines:["Cosplay", "Photography"], short:"Photography", image:"equipment/nikon-d5300.jpg", category:"t175", summary:"t176", skills:"t177", alt:"t174", credit:"t179"}
+    {id:"lunar", title:"Lunar Vow Archive", lines:["Lunar Vow", "Archive"], short:"Lunar Vow", image:"lunar-project.webp", width:1080, height:608, category:"t150", summary:"t151", skills:"t152", alt:"t149", credit:"t155"},
+    {id:"aerovate", title:"Aerovate", lines:["Aerovate"], short:"Aerovate", image:"equipment/drone-reference.png", width:1280, height:1280, category:"t163", summary:"t164", skills:"t165", alt:"t162", credit:"t167"},
+    {id:"photography", title:"Cosplay Photography", lines:["Cosplay", "Photography"], short:"Photography", image:"equipment/nikon-d5300.jpg", width:1400, height:1294, category:"t175", summary:"t176", skills:"t177", alt:"t174", credit:"t179"}
   ];
   const labels = {
     "zh-HK": {choose:"選擇作品", previous:"上一個作品", next:"下一個作品", hint:"選擇作品，探索創作方向", details:"閱讀作品詳情", position:"第 {current} 個作品，共 {total} 個", title:"將興趣變成作品"},
@@ -40,7 +40,7 @@
             <div class="showcase-panel${index === 0 ? " is-active" : ""}" data-showcase-project="${project.id}" id="${prefix}-panel-${index}" role="tabpanel" aria-labelledby="${prefix}-tab-${index}" tabindex="0"${index ? ' aria-hidden="true" inert' : ""}>
               <div class="showcase-art">
                 ${project.id === "aerovate" ? '<svg class="showcase-flight-trace" viewBox="0 0 640 570" fill="none" aria-hidden="true"><path d="M75 427C173 533 545 445 566 263C589 68 327 72 178 191"/></svg>' : ""}
-                <div class="showcase-depth"><div class="showcase-flight"><img src="${asset(project.image)}" alt="" data-alt="${project.alt}" width="1080" height="608" loading="lazy" decoding="async" draggable="false"></div></div>
+                <div class="showcase-depth"><div class="showcase-flight"><img src="${asset(project.image)}" alt="" data-alt="${project.alt}" width="${project.width}" height="${project.height}" loading="lazy" decoding="async" draggable="false"></div></div>
                 ${project.id === "photography" ? '<span class="showcase-focus" aria-hidden="true"><i></i><i></i><i></i><i></i><b>+</b></span>' : ""}
               </div>
               <span class="showcase-watermark" aria-hidden="true">${number(index)}</span>
@@ -61,7 +61,7 @@
             <div class="showcase-tabs" role="tablist">
               ${projects.map((project, index) => `
                 <button class="showcase-tab" type="button" role="tab" id="${prefix}-tab-${index}" aria-controls="${prefix}-panel-${index}" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}">
-                  <span class="showcase-tab-picture"><img src="${asset(project.image)}" alt="" width="216" height="122" loading="lazy" draggable="false"><span aria-hidden="true">${number(index)}</span></span>
+                  <span class="showcase-tab-picture"><img src="${asset(project.image)}" alt="" width="${project.width}" height="${project.height}" loading="lazy" decoding="async" draggable="false"><span aria-hidden="true">${number(index)}</span></span>
                   <span class="showcase-tab-name">${project.short}</span>
                 </button>`).join("")}
             </div>

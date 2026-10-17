@@ -12,12 +12,19 @@
   let messageDraft = "";
   let draftValues = null;
   let toastTimer;
-  const text = key => dictionary[key]?.[language] ?? dictionary[key]?.["zh-HK"] ?? key;
+  let renderedLanguage;
+  const text = (key, fallback = key) => {
+    const entry = Object.prototype.hasOwnProperty.call(dictionary, key) ? dictionary[key] : null;
+    return [entry?.[language], entry?.["zh-HK"], fallback, key].find(value => typeof value === "string" && value.length > 0) || "";
+  };
+  const setText = (node, value) => { if (node.textContent !== value) node.textContent = value; };
   body.classList.add("js");
 
   const masthead = document.querySelector(".masthead");
   function measureMasthead() {
-    if (masthead) document.documentElement.style.setProperty("--masthead-height", `${Math.ceil(masthead.getBoundingClientRect().height)}px`);
+    if (!masthead) return;
+    const height = `${Math.ceil(masthead.getBoundingClientRect().height)}px`;
+    if (document.documentElement.style.getPropertyValue("--masthead-height") !== height) document.documentElement.style.setProperty("--masthead-height", height);
   }
   measureMasthead();
   if (masthead && "ResizeObserver" in window) new ResizeObserver(measureMasthead).observe(masthead);
@@ -57,20 +64,24 @@
     const input = element.querySelector("[data-search]");
     const status = element.querySelector("[data-result]");
     const empty = element.querySelector("[data-empty]");
+    // Dictionary text is static; keep it searchable without rebuilding it on every keystroke.
+    const translations = new Map(items.map(item => [item, Array.from(item.querySelectorAll("[data-i18n]")).map(node => Object.values(dictionary[node.dataset.i18n] || {}).filter(value => typeof value === "string").join(" ")).join(" ")]));
     let category = "all";
     function update() {
       const query = (input?.value || "").trim().toLocaleLowerCase();
       let shown = 0;
       items.forEach(item => {
-        const allLanguages = Array.from(item.querySelectorAll("[data-i18n]")).map(node => Object.values(dictionary[node.dataset.i18n] || {}).join(" ")).join(" ");
-        const searchText = (item.textContent + " " + allLanguages + " " + item.id + " " + item.dataset.category).toLocaleLowerCase();
+        const searchText = (item.textContent + " " + translations.get(item) + " " + item.id + " " + (item.dataset.category || "")).toLocaleLowerCase();
         const visible = (category === "all" || item.dataset.category === category) && (!query || searchText.includes(query));
-        item.hidden = !visible;
+        if (item.hidden === visible) item.hidden = !visible;
         if (visible) shown++;
       });
-      buttons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.filter === category)));
-      if (status) status.textContent = text("results").replace("{shown}", shown).replace("{total}", items.length);
-      if (empty) empty.hidden = shown > 0;
+      buttons.forEach(button => {
+        const pressed = String(button.dataset.filter === category);
+        if (button.getAttribute("aria-pressed") !== pressed) button.setAttribute("aria-pressed", pressed);
+      });
+      if (status) setText(status, text("results").replace("{shown}", shown).replace("{total}", items.length));
+      if (empty && empty.hidden !== (shown > 0)) empty.hidden = shown > 0;
       document.dispatchEvent(new CustomEvent("portfolio:filter", {detail:{items}}));
     }
     buttons.forEach(button => button.addEventListener("click", () => { category = button.dataset.filter; update(); }));
@@ -97,10 +108,15 @@
   }
   function setLanguage(next) {
     language = supported.includes(next) ? next : "zh-HK";
+    if (renderedLanguage === language) return;
+    renderedLanguage = language;
     document.documentElement.lang = language;
     preference.set("language", language);
-    document.querySelectorAll("[data-i18n]").forEach(node => { node.textContent = text(node.dataset.i18n); });
-    document.querySelectorAll("[data-alt]").forEach(node => { node.alt = text(node.dataset.alt); });
+    document.querySelectorAll("[data-i18n]").forEach(node => { setText(node, text(node.dataset.i18n, node.textContent)); });
+    document.querySelectorAll("[data-alt]").forEach(node => {
+      const alt = text(node.dataset.alt, node.alt);
+      if (node.alt !== alt) node.alt = alt;
+    });
     document.querySelectorAll("[data-language]").forEach(button => { button.setAttribute("aria-pressed", String(button.dataset.language === language)); });
     themeButton?.setAttribute("aria-label", text("theme"));
     nav?.setAttribute("aria-label", text("nav"));

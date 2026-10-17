@@ -80,11 +80,17 @@
                         });
                         if (!response.ok) throw failure('http', response.status);
                         const manifest = await response.json();
-                        if (!Array.isArray(manifest.resources) || !manifest.resources.length ||
-                            manifest.resources.some(r => typeof r.url !== 'string' || !r.url)) {
+                        const page = document.body?.dataset.page || 'index';
+                        const selected = manifest.pages?.[page];
+                        if (!Array.isArray(selected) || !selected.length || selected.some(resource => {
+                            if (!resource || typeof resource.url !== 'string' || !resource.url ||
+                                !['image', 'file'].includes(resource.type)) return true;
+                            const url = new URL(resource.url, root);
+                            return url.origin !== root.origin || !url.pathname.startsWith(root.pathname);
+                        })) {
                             throw failure('manifest');
                         }
-                        resources = [...new Map(manifest.resources.map(r => [r.url, r])).values()];
+                        resources = [...new Map(selected.map(resource => [resource.url, resource])).values()];
                     } catch (error) {
                         if (timedOut) throw failure('timeout');
                         if (error instanceof SyntaxError) throw failure('manifest');

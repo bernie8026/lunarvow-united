@@ -1,152 +1,571 @@
 {
+  "version": 2,
+  "pages": {
+    "about": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ],
+    "contact": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ],
+    "education": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/education.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/education-content.js?v=education-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/education-motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/education-motion.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ],
+    "experience": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ],
+    "index": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/equipment.css?v=editorial-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/equipment-content.js?v=research-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ],
+    "projects": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/equipment.css?v=editorial-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/equipment-content.js?v=research-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ],
+    "sitemap": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ],
+    "skills": [
+      {
+        "url": "assets/site.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/arrival-cinematic.css?v=blue-violet-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/content.js",
+        "type": "file"
+      },
+      {
+        "url": "assets/site.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/preloader.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/showcase.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/immersive.js?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/motion.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/editorial.css?v=layout-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.css?v=motion-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/interactions.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/seo.js?v=report-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/identity.webp?v=blue-violet-2",
+        "type": "image"
+      }
+    ]
+  },
   "resources": [
-    {
-      "url": "about.html",
-      "type": "file"
-    },
-    {
-      "url": "assets/arrival-cinematic.css?v=blue-violet-2",
-      "type": "file"
-    },
-    {
-      "url": "assets/brand.svg?v=blue-violet-2",
-      "type": "image"
-    },
-    {
-      "url": "assets/camera.webp?v=blue-violet-2",
-      "type": "image"
-    },
-    {
-      "url": "assets/content.js",
-      "type": "file"
-    },
-    {
-      "url": "assets/drone.webp?v=blue-violet-2",
-      "type": "image"
-    },
-    {
-      "url": "assets/editorial.css?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/education/sfu-campus.jpg",
-      "type": "image"
-    },
-    {
-      "url": "assets/education-content.js?v=education-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/education-motion.css?v=motion-2",
-      "type": "file"
-    },
-    {
-      "url": "assets/education-motion.js?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/education.css?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/equipment/drone-reference.png",
-      "type": "image"
-    },
-    {
-      "url": "assets/equipment/godox-v480.jpg",
-      "type": "image"
-    },
-    {
-      "url": "assets/equipment/nikon-d5300.jpg",
-      "type": "image"
-    },
-    {
-      "url": "assets/equipment-content.js?v=research-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/equipment.css?v=editorial-1",
-      "type": "file"
-    },
     {
       "url": "assets/identity.webp?v=blue-violet-2",
       "type": "image"
-    },
-    {
-      "url": "assets/immersive.css?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/immersive.js?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/interactions.css?v=motion-2",
-      "type": "file"
-    },
-    {
-      "url": "assets/interactions.js?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/lunar-project.webp",
-      "type": "image"
-    },
-    {
-      "url": "assets/motion.css?v=motion-2",
-      "type": "file"
-    },
-    {
-      "url": "assets/motion.js?v=motion-2",
-      "type": "file"
-    },
-    {
-      "url": "assets/preloader.js",
-      "type": "file"
-    },
-    {
-      "url": "assets/showcase.css?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/showcase.js?v=motion-2",
-      "type": "file"
-    },
-    {
-      "url": "assets/site.css?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "assets/site.js?v=layout-1",
-      "type": "file"
-    },
-    {
-      "url": "contact.html",
-      "type": "file"
-    },
-    {
-      "url": "education.html",
-      "type": "file"
-    },
-    {
-      "url": "experience.html",
-      "type": "file"
-    },
-    {
-      "url": "index.html",
-      "type": "file"
-    },
-    {
-      "url": "projects.html",
-      "type": "file"
-    },
-    {
-      "url": "sitemap.html",
-      "type": "file"
-    },
-    {
-      "url": "skills.html",
-      "type": "file"
     }
   ]
 }

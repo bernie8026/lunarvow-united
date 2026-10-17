@@ -61,7 +61,10 @@ async function scroll(page, destination) {
             assert.deepEqual(state.clippedControls,[],label+' controls remain visible');
             assert(Math.abs(state.headerHeight-state.actualHeader)<1,label+' header offset is measured');
             if (name==='experience') assert(state.journeys.length && state.journeys.every(value=>value==='100%'),label+' every journey segment completes');
-            if (name==='index') assert.equal(state.chapter,'#chapters',label+' final chapter is current');
+            if (name==='index') {
+              if (state.chapter!=='#chapters') console.error('Chapter diagnostics:', await page.evaluate(()=>({page:document.body.dataset.page,rail:document.querySelector('.chapter-rail')?.outerHTML,ready:document.readyState})),errors);
+              assert.equal(state.chapter,'#chapters',label+' final chapter is current');
+            }
             cases++;
           }
         }

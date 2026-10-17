@@ -53,10 +53,11 @@
   function snapshotSkills() {
     previous = new Map(Array.from(skillZone?.querySelectorAll("[data-filter-item]") || []).filter(item => !item.hidden).map(item => [item, item.getBoundingClientRect().top + scrollY]));
   }
-  skillZone?.addEventListener("click", event => {if (event.target.closest("[data-filter]")) snapshotSkills();}, true);
+  skillZone?.addEventListener("click", event => {if (event.target instanceof Element && event.target.closest("[data-filter]")) snapshotSkills();}, true);
   document.addEventListener("portfolio:filter", event => {
-    if (!skillZone || !allowed()) return;
-    event.detail?.items?.filter(item => skillZone.contains(item) && !item.hidden).forEach(item => {
+    const items = event.detail?.items;
+    if (!skillZone || !allowed() || !Array.isArray(items)) return;
+    items.filter(item => item instanceof Element && skillZone.contains(item) && !item.hidden).forEach(item => {
       const top = item.getBoundingClientRect().top + scrollY;
       const before = previous.get(item);
       if (before !== undefined && Math.abs(before - top) > 1) play(item, [{transform:`translateY(${before - top}px)`}, {transform:"none"}], {duration:430,easing:"cubic-bezier(.2,.7,.3,1)"});
