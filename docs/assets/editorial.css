@@ -6,6 +6,17 @@ body:is([data-page="about"], [data-page="experience"], [data-page="skills"], [da
 }
 body:is([data-page="about"], [data-page="experience"], [data-page="skills"], [data-page="contact"], [data-page="sitemap"]) .page-heading::before { display: none; }
 body:is([data-page="about"], [data-page="experience"], [data-page="skills"], [data-page="contact"], [data-page="sitemap"]) .page-heading h1 { letter-spacing: -.035em; }
+.page-heading .page-number {
+  position: absolute;
+  right: 8%;
+  bottom: 0;
+  font: italic 190px/.8 Georgia,serif;
+  color: var(--accent);
+  opacity: .12;
+  z-index: -1;
+  pointer-events: none;
+  user-select: none;
+}
 body:is([data-page="about"], [data-page="experience"], [data-page="skills"]) .closing {
   border: 0;
   background: transparent;
@@ -49,7 +60,6 @@ body[data-page="about"] .closing { margin-top: 10px; padding-block: 22px 48px; }
 
 /* EXPERIENCE — a continuous journey with a clear reading line. */
 body[data-page="experience"] .page-heading { position: relative; padding-bottom: 44px; padding-right: max(18vw, 80px); }
-body[data-page="experience"] .page-heading::after { content: "02"; position: absolute; right: 8%; bottom: 0; font: italic 190px/.8 Georgia,serif; color: var(--accent); opacity: .12; z-index: -1; pointer-events: none; }
 body[data-page="experience"] .page-heading h1 { font-size: clamp(52px, 6.5vw, 94px); max-width: 850px; }
 body[data-page="experience"] main > .section { max-width: 1280px; padding-top: 35px; }
 body[data-page="experience"] .experience-entry { position: relative; border: 0; gap: clamp(35px, 5vw, 75px); grid-template-columns: minmax(190px,.65fr) minmax(0,1.4fr); padding: 24px 0 78px 56px; }
@@ -166,6 +176,7 @@ body[data-page="index"] #chapters .navigation-row > span:last-child { position: 
   body[data-page="contact"] .availability { max-width: 600px; margin-top: 25px; }
 }
 @media (max-width: 760px) {
+  .page-heading .page-number { font-size: clamp(96px,18vw,140px); right: 5%; bottom: 20px; opacity: .08; }
   body:is([data-page="about"], [data-page="experience"], [data-page="skills"], [data-page="contact"], [data-page="sitemap"]) .page-heading { padding-top: 26px; }
   body:is([data-page="about"], [data-page="experience"], [data-page="skills"], [data-page="contact"], [data-page="sitemap"]) .heading-meta { padding-bottom: 30px; }
   body[data-page="about"] .about-layout { grid-template-columns: minmax(0,.65fr) minmax(0,1fr); gap: 30px; }
@@ -177,7 +188,6 @@ body[data-page="index"] #chapters .navigation-row > span:last-child { position: 
   body[data-page="about"] .principles article .file-label { grid-column: 1; grid-row: 1 / 3; margin-top: 7px; }
   body[data-page="about"] .principles article :is(h3,p) { grid-column: 2; }
   body[data-page="experience"] .page-heading { padding-right: 25px; }
-  body[data-page="experience"] .page-heading::after { font-size: 140px; right: 5%; bottom: 20px; opacity: .08; }
   body[data-page="experience"] .experience-entry { grid-template-columns: 1fr; gap: 24px; padding-left: 40px; padding-bottom: 65px; }
   body[data-page="experience"] .experience-aside h2 { margin-top: 8px; }
   body[data-page="experience"] .experience-entry > div:last-child > h3 { font-size: 22px; }
@@ -266,6 +276,7 @@ body[data-page="index"] #chapters .navigation-row > span:last-child { position: 
   body[data-page="sitemap"] .sitemap-grid { grid-template-columns: 1fr; }
 }
 @media print {
+  .page-heading .page-number { display: none; }
   body[data-page="about"] .page-heading + .section,
   body[data-page="about"] .about-approach { padding-top: 25px; }
   body[data-page="about"] .about-layout { display: block; }
