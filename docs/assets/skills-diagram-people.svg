@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" fill="none">
+  <defs>
+    <linearGradient id="shared" x1="241" y1="194" x2="364" y2="315" gradientUnits="userSpaceOnUse"><stop stop-color="#8a90e4" stop-opacity=".25"/><stop offset="1" stop-color="#8d70d1" stop-opacity=".06"/></linearGradient>
+    <marker id="arrow" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="m0 0 5 3-5 3" stroke="#646dcc" stroke-width="1.4" fill="none"/></marker>
+  </defs>
+  <g stroke="#253550" stroke-width="1" opacity=".19" stroke-dasharray="2 7">
+    <path d="M81 110h438v290H81V110ZM300 50v398M50 250h500"/>
+    <path d="m91 112 419 285M90 397l420-285M155 75v350M447 75v350"/>
+    <path d="m103 250 197-115 197 115-197 115-197-115Z"/>
+  </g>
+  <!-- Four independent stations connect through a shared central assembly. -->
+  <g stroke="#253550" stroke-width="1.4" stroke-linejoin="miter">
+    <path d="M99 94h105l17 17v88H99V94Z" fill="#a7b8df" fill-opacity=".08"/>
+    <path d="M99 94h105l17 17m-17-17v17h17M108 188h34m13 0h55M108 104h18" opacity=".4"/>
+    <path d="M386 77h103l17 17v88H386V77Z" fill="#a7b8df" fill-opacity=".08"/>
+    <path d="M386 77h103l17 17m-17-17v17h17M395 171h34m13 0h55M395 87h18" opacity=".4"/>
+    <path d="M76 322h104l17 17v88H76V322Z" fill="#a7b8df" fill-opacity=".08"/>
+    <path d="M76 322h104l17 17m-17-17v17h17M85 416h34m13 0h56M85 332h18" opacity=".4"/>
+    <path d="M394 331h103l17 17v88H394V331Z" fill="#a7b8df" fill-opacity=".08"/>
+    <path d="M394 331h103l17 17m-17-17v17h17M403 425h34m13 0h55M403 341h18" opacity=".4"/>
+    <path d="M99 115V94h20m82 105h20v-20M386 98V77h20m80 105h20v-20M76 343v-21h20m81 105h20v-20M394 352v-21h20m80 105h20v-20" stroke-width="2.7"/>
+  </g>
+  <!-- Angular person marks: square heads and open shoulder lines, with no identity text. -->
+  <g stroke="#253550" stroke-width="1.5" stroke-linejoin="miter">
+    <path d="M145 119h27v27h-27v-27Zm-17 56v-15l17-9h27l17 9v15M145 151l13 14 14-14"/>
+    <path d="M431 102h27v27h-27v-27Zm-17 56v-15l17-9h27l17 9v15M431 134l13 14 14-14"/>
+    <path d="M122 347h27v27h-27v-27Zm-17 56v-15l17-9h27l17 9v15M122 379l13 14 14-14"/>
+    <path d="M439 356h27v27h-27v-27Zm-17 56v-15l17-9h27l17 9v15M439 388l13 14 14-14"/>
+    <path d="M151 126h15m-15 6h9M437 109h15m-15 6h9M128 354h15m-15 6h9M445 363h15m-15 6h9" opacity=".35"/>
+  </g>
+  <!-- Orthogonal directional routes communicate exchange rather than a static network. -->
+  <g stroke="#646dcc" stroke-width="1.6" marker-end="url(#arrow)">
+    <path d="M221 147h27v41l27 17"/>
+    <path d="M334 207l28-17v-61h24"/>
+    <path d="M197 374h30v-51l41-24"/>
+    <path d="m338 298 33 20v66h23"/>
+  </g>
+  <g stroke="#253550" stroke-width="1" opacity=".35" stroke-dasharray="3 5">
+    <path d="M221 163h15v36l29 17M344 219l30-18v-56h12M197 358h18v-46l41-24M349 288l34 20v60h11"/>
+    <path d="M159 199v63h-23v60M445 182v75h10v74"/>
+  </g>
+  <!-- Shared workpiece: four interlocking quadrants sitting over a detached carrier. -->
+  <g stroke="#253550" stroke-width="1.4" stroke-linejoin="miter">
+    <path d="m227 289 73-42 74 42-74 43-73-43Z" fill="#a7b8df" fill-opacity=".08"/>
+    <path d="M227 289v9l73 43 74-43v-9M300 332v9"/>
+    <path d="m242 289 58-33 59 33-59 34-58-34Z" stroke-dasharray="3 4" opacity=".35"/>
+    <path d="M227 289v9l17 10m113 0 17-10v-9" stroke-width="2.5"/>
+  </g>
+  <g stroke="#6971cf" stroke-width="1.5" stroke-linejoin="miter">
+    <path d="m300 189 61 35v58l-61 35-61-35v-58l61-35Z" fill="url(#shared)"/>
+    <path d="m239 224 61 35 61-35M300 259v58"/>
+    <path d="m300 196 24 14-24 14-24-14 24-14Zm-31 18 24 14-24 14-24-14 24-14Zm62 0 24 14-24 14-24-14 24-14Zm-31 18 24 14-24 14-24-14 24-14Z" fill="#7b7cd8" fill-opacity=".13"/>
+    <path d="m250 242 20 12v24l-20-12v-24Zm80 12 20-12v24l-20 12v-24Z" opacity=".6"/>
+    <path d="m280 260 12 7v27l-12-7v-27Zm28 7 12-7v27l-12 7v-27Z" fill="#787bd1" fill-opacity=".2"/>
+    <path d="m296 191 4-2 5 3m50 29 6 3v8m-61 76v9l-7-4m-54-41v10l7 4" stroke-width="2.8"/>
+  </g>
+  <g stroke="#253550" stroke-width="1.2" opacity=".5">
+    <path d="M54 92h21m-21 6h10M520 193h24m-12-6v12M45 374h17m-8-7v14M268 420h52m-26-6v12M302 77h19m-10-6v12"/>
+    <path d="m254 123 9 5-9 5-9-5 9-5Zm116 257 9 5-9 5-9-5 9-5Z"/>
+    <path d="M108 270h22m-22 6h13M475 262h29m-29 6h17"/>
+  </g>
+  <g fill="#6c73d2"><path d="M244 143h7v7h-7zM358 125h7v7h-7zM223 370h7v7h-7zM367 380h7v7h-7z"/><path d="M95 90h8v8h-8zM382 73h8v8h-8zM72 318h8v8h-8zM390 327h8v8h-8z" opacity=".65"/><path d="M134 259h5v5h-5zM452 254h5v5h-5zM297 418h5v5h-5z" opacity=".4"/></g>
+</svg>

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" fill="none">
+  <defs>
+    <linearGradient id="pane" x1="143" y1="128" x2="449" y2="364" gradientUnits="userSpaceOnUse"><stop stop-color="#8792e4" stop-opacity=".15"/><stop offset="1" stop-color="#7486c3" stop-opacity=".03"/></linearGradient>
+    <linearGradient id="section" x1="274" y1="177" x2="357" y2="293" gradientUnits="userSpaceOnUse"><stop stop-color="#8188e2" stop-opacity=".25"/><stop offset="1" stop-color="#8d70d1" stop-opacity=".07"/></linearGradient>
+  </defs>
+  <g stroke="#253550" stroke-width="1" opacity=".2" stroke-dasharray="2 7">
+    <path d="m62 286 238 139 238-139M85 165l215-125 215 125M300 40v414"/>
+    <path d="M126 146v219M474 146v219M192 112v295m216-295v295"/>
+    <path d="m86 237 214 124 214-124M88 335l212-124 212 124"/>
+  </g>
+  <!-- Detached backing layers show an interface assembled from sections. -->
+  <g stroke="#253550" stroke-width="1.35" stroke-linejoin="miter">
+    <path d="m119 327 180-105 182 105-182 106-180-106Z" fill="#a8b8de" fill-opacity=".07"/>
+    <path d="M119 327v11l180 105 182-105v-11M299 433v10"/>
+    <path d="m140 327 159-92 160 92-160 93-159-93Z" opacity=".3"/>
+    <path d="m119 327 31 18m104 61 45 27 49-29m99-58 34-19" stroke-width="3"/>
+    <path d="m154 281 145-84 147 84-147 85-145-85Z" fill="#bbc8e7" fill-opacity=".08"/>
+    <path d="M154 281v9l145 85 147-85v-9M299 366v9"/>
+    <path d="m172 281 127-73 129 73-129 74-127-74Z" stroke-dasharray="3 5" opacity=".35"/>
+  </g>
+  <!-- Browser shell: three square controls, a long location field and a narrow sidebar. -->
+  <g stroke="#253550" stroke-width="1.5" stroke-linejoin="miter">
+    <path d="m126 171 173-100 176 102-176 102-173-104Z" fill="url(#pane)"/>
+    <path d="M126 171v13l173 102 176-102v-11M299 275v13"/>
+    <path d="m149 158 173 103M157 175l39-23 137 80-39 23-137-80Z" fill="#253550" fill-opacity=".04"/>
+    <path d="m151 163 5-3 5 3-5 3-5-3Zm11-6 5-3 5 3-5 3-5-3Zm11-6 5-3 5 3-5 3-5-3Z" fill="#253550" fill-opacity=".3" stroke="none"/>
+    <path d="m206 139 94-54 11 6-94 55-11-7Z" opacity=".4"/>
+    <path d="m170 176 22-13m-13 19 22-13m-13 19 22-13m-13 19 22-13m-8 21 22-13" stroke-width="2" opacity=".35"/>
+    <path d="M126 171v13l26 15m296-10 27-16M278 263l21 12 23-13" stroke-width="3"/>
+  </g>
+  <!-- Elevated content modules expose their connections to the underlying page. -->
+  <g stroke="#6870cf" stroke-width="1.5" stroke-linejoin="miter">
+    <path d="m221 168 78-45 85 49-78 45-85-49Z" fill="url(#section)"/>
+    <path d="M221 168v10l85 49 78-45v-10M306 217v10"/>
+    <path d="m240 168 59-34 65 38-59 34-65-38Z" opacity=".4"/>
+    <path d="m260 168 38-22 38 22-38 22-38-22Z" fill="#7c7bd6" fill-opacity=".15"/>
+    <path d="m282 166-8 4 8 4m32-13 8 4-8 4m-13-13-8 17" stroke-width="2"/>
+    <path d="m310 239 41-24 47 27-41 24-47-27Z" fill="url(#section)"/>
+    <path d="M310 239v8l47 27 41-24v-8M357 266v8"/>
+    <path d="m327 239 25-14m-17 19 25-14m-17 19 25-14" opacity=".65"/>
+  </g>
+  <g stroke="#253550" stroke-width="1.4" stroke-linejoin="miter">
+    <path d="m222 217 33-19 40 23-33 19-40-23Z" fill="#a2b1da" fill-opacity=".12"/>
+    <path d="M222 217v8l40 23 33-19v-8M262 240v8"/>
+    <path d="m235 217 20-11m-12 16 20-11" opacity=".5"/>
+    <path d="m221 178-26 15v27l51 30v28m138-96 32 19v26l-18 10M306 227v38l-33 19v29M357 274v20l34 20v27" stroke-dasharray="3 5" opacity=".4"/>
+    <path d="m246 278 27 16 26-15m-53 19 27 16 26-15m68 42 24 14 24-14" opacity=".45"/>
+    <path d="m102 208-19 11v43l39 23M478 230l36 20v49l-34 20M172 112l37-21h31M355 396l49-29"/>
+    <path d="M76 219h13m420 73h14M188 88v10m-6-5h12M90 344h15m-15 6h8" opacity=".5"/>
+    <path d="m91 273 9 5v12l-9-5v-12Zm419-73 12 7-12 7-12-7 12-7Z" opacity=".4"/>
+  </g>
+  <g fill="#6c73d2"><path d="M122 167h8v8h-8zM471 169h8v8h-8zM295 271h8v8h-8z"/><path d="M242 274h7v7h-7zM388 337h7v7h-7zM116 323h7v7h-7zM477 323h7v7h-7z" opacity=".65"/><path d="M204 86h4v4h-4zM511 247h4v4h-4zM84 347h4v4h-4z" opacity=".45"/></g>
+</svg>

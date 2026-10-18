@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500" fill="none">
+  <defs>
+    <linearGradient id="core" x1="224" y1="179" x2="376" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7584ff" stop-opacity=".23"/>
+      <stop offset="1" stop-color="#9372df" stop-opacity=".07"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="150" y1="291" x2="445" y2="431" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d4dcf8" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#91a2da" stop-opacity=".04"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Survey lines keep the structure open and deliberately off-centre. -->
+  <g stroke="#263858" stroke-width="1" opacity=".2" stroke-dasharray="2 7">
+    <path d="M64 330 300 459 540 328M66 175 300 47 539 177"/>
+    <path d="M300 47v412M121 145v227M479 146v226"/>
+    <path d="m95 251 205 112 205-112M167 103l266 145M167 392l266-145"/>
+    <path d="M223 128v194M377 128v194M145 216l310 169"/>
+  </g>
+
+  <!-- Lower carrier: thin, detached plates and an exposed front edge. -->
+  <g stroke="#253550" stroke-width="1.4" stroke-linejoin="miter">
+    <path d="m122 350 178-97 178 97-178 97-178-97Z" fill="url(#plate)"/>
+    <path d="M122 350v14l178 97 178-97v-14M300 447v14"/>
+    <path d="m144 350 156-85 156 85-156 85-156-85Z" opacity=".35"/>
+    <path d="m157 350 143-78 143 78-143 78-143-78Z" stroke-dasharray="4 5" opacity=".3"/>
+    <path d="m122 350 32 17m19 10 62 34m22 12 43 24m0 14 40-22m21-12 74-40m16-9 27-14" stroke-width="3"/>
+    <path d="m173 361 37 20m-21-38 37 20m-21-38 37 20m-21-38 37 20" opacity=".55"/>
+    <path d="m359 372 18-10m-7 20 18-10m-7 20 18-10m-7 20 18-10" opacity=".55"/>
+    <path d="m259 408 41 22 49-27M408 338l31 17-27 15M165 338l28-15"/>
+    <path d="m154 354 13 7v6l-13-7v-6Zm25 14 13 7v6l-13-7v-6Zm25 14 13 7v6l-13-7v-6Z" fill="#253550" opacity=".3" stroke="none"/>
+  </g>
+
+  <!-- Separate upper chassis, with gaps at its rails and attachment points. -->
+  <g stroke="#253550" stroke-width="1.5" stroke-linejoin="miter">
+    <path d="m134 297 166-90 166 90-166 90-166-90Z" fill="#c5d0ef" fill-opacity=".09"/>
+    <path d="M134 297v9l166 90 166-90v-9M300 387v9"/>
+    <path d="m154 297 146-79 146 79-146 79-146-79Z" opacity=".38"/>
+    <path d="m189 297 111-60 111 60-111 60-111-60Z" stroke="#6a6ed6" stroke-opacity=".65"/>
+    <path d="m206 297 94-51 94 51-94 51-94-51Z" stroke-dasharray="2 4" opacity=".32"/>
+    <path d="m134 297 37 20m91 49 38 21 45-25m88-47 33-18M269 224l31-17 39 21" stroke-width="3"/>
+    <path d="M170 318v34m260-34v34M231 355v32m138-32v32" stroke-dasharray="2 5" opacity=".35"/>
+    <path d="m164 291 13 7-13 7-13-7 13-7Zm271 0 13 7-13 7-13-7 13-7Z" fill="#253550" fill-opacity=".1"/>
+  </g>
+
+  <!-- The floating module is the sole filled focal point. -->
+  <g stroke="#646bd0" stroke-width="1.6" stroke-linejoin="miter">
+    <path d="m300 164 76 42-76 42-76-42 76-42Z" fill="url(#core)"/>
+    <path d="m224 206 76 42v72l-76-42v-72Z" fill="#7584ff" fill-opacity=".14"/>
+    <path d="m300 248 76-42v72l-76 42v-72Z" fill="#7c68c5" fill-opacity=".08"/>
+    <path d="m240 206 60-33 60 33-60 33-60-33Z" opacity=".45"/>
+    <path d="m254 206 46-25 46 25-46 25-46-25Z" fill="#7276d5" fill-opacity=".1" stroke-width="1"/>
+    <path d="m260 206 40-22 40 22-40 22-40-22Z" stroke-dasharray="2 3" stroke-width=".8" opacity=".6"/>
+    <path d="m237 227 49 27v43l-49-27v-43Z" opacity=".4"/>
+    <path d="m316 258 45-25v30l-45 25v-30Z" opacity=".45"/>
+    <path d="M300 248v72m-76-114 76 42 76-42" stroke-width="2.2"/>
+    <path d="m244 240 27 15m-27-4 18 10m71-3 19-10m-19 21 11-6" stroke-width="2" opacity=".75"/>
+    <path d="m294 169 6-3 6 3m64 34 5 3v8m-75 98v7l-6-3m-69-44v6l6 3" stroke-width="3"/>
+  </g>
+
+  <!-- Sparse pin banks and the detached cap suggest an exploded assembly. -->
+  <g stroke="#253550" stroke-width="1.2">
+    <path d="m300 89 62 34-62 34-62-34 62-34Z" fill="#b5c2e8" fill-opacity=".1"/>
+    <path d="M238 123v7l62 34 62-34v-7M300 157v7"/>
+    <path d="m257 123 43-23 43 23-43 23-43-23Z" opacity=".4"/>
+    <path d="m277 123 23-13 23 13-23 13-23-13Z" fill="#6e75d4" fill-opacity=".24" stroke="#6e75d4"/>
+    <path d="M255 139v25m15-17v25m15-17v25m60-41v25m-15-17v25m-15-17v25" stroke-dasharray="2 4" opacity=".32"/>
+    <path d="m235 287-9 5m20 1-9 5m20 1-9 5m20 1-9 5m20 1-9 5m20 1-9 5m49-5 9 5m2-11 9 5m2-11 9 5m2-11 9 5m2-11 9 5m2-11 9 5" opacity=".6"/>
+  </g>
+
+  <!-- Fragmented external tooling: each corner has a different silhouette. -->
+  <g stroke="#253550" stroke-width="1.5" stroke-linejoin="miter">
+    <path d="m146 168-25 14v44m0 19v45m0 16v23l21 12M453 169l26 14v71m0 24v51l-22 12"/>
+    <path d="m158 161 85-46m117 0 49 27m-194 96 85 46 45-24m21-11 61-33" opacity=".55"/>
+    <path d="m148 185 13-7v-28l-13 7v28Zm291-15 13 7v28l-13-7v-28Z" fill="#253550" fill-opacity=".09"/>
+    <path d="m117 213 8 4v31l-8-4v-31Zm358 51 8-4v29l-8 4v-29Z" fill="#253550"/>
+    <path d="M82 272h40m-40-5v10m5-36h13l20 11m359-23 20-11h25m-9-5v10M292 50h17m-8-8v17" opacity=".48"/>
+    <path d="m92 297 25 13v13l-25-13v-13Zm409-103 15 8-15 8-15-8 15-8Z" opacity=".4"/>
+    <path d="M81 361h13m-13 5h7m401 35h24m-12-6v12M205 72h19m-19 5h8" opacity=".5"/>
+  </g>
+
+  <!-- Square fiducials stay crisp at both large and small display sizes. -->
+  <g fill="#6c73d2">
+    <path d="M117 178h8v8h-8zM475 179h8v8h-8zM296 279h8v8h-8z"/>
+    <path d="M129 294h6v6h-6zM463 294h6v6h-6zM297 444h6v6h-6z" opacity=".7"/>
+    <path d="M203 89h4v4h-4zM505 287h4v4h-4zM92 389h4v4h-4z" opacity=".5"/>
+  </g>
+</svg>

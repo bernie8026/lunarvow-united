@@ -55,7 +55,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
@@ -121,7 +121,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
@@ -195,7 +195,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
@@ -269,7 +269,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
@@ -343,7 +343,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
@@ -417,7 +417,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
@@ -483,7 +483,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
@@ -549,12 +549,24 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=report-1",
+        "url": "assets/interactions.js?v=console-1",
         "type": "file"
       },
       {
         "url": "assets/seo.js?v=report-1",
         "type": "file"
+      },
+      {
+        "url": "assets/skills-console.css?v=endfield-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/skills-console.js?v=endfield-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/skills-diagram-web.svg?v=endfield-1",
+        "type": "image"
       },
       {
         "url": "assets/identity.webp?v=blue-violet-2",

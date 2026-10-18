@@ -56,7 +56,7 @@
   skillZone?.addEventListener("click", event => {if (event.target instanceof Element && event.target.closest("[data-filter]")) snapshotSkills();}, true);
   document.addEventListener("portfolio:filter", event => {
     const items = event.detail?.items;
-    if (!skillZone || !allowed() || !Array.isArray(items)) return;
+    if (!skillZone || skillZone.classList.contains("skills-enhanced") || !allowed() || !Array.isArray(items)) return;
     items.filter(item => item instanceof Element && skillZone.contains(item) && !item.hidden).forEach(item => {
       const top = item.getBoundingClientRect().top + scrollY;
       const before = previous.get(item);
