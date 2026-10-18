@@ -8,7 +8,7 @@ const motionAssets=new Set(['motion.css','motion.js','immersive.css','immersive.
 const layoutAssets=new Set(["site.css", "site.js", "editorial.css", "education.css", "education-motion.js", "showcase.css", "immersive.css", "immersive.js", "interactions.js"].map(file=>'assets/'+file));
 const contentVersions={'assets/education-content.js':'education-1','assets/equipment-content.js':'research-1'};
 const reportAssets=new Set(['site.js','interactions.js','showcase.js','motion.js','preloader.js','seo.js'].map(file=>'assets/'+file));
-const versionFor=url=>reportAssets.has(url)?'report-1':layoutAssets.has(url)?'layout-1':contentVersions[url]|| (motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'');
+const versionFor=url=>url==='assets/editorial.css'?'profile-1':reportAssets.has(url)?'report-1':layoutAssets.has(url)?'layout-1':contentVersions[url]|| (motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'');
 // Only the active page's scripts, styles and eager imagery belong to its intro.
 // Lazy images, other HTML pages and sharing artwork remain outside this queue.
 const pages={};
