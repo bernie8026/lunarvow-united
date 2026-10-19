@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("immersive", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const body = document.body;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const labels = {
@@ -35,7 +37,7 @@
     function queueChapter() { if (!queued) { queued = true; requestAnimationFrame(updateChapter); } }
     addEventListener("scroll", queueChapter, {passive:true});
     addEventListener("resize", queueChapter);
-    document.addEventListener("portfolio:language", queueChapter);
+    scope.on(document, "portfolio:language", queueChapter);
     if ("ResizeObserver" in window) new ResizeObserver(queueChapter).observe(body);
     updateChapter();
   }
@@ -55,7 +57,7 @@
     render();
     broadcastMotion();
   });
-  document.addEventListener("portfolio:language", render);
+  scope.on(document, "portfolio:language", render);
   render();
   broadcastMotion();
 
@@ -120,9 +122,9 @@
   hero.addEventListener("pointerleave", () => { targetX = targetY = 0; requestFrame(); });
   addEventListener("scroll", requestFrame, {passive:true});
   addEventListener("resize", requestFrame, {passive:true});
-  document.addEventListener("portfolio:motion", syncActivity);
-  document.addEventListener("visibilitychange", syncActivity);
-  reduced.addEventListener("change", syncActivity);
+  scope.on(document, "portfolio:motion", syncActivity);
+  scope.on(document, "visibilitychange", syncActivity);
+  scope.on(reduced, "change", syncActivity);
   new MutationObserver(syncActivity).observe(body, {attributes:true, attributeFilter:["class"]});
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(entries => {
@@ -131,4 +133,4 @@
     }).observe(hero);
   }
   syncActivity();
-})();
+});

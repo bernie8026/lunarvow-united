@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("skills-console", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const zone = document.querySelector('[data-filter-zone="skills"]');
   const roster = zone?.querySelector('.skill-roster');
   const items = Array.from(zone?.querySelectorAll('.skill-item') || []);
@@ -114,19 +116,19 @@
   });
   zone.querySelectorAll('[data-skill-step]').forEach(button => button.addEventListener('click',() => move(Number(button.dataset.skillStep))));
   const directory = zone.querySelector('.lore-directory');
-  document.addEventListener('keydown',event => {if (event.key === 'Escape' && directory.open) {directory.open=false;directory.querySelector('summary').focus();}});
+  scope.on(document, 'keydown',event => {if (event.key === 'Escape' && directory.open) {directory.open=false;directory.querySelector('summary').focus();}});
   function syncMotion() {
     zone.classList.toggle('skills-motion-idle',!motionAllowed());
     window.SkillLoreScene?.pause(!motionAllowed());
     window.SkillLoreOrbit?.pause(!motionAllowed());
     if (!motionAllowed()) textAnimation?.cancel();
   }
-  document.addEventListener('portfolio:filter',event => {if(event.detail?.items?.some(item => items.includes(item))) syncFilter();});
-  document.addEventListener('portfolio:language',translate);
-  document.addEventListener('portfolio:motion',syncMotion);
-  document.addEventListener('visibilitychange',syncMotion);
+  scope.on(document, 'portfolio:filter',event => {if(event.detail?.items?.some(item => items.includes(item))) syncFilter();});
+  scope.on(document, 'portfolio:language',translate);
+  scope.on(document, 'portfolio:motion',syncMotion);
+  scope.on(document, 'visibilitychange',syncMotion);
   if ('IntersectionObserver' in window) new IntersectionObserver(entries => zone.classList.toggle('skills-offscreen',!entries[0].isIntersecting)).observe(zone);
-  reduced.addEventListener('change',syncMotion);
+  scope.on(reduced, 'change',syncMotion);
   new MutationObserver(syncMotion).observe(document.body,{attributes:true,attributeFilter:['class']});
   zone.classList.add('skills-enhanced');
   roster.hidden = false;
@@ -135,4 +137,4 @@
   translate();
   syncFilter();
   syncMotion();
-})();
+});

@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("skills-lore-orbit", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const canvas = document.querySelector('[data-lore-orbit]');
   const zone = canvas?.closest('.skills-console');
   const reticle = zone?.querySelector('.lore-reticle');
@@ -292,5 +294,6 @@
       canvas.dataset.running = 'false';
     }
   };
+  scope.cleanup(() => { window.SkillLoreOrbit?.destroy(); delete window.SkillLoreOrbit; });
   resize();
-})();
+});

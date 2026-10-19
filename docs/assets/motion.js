@@ -1,7 +1,9 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const body = document.body;
-  const root = new URL("../", document.currentScript.src);
+  const root = new URL("../", scope.src);
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const sessionKey = "bernie-portfolio-arrival-v2";
   const labels = {
@@ -55,7 +57,7 @@
       if(!observer || reduced.matches || (rect.bottom>0 && rect.top<innerHeight)) reveal(element);
     });
   }
-  document.addEventListener("focusin",event => {
+  scope.on(document, "focusin",event => {
     let element=event.target;
     while(element && element!==body){
       const state=states.get(element);
@@ -63,7 +65,7 @@
       element=element.parentElement;
     }
   });
-  reduced.addEventListener?.("change",() => {
+  scope.on(reduced, "change",() => {
     if(!reduced.matches)return;
     elements.forEach(element => {const state=states.get(element);state.animation?.cancel();state.animation=null;state.revealed=true;element.dataset.motionState="ready";});
     activeArrival?.skip();
@@ -73,9 +75,9 @@
     elements.forEach(element => {const state=states.get(element);state.animation?.cancel();state.animation=null;element.dataset.motionState="ready";});
     if (body.classList.contains("motion-paused")) activeArrival?.skip();
   }
-  document.addEventListener("portfolio:motion", syncSceneMotion);
-  document.addEventListener("visibilitychange", syncSceneMotion);
-  window.addEventListener("pageshow",event => {
+  scope.on(document, "portfolio:motion", syncSceneMotion);
+  scope.on(document, "visibilitychange", syncSceneMotion);
+  scope.on(window, "pageshow",event => {
     if(event.persisted){activeArrival?.skip();startPageMotion();}
   });
 
@@ -102,11 +104,12 @@
     let exitTimer;
     let task;
     let tick;
+    scope.cleanup(() => task?.cancel());
     const skip=screen.querySelector(".boot-screen__skip-animation");
     const retry=screen.querySelector(".boot-screen__retry");
     const status=screen.querySelector(".boot-screen__status");
     function render() {
-      if(finished)return;
+      if(finished || scope.disposed)return;
       const label=text();
       const ready=preloadReady&&pageReady;
       const percent=ready?100:progress.total?Math.min(99,Math.floor(progress.loaded/progress.total*100)):0;
@@ -124,7 +127,7 @@
       retry.textContent=label.retry;retry.hidden=progress.running||!progress.failed.length;
     }
     function finish() {
-      if(finished)return;
+      if(finished || scope.disposed)return;
       finished=true;clearInterval(tick);clearTimeout(exitTimer);task?.cancel();
       document.removeEventListener("keydown",onKey);document.removeEventListener("portfolio:language",render);
       try{sessionStorage.setItem(sessionKey,"complete");}catch{}
@@ -153,7 +156,7 @@
     }
     activeArrival={skip:()=>leave(true)};
     skip.addEventListener("click",()=>leave(true));
-    document.addEventListener("keydown",onKey);document.addEventListener("portfolio:language",render);
+    scope.on(document, "keydown",onKey);scope.on(document, "portfolio:language",render);
     screen.focus({preventScroll:true});render();
     async function runOffline() {
       const paths=["identity.webp"];
@@ -167,7 +170,7 @@
       progress.running=false;preloadReady=!progress.failed.length;render();leave();
     }
     async function run() {
-      if(finished)return;
+      if(finished || scope.disposed)return;
       if(location.protocol==="file:"){await runOffline();return;}
       if(!task){task=window.BHR_PRELOADER?.create(value=>{progress=value;render();});}
       if(!task){progress={total:0,loaded:0,failed:["loader"],running:false};render();return;}
@@ -175,17 +178,17 @@
     }
     retry.addEventListener("click",run);
     (async()=>{
-      if(document.readyState!=="complete")await new Promise(resolve=>window.addEventListener("load",resolve,{once:true}));
+      if(document.readyState!=="complete")await new Promise(resolve=>scope.on(window, "load",resolve,{once:true}));
       try{await document.fonts?.ready;}catch{}
-      if(finished)return;pageReady=true;render();leave();
+      if(finished || scope.disposed)return;pageReady=true;render();leave();
     })();
     tick=setInterval(()=>{render();leave();},250);
     run().catch(()=>{progress.running=false;progress.failed=["loader"];render();});
   }
   const replay=document.querySelector(".motion-replay");
   if(replay){replay.hidden=false;replay.textContent=text().replay;replay.addEventListener("click",showArrival);}
-  document.addEventListener("portfolio:language",()=>{if(replay)replay.textContent=text().replay;});
+  scope.on(document, "portfolio:language",()=>{if(replay)replay.textContent=text().replay;});
   let firstArrival=true;
   try{firstArrival=sessionStorage.getItem(sessionKey)!=="complete";}catch{}
   if(firstArrival)showArrival();else requestAnimationFrame(startPageMotion);
-})();
+});

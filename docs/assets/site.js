@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("site", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const body = document.body;
   const dictionary = window.PORTFOLIO_TEXT || {};
   const supported = ["zh-HK", "en", "zh-CN"];
@@ -10,7 +12,7 @@
   const queryLanguage = new URLSearchParams(location.search).get("lang");
   let language = [queryLanguage, preference.get("language"), "zh-HK"].find(value => supported.includes(value));
   let messageDraft = "";
-  let draftValues = null;
+  let draftValues = scope.memory.draftValues || null;
   let toastTimer;
   let renderedLanguage;
   const text = (key, fallback = key) => {
@@ -42,7 +44,7 @@
       menu.setAttribute("aria-expanded", String(open));
       nav.dataset.open = String(open);
     });
-    document.addEventListener("keydown", event => {
+    scope.on(document, "keydown", event => {
       if (event.key === "Escape" && menu.getAttribute("aria-expanded") === "true") {
         nav.dataset.open = "false";
         menu.setAttribute("aria-expanded", "false");
@@ -114,6 +116,7 @@
     const topic = Array.from(topicSelect.options).find(option => option.value === draftValues.topic)?.textContent || draftValues.topic;
     messageDraft = text("draftTitle") + "\n\n" + text("draftName") + ": " + draftValues.name + "\n" + text("draftEmail") + ": " + draftValues.email + "\n" + text("draftTopic") + ": " + topic + "\n\n" + text("draftBody") + ":\n" + draftValues.message;
     document.getElementById("message-preview").textContent = messageDraft;
+    document.getElementById("message-result").hidden = false;
     document.getElementById("form-status").textContent = text("draftReady");
   }
   function setLanguage(next) {
@@ -138,7 +141,7 @@
     try {
       const url = new URL(location.href);
       url.searchParams.set("lang", language);
-      history.replaceState(null, "", url);
+      history.replaceState(history.state, "", url);
     } catch {}
   }
   document.querySelectorAll("[data-language]").forEach(button => button.addEventListener("click", () => setLanguage(button.dataset.language)));
@@ -180,6 +183,7 @@
         field.addEventListener("input", () => field.setCustomValidity(""), {once:true});
         return;
       }
+      scope.memory.draftValues = draftValues;
       renderDraft();
       document.getElementById("message-result").hidden = false;
       document.getElementById("message-preview").focus();
@@ -197,4 +201,4 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     });
   }
-})();
+});

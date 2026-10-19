@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("seo", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const base = "https://bernie8026.github.io/lunarvow-united/";
   const supported = ["zh-HK", "en", "zh-CN"];
   const locales = {"zh-HK":"zh_HK", en:"en_HK", "zh-CN":"zh_CN"};
@@ -143,6 +145,6 @@
     setMeta('meta[name="twitter:description"]', metadata.description);
     setMeta('meta[name="twitter:image:alt"]', imageAlts[language]);
   };
-  document.addEventListener("portfolio:language", update);
+  scope.on(document, "portfolio:language", update);
   update();
-})();
+});

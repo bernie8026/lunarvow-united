@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("showcase", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const mounts = document.querySelectorAll("[data-project-showcase]");
   if (!mounts.length) return;
 
@@ -16,7 +18,7 @@
   };
   const language = () => labels[document.documentElement.lang] ? document.documentElement.lang : "zh-HK";
   const text = key => dictionary[key]?.[language()] ?? dictionary[key]?.["zh-HK"] ?? "";
-  const assetBase = new URL("./", document.currentScript.src);
+  const assetBase = new URL("./", scope.src);
   const asset = filename => new URL(filename, assetBase).href;
   const number = index => String(index + 1).padStart(2, "0");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -198,12 +200,12 @@
       });
     }, {passive:true});
     stage.addEventListener("pointerleave", resetDepth, {passive:true});
-    document.addEventListener("visibilitychange", syncMotion);
-    document.addEventListener("portfolio:motion", event => {
+    scope.on(document, "visibilitychange", syncMotion);
+    scope.on(document, "portfolio:motion", event => {
       pausedByEvent = Boolean(event.detail?.paused);
       syncMotion();
     });
-    reducedMotion.addEventListener("change", syncMotion);
+    scope.on(reducedMotion, "change", syncMotion);
     new MutationObserver(syncMotion).observe(document.body, {attributes:true, attributeFilter:["class"]});
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(entries => {
@@ -249,7 +251,7 @@
         requestAnimationFrame(() => target.focus({preventScroll:true}));
       });
     });
-    document.addEventListener("portfolio:language", translate);
+    scope.on(document, "portfolio:language", translate);
     translate();
   });
-})();
+});

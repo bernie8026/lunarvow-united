@@ -112,3 +112,7 @@ node scripts/verify-site-layout.cjs
 ```
 
 瀏覽器驗證沿用 `PORTFOLIO_BASE_URL`；後兩項需要 Playwright 及 Chrome。
+
+
+無刷新選單 / Seamless navigation
+線上版本以 Fetch + History API 切換八個獨立 HTML 頁面，支援返回／前進、頁面定位、三語介面及頁面互動。新頁面備妥後才切換，載入失敗可重試；支援 View Transitions 嘅瀏覽器使用連續轉場，其餘使用淡出／滑入，減少動態模式則直接切換。每次轉頁會清理上一頁嘅監聽、計時器及粒子動畫。解壓 ZIP 直接用 file:// 開啟時，保留一般 HTML 導覽。

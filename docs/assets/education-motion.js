@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("education-motion", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const body = document.body;
   if (body.dataset.page !== "education") return;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
@@ -144,14 +146,14 @@
   addEventListener("scroll", queueDraw, {passive:true});
   addEventListener("resize", queueDraw, {passive:true});
   if ("ResizeObserver" in window) new ResizeObserver(queueDraw).observe(document.querySelector("main"));
-  document.addEventListener("visibilitychange", stateChanged);
-  document.addEventListener("portfolio:motion", event => {
+  scope.on(document, "visibilitychange", stateChanged);
+  scope.on(document, "portfolio:motion", event => {
     if (typeof event.detail?.paused === "boolean") eventPaused = event.detail.paused;
     stateChanged();
   });
-  document.addEventListener("portfolio:language", queueDraw);
-  reduced.addEventListener("change", stateChanged);
+  scope.on(document, "portfolio:language", queueDraw);
+  scope.on(reduced, "change", stateChanged);
   new MutationObserver(stateChanged).observe(body, {attributes:true, attributeFilter:["class"]});
   body.classList.add("edu-motion-ready");
   draw();
-})();
+});

@@ -23,11 +23,15 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -35,15 +39,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -55,11 +59,11 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -68,6 +72,10 @@
       },
       {
         "url": "assets/theme.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -97,11 +105,15 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -109,15 +121,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -129,11 +141,11 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -142,6 +154,10 @@
       },
       {
         "url": "assets/theme.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -175,6 +191,10 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
@@ -183,7 +203,7 @@
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -191,15 +211,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -211,7 +231,7 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -219,11 +239,11 @@
         "type": "file"
       },
       {
-        "url": "assets/education-motion.js?v=layout-1",
+        "url": "assets/education-motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -232,6 +252,10 @@
       },
       {
         "url": "assets/theme.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -261,11 +285,15 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -273,15 +301,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -293,11 +321,11 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -306,6 +334,10 @@
       },
       {
         "url": "assets/theme.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -339,6 +371,10 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
@@ -347,7 +383,7 @@
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -355,15 +391,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -375,11 +411,11 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -388,6 +424,10 @@
       },
       {
         "url": "assets/theme.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -421,6 +461,10 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
@@ -429,7 +473,7 @@
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -437,15 +481,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -457,11 +501,11 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -470,6 +514,10 @@
       },
       {
         "url": "assets/theme.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -499,11 +547,15 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -511,15 +563,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -531,11 +583,11 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -544,6 +596,10 @@
       },
       {
         "url": "assets/theme.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -573,11 +629,15 @@
         "type": "file"
       },
       {
+        "url": "assets/navigation.js?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
         "url": "assets/content.js",
         "type": "file"
       },
       {
-        "url": "assets/site.js?v=cyber-blue-1",
+        "url": "assets/site.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -585,15 +645,15 @@
         "type": "file"
       },
       {
-        "url": "assets/showcase.js?v=report-1",
+        "url": "assets/showcase.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/immersive.js?v=layout-1",
+        "url": "assets/immersive.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=cyber-blue-1",
+        "url": "assets/motion.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -605,11 +665,11 @@
         "type": "file"
       },
       {
-        "url": "assets/interactions.js?v=console-1",
+        "url": "assets/interactions.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/seo.js?v=report-1",
+        "url": "assets/seo.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -617,15 +677,15 @@
         "type": "file"
       },
       {
-        "url": "assets/skills-lore-scene.js?v=cyber-blue-1",
+        "url": "assets/skills-lore-scene.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/skills-lore-orbit.js?v=cyber-blue-1",
+        "url": "assets/skills-lore-orbit.js?v=soft-navigation-1",
         "type": "file"
       },
       {
-        "url": "assets/skills-console.js?v=skills-particles-2",
+        "url": "assets/skills-console.js?v=soft-navigation-1",
         "type": "file"
       },
       {
@@ -638,6 +698,10 @@
       },
       {
         "url": "assets/theme-skills.css?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
       },
       {

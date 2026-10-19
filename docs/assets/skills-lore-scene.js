@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("skills-lore-scene", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const canvas = document.querySelector('[data-lore-canvas]');
   if (!canvas) return;
   const ctx = canvas.getContext('2d', { alpha: true });
@@ -461,6 +463,7 @@
   }) : null;
   visibilityObserver?.observe(canvas);
   resize();
+  scope.cleanup(() => { window.SkillLoreScene?.destroy(); delete window.SkillLoreScene; });
   canvas.dataset.pointSource = 'skill';
   canvas.dataset.colorMode = document.body.dataset.theme === 'light' ? 'light' : 'dark';
-})();
+});

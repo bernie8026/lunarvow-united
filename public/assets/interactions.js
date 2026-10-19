@@ -1,5 +1,7 @@
 "use strict";
-(() => {
+window.PORTFOLIO_PAGES.register("interactions", document.currentScript.src, scope => {
+  const {addEventListener, requestAnimationFrame, cancelAnimationFrame, setTimeout, clearTimeout, setInterval, clearInterval, ResizeObserver, IntersectionObserver, MutationObserver} = scope;
+
   const body = document.body;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const fine = matchMedia("(hover: hover) and (pointer: fine)");
@@ -43,8 +45,8 @@
   function queueScroll() {if (!queued) {queued = true; requestAnimationFrame(updateScroll);}}
   addEventListener("scroll", queueScroll, {passive:true});
   addEventListener("resize", queueScroll);
-  document.addEventListener("portfolio:language", queueScroll);
-  document.addEventListener("toggle", queueScroll, true);
+  scope.on(document, "portfolio:language", queueScroll);
+  scope.on(document, "toggle", queueScroll, true);
   if ("ResizeObserver" in window) new ResizeObserver(queueScroll).observe(body);
 
   // Move existing skill rows to their new positions when the visitor filters.
@@ -54,7 +56,7 @@
     previous = new Map(Array.from(skillZone?.querySelectorAll("[data-filter-item]") || []).filter(item => !item.hidden).map(item => [item, item.getBoundingClientRect().top + scrollY]));
   }
   skillZone?.addEventListener("click", event => {if (event.target instanceof Element && event.target.closest("[data-filter]")) snapshotSkills();}, true);
-  document.addEventListener("portfolio:filter", event => {
+  scope.on(document, "portfolio:filter", event => {
     const items = event.detail?.items;
     if (!skillZone || skillZone.classList.contains("skills-enhanced") || !allowed() || !Array.isArray(items)) return;
     items.filter(item => item instanceof Element && skillZone.contains(item) && !item.hidden).forEach(item => {
@@ -108,7 +110,7 @@
   function translate() {
     if (flashButton) flashButton.textContent = {"zh-HK":"⚡ 試閃動畫",en:"⚡ Test flash","zh-CN":"⚡ 试闪动画"}[document.documentElement.lang] || "⚡ Test flash";
   }
-  document.addEventListener("portfolio:language", translate);
+  scope.on(document, "portfolio:language", translate);
   translate();
 
   const draft = document.getElementById("message-result");
@@ -126,9 +128,9 @@
     if (flashButton) flashButton.disabled = !allowed();
     queueScroll();
   }
-  document.addEventListener("portfolio:motion", sync);
-  document.addEventListener("visibilitychange", sync);
-  reduced.addEventListener("change", sync);
+  scope.on(document, "portfolio:motion", sync);
+  scope.on(document, "visibilitychange", sync);
+  scope.on(reduced, "change", sync);
   new MutationObserver(sync).observe(body, {attributes:true,attributeFilter:["class"]});
   sync();
-})();
+});
