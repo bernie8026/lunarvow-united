@@ -1,4 +1,4 @@
-/* Offline regression checks for per-page intro loading and cancellation. */
+/* Offline regression checks for complete per-page loading and cancellation. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -24,33 +24,38 @@ function attributes(tag) {
 function verifyManifest() {
   const manifestPath = path.join(publicRoot, 'assets/preload-manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  assert.equal(manifest.version, 2, 'Run scripts/prepare-site.cjs before this test');
+  assert.equal(manifest.version, 3, 'Run scripts/prepare-site.cjs before this test');
   assert.deepEqual(manifest.resources, [{url:'assets/identity.webp?v=cyber-blue-1',type:'image'}], 'Existing open tabs can replay with the shared intro artwork');
   assert.deepEqual(Object.keys(manifest.pages).sort(), [...pages].sort());
   const motion = fs.readFileSync(path.join(publicRoot, 'assets/motion.js'), 'utf8');
   const introImage = motion.match(/new URL\("([^"]*identity\.webp[^"]*)",root\)/)?.[1];
   assert.ok(introImage, 'Intro artwork URL is defined');
+  const showcase = fs.readFileSync(path.join(publicRoot, 'assets/showcase.js'), 'utf8');
+  const showcaseImages = [...showcase.matchAll(/\bimage\s*:\s*["']([^"']+)["']/g)].map(match => 'assets/' + match[1]);
+  assert.ok(showcaseImages.length >= 3, 'Runtime showcase imagery is discoverable');
   for (const page of pages) {
     const html = fs.readFileSync(path.join(publicRoot, `${page}.html`), 'utf8');
     assert.equal(attributes(html.match(/<body\b[^>]*>/i)[0])['data-page'], page);
     const expected = new Map([[introImage, 'image']]);
-    const lazyImages = new Set();
+    const pageImages = new Set();
     for (const tag of html.match(/<(?:script|link|img)\b[^>]*>/gi) || []) {
       const attrs = attributes(tag);
       let url;
       let type;
       if (/^<script\b/i.test(tag)) { url = attrs.src; type = 'file'; }
-      if (/^<link\b/i.test(tag) && attrs.rel === 'stylesheet') { url = attrs.href; type = 'file'; }
+      if (/^<link\b/i.test(tag) && ['stylesheet', 'icon'].includes(attrs.rel)) { url = attrs.href; type = 'file'; }
       if (/^<img\b/i.test(tag)) {
-        if (attrs.loading === 'lazy') { lazyImages.add(attrs.src?.split('?')[0]); continue; }
         url = attrs.src; type = 'image';
+        if (url) pageImages.add(url.split('?')[0]);
       }
       if (url?.startsWith('assets/')) expected.set(url, type);
     }
+    if (['index', 'projects'].includes(page)) for (const image of showcaseImages) expected.set(image, 'image');
     const actual = manifest.pages[page];
     assert.ok(Array.isArray(actual) && actual.length, `${page}: resources exist`);
     assert.equal(new Set(actual.map(resource => resource.url)).size, actual.length, `${page}: no duplicates`);
-    assert.deepEqual(actual.map(resource => [resource.url, resource.type]).sort(), [...expected].sort(), `${page}: matches authored HTML and intro image, including cache versions`);
+    assert.deepEqual(actual.map(resource => [resource.url, resource.type]).sort(), [...expected].sort(), `${page}: includes authored resources, lazy imagery and runtime showcase imagery with matching cache versions`);
+    for (const image of pageImages) assert.ok(actual.some(resource => resource.type === 'image' && resource.url.split('?')[0] === image), `${page}: includes ${image} before reveal`);
     for (const resource of actual) {
       const url = new URL(resource.url, base);
       const filename = resource.url.split('?')[0];
@@ -58,8 +63,7 @@ function verifyManifest() {
       assert.ok(url.pathname.startsWith(new URL(base).pathname));
       assert.ok(fs.existsSync(path.join(publicRoot, filename)), `${page}: ${filename} exists`);
       assert.ok(!filename.endsWith('.html') && !filename.includes('social-preview'), `${page}: no unrelated HTML or share artwork`);
-      assert.ok(!lazyImages.has(filename), `${page}: lazy imagery is not preloaded`);
-      assert.ok(resource.type === 'image' || /\.(?:css|js)$/.test(filename), `${page}: only scripts/styles/eager imagery`);
+      assert.ok(resource.type === 'image' || /\.(?:css|js|svg)$/.test(filename), `${page}: only scripts/styles, page imagery and favicon`);
     }
   }
   const published = path.join(root, 'docs/assets/preload-manifest.json');
@@ -81,7 +85,7 @@ function harness(options = {}) {
     if (signal?.aborted) abort();
     else signal?.addEventListener('abort', abort, { once: true });
   });
-  const manifest = options.manifest || { version: 2, pages: { education: [{ url: 'assets/page.js', type: 'file' }, { url: 'assets/eager.png', type: 'image' }], index: [{ url: 'assets/index-only.js', type: 'file' }] } };
+  const manifest = options.manifest || { version: 3, pages: { education: [{ url: 'assets/page.js', type: 'file' }, { url: 'assets/eager.png', type: 'image' }], index: [{ url: 'assets/index-only.js', type: 'file' }] } };
   async function fetch(url, init = {}) {
     const key = keyFor(url);
     state.fetches.push(key);
@@ -124,7 +128,7 @@ function harness(options = {}) {
   }
   const context = vm.createContext({
     URL, AbortController, Image: FakeImage, fetch,
-    document: { currentScript: { src: `${base}assets/preloader.js?v=test` }, body: { dataset: options.noPage ? {} : { page: options.page || 'education' } } },
+    document: { currentScript: { src: `${base}assets/preloader.js?v=test` }, baseURI: base + (options.page || 'education') + '.html', images: options.domImages, body: { dataset: options.noPage ? {} : { page: options.page || 'education' } } },
     window: {},
     setTimeout(callback, duration) { const timer = setTimeout(callback, duration); timers.add(timer); return timer; },
     clearTimeout(timer) { timers.delete(timer); clearTimeout(timer); }
@@ -158,6 +162,25 @@ async function verifyRuntime() {
     assert.equal(env.state.images.length, 0);
     cases++;
   });
+  const domImages = [
+    `${base}assets/eager.png`, `${base}assets/runtime.png`,
+    'https://other.test/remote.png', 'https://example.test/outside.png',
+    'data:image/png;base64,AA=='
+  ].map(src => ({ src, currentSrc: src, loading: 'lazy', getAttribute(name) { return name === 'src' ? src : null; } }));
+  await withHarness({ domImages, holdDecodes: ['assets/runtime.png'] }, async env => {
+    let settled = false;
+    const pending = env.task.run().then(result => { settled = true; return result; });
+    await until(() => env.decodes.has('assets/runtime.png'), 'runtime page image decode');
+    assert.equal(settled, false, 'Runtime-injected image decoding blocks readiness');
+    assert.equal(domImages[0].loading, 'eager', 'An authored lazy image is promoted for complete-page loading');
+    assert.equal(domImages[1].loading, 'eager', 'A runtime lazy image is promoted for complete-page loading');
+    assert.deepEqual([...env.state.images].sort(), ['assets/eager.png', 'assets/runtime.png'], 'Resolved DOM URLs deduplicate against the manifest and exclude outside resources');
+    assert.equal(env.counts.image.get('assets/eager.png'), 1, 'The same relative manifest and absolute DOM URL load once');
+    env.decodes.get('assets/runtime.png')();
+    assert.equal(await pending, true);
+    assert.deepEqual(env.state.reports.at(-1), { total: 3, loaded: 3, failed: [], errors: [], running: false });
+    cases++;
+  });
   await withHarness({ holdBodies: ['assets/page.js'], holdDecodes: ['assets/eager.png'] }, async env => {
     let settled = false;
     const pending = env.task.run().then(result => { settled = true; return result; });
@@ -171,7 +194,7 @@ async function verifyRuntime() {
     assert.equal(await pending, true);
     cases++;
   });
-  const retryManifest = { version: 2, pages: { education: [
+  const retryManifest = { version: 3, pages: { education: [
     { url: 'assets/keep.js', type: 'file' }, { url: 'assets/retry.js', type: 'file' },
     { url: 'assets/keep.png', type: 'image' }, { url: 'assets/retry.png', type: 'image' }
   ] } };
@@ -199,7 +222,7 @@ async function verifyRuntime() {
     cases++;
   });
   const waitingFiles = Array.from({ length: 8 }, (_, index) => ({ url: `assets/wait-${index}.js`, type: 'file' }));
-  await withHarness({ manifest: { version: 2, pages: { education: waitingFiles } }, holdBodies: waitingFiles.map(resource => resource.url) }, async env => {
+  await withHarness({ manifest: { version: 3, pages: { education: waitingFiles } }, holdBodies: waitingFiles.map(resource => resource.url) }, async env => {
     const pending = env.task.run();
     await until(() => env.bodies.size === 6, 'six active workers');
     assert.equal(await env.task.run(), false, 'Concurrent run is ignored');
@@ -213,7 +236,7 @@ async function verifyRuntime() {
     assert.equal(await env.task.run(), false, 'Canceled tasks remain stopped');
     cases++;
   });
-  await withHarness({ manifest: { version: 2, pages: { education: [{ url: 'assets/wait.png', type: 'image' }] } }, holdImages: ['assets/wait.png'] }, async env => {
+  await withHarness({ manifest: { version: 3, pages: { education: [{ url: 'assets/wait.png', type: 'image' }] } }, holdImages: ['assets/wait.png'] }, async env => {
     const pending = env.task.run();
     await until(() => env.state.images.length === 1, 'active image');
     const reportCount = env.state.reports.length;
@@ -225,11 +248,11 @@ async function verifyRuntime() {
   });
   const invalid = [
     {}, { resources: [{ url: 'assets/old.js', type: 'file' }] },
-    { version: 2, pages: { education: [] } },
-    { version: 2, pages: { education: [null] } },
-    { version: 2, pages: { education: [{ url: 'assets/a.js', type: 'script' }] } },
-    { version: 2, pages: { education: [{ url: 'https://other.test/a.js', type: 'file' }] } },
-    { version: 2, pages: { education: [{ url: '../outside.js', type: 'file' }] } }
+    { version: 3, pages: { education: [] } },
+    { version: 3, pages: { education: [null] } },
+    { version: 3, pages: { education: [{ url: 'assets/a.js', type: 'script' }] } },
+    { version: 3, pages: { education: [{ url: 'https://other.test/a.js', type: 'file' }] } },
+    { version: 3, pages: { education: [{ url: '../outside.js', type: 'file' }] } }
   ];
   for (const manifest of invalid) await withHarness({ manifest }, async env => {
     assert.equal(await env.task.run(), false, 'Malformed manifest is rejected');

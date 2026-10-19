@@ -7,6 +7,7 @@
   const pages = ["index", "about", "experience", "education", "skills", "projects", "contact", "sitemap"];
   const modules = new Map(), mounted = [], memories = new Map(), pageStates = new Map();
   const documents = new Map(), scriptLoads = new Map(), styleLoads = new Map(), scrollPositions = new Map();
+  const preparationTimeout = 60000;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   let preparing = false, sequence = 0, currentURL = new URL(location.href), activeTransition;
   let routeAnimation = null, latestRequest = null, currentEntry = null;
@@ -153,10 +154,22 @@
     const key = keyFor(url);
     if (!documents.has(key)) {
       const endpoint = new URL(key + ".html", root);
-      const promise = fetch(endpoint, {credentials:"same-origin", headers:{Accept:"text/html"}}).then(response => {
+      const controller = new AbortController();
+      let timer, promise;
+      const request = fetch(endpoint, {credentials:"same-origin", headers:{Accept:"text/html"}, signal:controller.signal}).then(response => {
         if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) throw new Error("Page unavailable");
         return response.text();
-      }).then(source => { parsePage(source, url); return source; }).catch(error => { documents.delete(key); throw error; });
+      }).then(source => { parsePage(source, url); return source; });
+      const timeout = new Promise((resolve, reject) => {
+        timer = native.timeout(() => {
+          reject(new Error("Page request timed out"));
+          controller.abort();
+        }, preparationTimeout);
+      });
+      promise = Promise.race([request, timeout]).catch(error => {
+        if (documents.get(key) === promise) documents.delete(key);
+        throw error;
+      }).finally(() => native.clearTimeout(timer));
       documents.set(key, promise);
     }
     return documents.get(key);
@@ -169,25 +182,49 @@
   const loadedScripts = new Set([...document.querySelectorAll("script[src]")].map(el => el.src));
   function loadScript(src) {
     if (loadedScripts.has(src)) return Promise.resolve();
-    if (!scriptLoads.has(src)) scriptLoads.set(src, new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = src; script.async = false;
-      script.onload = () => { loadedScripts.add(src); resolve(); };
-      script.onerror = () => { script.remove(); scriptLoads.delete(src); reject(new Error("Script unavailable")); };
-      document.head.append(script);
-    }));
+    if (!scriptLoads.has(src)) {
+      let script, timer, promise;
+      promise = new Promise((resolve, reject) => {
+        script = document.createElement("script");
+        script.src = src; script.async = false;
+        script.onload = () => { loadedScripts.add(src); resolve(); };
+        script.onerror = () => reject(new Error("Script unavailable"));
+        timer = native.timeout(() => reject(new Error("Script request timed out")), preparationTimeout);
+        document.head.append(script);
+      }).catch(error => {
+        script?.remove();
+        if (scriptLoads.get(src) === promise) scriptLoads.delete(src);
+        throw error;
+      }).finally(() => {
+        native.clearTimeout(timer);
+        if (script) script.onload = script.onerror = null;
+      });
+      scriptLoads.set(src, promise);
+    }
     return scriptLoads.get(src);
   }
   function loadStyle(href) {
     const existing = [...document.querySelectorAll('link[rel="stylesheet"]')].find(link => link.href === href);
     if (existing?.sheet) return Promise.resolve(existing);
-    if (!styleLoads.has(href)) styleLoads.set(href, new Promise((resolve, reject) => {
-      const link = existing || document.createElement("link");
-      link.rel = "stylesheet"; link.href = href; link.media = "not all";
-      link.onload = () => resolve(link);
-      link.onerror = () => { link.remove(); styleLoads.delete(href); reject(new Error("Styles unavailable")); };
-      if (!existing) document.head.append(link);
-    }));
+    if (!styleLoads.has(href)) {
+      let link, timer, promise;
+      promise = new Promise((resolve, reject) => {
+        link = existing || document.createElement("link");
+        link.rel = "stylesheet"; link.href = href; link.media = "not all";
+        link.onload = () => resolve(link);
+        link.onerror = () => reject(new Error("Styles unavailable"));
+        timer = native.timeout(() => reject(new Error("Style request timed out")), preparationTimeout);
+        if (!existing) document.head.append(link);
+      }).catch(error => {
+        link?.remove();
+        if (styleLoads.get(href) === promise) styleLoads.delete(href);
+        throw error;
+      }).finally(() => {
+        native.clearTimeout(timer);
+        if (link) link.onload = link.onerror = null;
+      });
+      styleLoads.set(href, promise);
+    }
     return styleLoads.get(href);
   }
   function applyHead(parsed, styles) {
@@ -238,13 +275,14 @@
     notice.hidden = true;
     busy(true);
     const from = new URL(currentURL), back = options.history === "pop";
+    document.dispatchEvent(new CustomEvent("portfolio:navigation-start", {detail:{from:from.href, to:url.href}}));
     try {
       const parsed = parsePage(await getPage(url), url);
       const styleURLs = [...parsed.querySelectorAll('link[rel="stylesheet"]')].map(link => assetURL(link.getAttribute("href")));
-      // Never evaluate a second router from fetched HTML, including an older
-      // cached version that predates the singleton guard above.
-      const routerPath = new URL("assets/navigation.js", root).pathname;
-      const scripts = [...parsed.querySelectorAll('script[src]')].map(script => assetURL(script.getAttribute("src"))).filter(src => new URL(src).pathname !== routerPath);
+      // The router and synchronous first-paint gate belong to this document.
+      // Fetched pages may reference other versions; neither may execute again.
+      const documentScripts = new Set(["assets/navigation.js", "assets/page-entry.js"].map(path => new URL(path, root).pathname));
+      const scripts = [...parsed.querySelectorAll('script[src]')].map(script => assetURL(script.getAttribute("src"))).filter(src => !documentScripts.has(new URL(src).pathname));
       const styles = await Promise.all(styleURLs.map(loadStyle));
       if (ticket !== sequence) return;
       preparing = true;
@@ -258,9 +296,17 @@
       if (ticket !== sequence) return;
       rememberPage();
       rememberScroll();
-      const animate = motionEnabled();
+      const loaderActive = Boolean(window.BHR_LOADING);
+      const animate = !loaderActive && motionEnabled();
       document.documentElement.dataset.routeDirection = back || pages.indexOf(pageName(url)) < pages.indexOf(pageName(from)) ? "back" : "forward";
       document.documentElement.dataset.routeScene = pageName(url) === "skills" ? "focus" : pageName(url) === "projects" ? "reveal" : "slide";
+      const focusPage = () => {
+        positionPage(url, options.scroll);
+        const target = document.querySelector("main h1") || document.querySelector("main");
+        target?.setAttribute("tabindex", "-1");
+        target?.focus({preventScroll:true});
+        announcement.textContent = document.title;
+      };
       const commit = () => {
         if (ticket !== sequence) return;
         mounted.splice(0).reverse().forEach(scope => scope.dispose());
@@ -281,13 +327,18 @@
         for (const src of scripts) { const record = modules.get(src); if (record) mount(record); }
         restorePage(url);
         positionPage(url, options.scroll);
-        const target = document.querySelector("main h1") || document.querySelector("main");
-        target?.setAttribute("tabindex", "-1");
-        target?.focus({preventScroll:true});
-        announcement.textContent = document.title;
+        if (!loaderActive) focusPage();
         document.dispatchEvent(new CustomEvent("portfolio:navigated", {detail:{from:from.href, to:currentURL.href}}));
       };
-      if (animate && typeof document.startViewTransition === "function") {
+      if (loaderActive) {
+        // Keep the live loading screen painting instead of freezing it inside
+        // a browser snapshot. The newly mounted page owns its readiness gate.
+        commit();
+        if (ticket !== sequence) return;
+        await window.BHR_LOADING?.finished;
+        if (ticket !== sequence) return;
+        focusPage();
+      } else if (animate && typeof document.startViewTransition === "function") {
         activeTransition = document.startViewTransition(commit);
         await activeTransition.updateCallbackDone;
         await activeTransition.finished.catch(() => {});
@@ -307,6 +358,7 @@
       if (ticket !== sequence) return;
       console.error("Portfolio navigation:", error);
       if (back) { currentEntry = stateId(); history.replaceState({...history.state, portfolioRoute:currentEntry}, "", from); currentURL = from; }
+      document.dispatchEvent(new CustomEvent("portfolio:navigation-error", {detail:{from:from.href, to:url.href}}));
       showError();
     } finally {
       if (ticket === sequence) { preparing = false; busy(false); routeAnimation = null; activeTransition = null; }

@@ -10,9 +10,11 @@ const contentVersions={'assets/skills-console.css':'skills-particles-2','assets/
 const reportAssets=new Set(['site.js','interactions.js','showcase.js','motion.js','preloader.js','seo.js'].map(file=>'assets/'+file));
 const themeAssets=new Set(['skills-console.css','theme.css','theme-home.css','theme-skills.css','site.js','motion.js','brand.svg','identity.webp','skills-lore-scene.js','skills-lore-orbit.js'].map(file=>'assets/'+file));
 const navigationAssets=new Set(['assets/site.js', 'assets/showcase.js', 'assets/immersive.js', 'assets/motion.js', 'assets/interactions.js', 'assets/education-motion.js', 'assets/seo.js', 'assets/skills-lore-scene.js', 'assets/skills-lore-orbit.js', 'assets/skills-console.js', 'assets/navigation.js', 'assets/navigation.css']);
-const versionFor=url=>url==='assets/navigation.js'?'soft-navigation-3':navigationAssets.has(url)?'soft-navigation-1':themeAssets.has(url)?'cyber-blue-1':url==='assets/editorial.css'?'numbers-1':url==='assets/interactions.js'?'console-1':reportAssets.has(url)?'report-1':layoutAssets.has(url)?'layout-1':contentVersions[url]|| (motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'');
-// Only the active page's scripts, styles and eager imagery belong to its intro.
-// Lazy images, other HTML pages and sharing artwork remain outside this queue.
+const loadingAssets=new Set(['page-entry.js','page-loading.css','motion.js','preloader.js'].map(file=>'assets/'+file));
+const versionFor=url=>loadingAssets.has(url)?'page-loading-1':url==='assets/navigation.js'?'page-loading-1':navigationAssets.has(url)?'soft-navigation-1':themeAssets.has(url)?'cyber-blue-1':url==='assets/editorial.css'?'numbers-1':url==='assets/interactions.js'?'console-1':reportAssets.has(url)?'report-1':layoutAssets.has(url)?'layout-1':contentVersions[url]|| (motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'');
+// Load all imagery for this destination, including hidden showcase slides.
+// Other HTML documents and social sharing artwork are not page resources.
+const showcaseImages=[...fs.readFileSync(path.join(publicRoot,'assets/showcase.js'),'utf8').matchAll(/\bimage:\s*["']([^"']+)["']/g)].map(match=>'assets/'+match[1]);
 const pages={};
 const attribute=(tag,name)=>tag.match(new RegExp('\\b'+name+'=["\\\']([^"\\\']+)["\\\']','i'))?.[1];
 for(const file of fs.readdirSync(publicRoot).filter(file=>file.endsWith('.html'))){
@@ -28,16 +30,17 @@ for(const file of fs.readdirSync(publicRoot).filter(file=>file.endsWith('.html')
   };
   for(const tag of html.match(/<(?:script|link|img)\b[^>]*>/gi)||[]){
     if(/^<script\b/i.test(tag))add(attribute(tag,'src'),'file');
-    else if(/^<link\b/i.test(tag)&&attribute(tag,'rel')==='stylesheet')add(attribute(tag,'href'),'file');
-    else if(/^<img\b/i.test(tag)&&attribute(tag,'loading')!=='lazy')add(attribute(tag,'src'),'image');
+    else if(/^<link\b/i.test(tag)&&['stylesheet','icon'].includes(attribute(tag,'rel')))add(attribute(tag,'href'),'file');
+    else if(/^<img\b/i.test(tag))add(attribute(tag,'src'),'image');
   }
+  if(/\bdata-project-showcase\b/.test(html))showcaseImages.forEach(url=>add(url,'image'));
   add('assets/identity.webp','image');
   pages[path.basename(file,'.html')]=[...resources.values()];
 }
 // Existing open tabs use the old schema when replaying the intro; retain its
 // shared artwork entry without restoring the previous whole-site download.
 const resources=[{url:'assets/identity.webp?v=cyber-blue-1',type:'image'}];
-fs.writeFileSync(path.join(publicRoot,'assets/preload-manifest.json'),JSON.stringify({version:2,pages,resources},null,2)+'\n');
+fs.writeFileSync(path.join(publicRoot,'assets/preload-manifest.json'),JSON.stringify({version:3,pages,resources},null,2)+'\n');
 fs.rmSync(dist,{recursive:true,force:true});
 fs.cpSync(publicRoot,dist,{recursive:true});
 // Preserve old links to the copied site while presenting portfolio content.

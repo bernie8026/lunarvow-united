@@ -11,8 +11,13 @@ const pages = ['index','about','experience','education','skills','projects','con
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('response', response => {if(response.url().startsWith(base) && response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);});
+  async function visit(url) {
+    const response=await page.goto(url);
+    await page.locator('.boot-screen').waitFor({state:'detached'});
+    return response;
+  }
   for (const name of pages) {
-    const response = await page.goto(new URL(`${name}.html?lang=zh-HK`,base).href);
+    const response = await visit(new URL(`${name}.html?lang=zh-HK`,base).href);
     assert.equal(response.status(),200,name);
     await page.locator('main h1').waitFor();
     assert.equal(await page.locator('main h1').count(),1);
@@ -35,15 +40,16 @@ const pages = ['index','about','experience','education','skills','projects','con
     });
     assert.deepEqual(missing,[],`${name} missing resources`);
   }
-  await page.goto(new URL('index.html?lang=zh-HK',base).href);
+  await visit(new URL('index.html?lang=zh-HK',base).href);
   await page.locator('.ambient-toggle').click();
   assert(await page.locator('body').evaluate(el=>el.classList.contains('motion-paused')));
   await page.reload();
+  await page.locator('.boot-screen').waitFor({state:'detached'});
   assert.equal(await page.locator('.ambient-toggle').getAttribute('aria-pressed'),'true');
   await page.locator('.ambient-toggle').click();
   await page.locator('.chapter-rail a[href="#selected-work"]').click();
   await page.waitForFunction(()=>document.querySelector('.chapter-rail a[href="#selected-work"]').getAttribute('aria-current') === 'true');
-  await page.goto(new URL('projects.html?lang=zh-HK',base).href);
+  await visit(new URL('projects.html?lang=zh-HK',base).href);
   await page.locator('[data-filter="stem"]').click();
   assert.equal(await page.locator('[data-filter-item]:visible').count(),1);
   await page.locator('[data-filter="all"]').click();
@@ -56,7 +62,7 @@ const pages = ['index','about','experience','education','skills','projects','con
   assert(await page.locator('#dialog-lunar').isVisible());
   await page.keyboard.press('Escape');
   assert(!(await page.locator('#dialog-lunar').isVisible()));
-  await page.goto(new URL('contact.html?lang=en',base).href);
+  await visit(new URL('contact.html?lang=en',base).href);
   await page.locator('[name="name"]').fill('Portfolio check');
   await page.locator('[name="email"]').fill('test@example.com');
   await page.locator('[name="message"]').fill('Checking that the existing local draft still works.');
@@ -70,7 +76,7 @@ const pages = ['index','about','experience','education','skills','projects','con
     console.error('Intro diagnostics:', await arrival.evaluate(()=>({url:location.href,session:sessionStorage.getItem('bernie-portfolio-arrival-v2'),body:document.body.className,screens:document.querySelectorAll('.boot-screen').length})),errors);
     throw error;
   });
-  assert.equal(await arrival.locator('.boot-screen').getAttribute('data-minimum-ms'),'10000');
+  assert.equal(await arrival.locator('.boot-screen').getAttribute('data-hold-ms'),'2000');
   await arrival.locator('.boot-screen__skip-animation').click();
   await arrival.locator('.boot-screen').waitFor({state:'detached'});
   assert.equal(await arrival.locator('main').evaluate(el=>el.inert),false);

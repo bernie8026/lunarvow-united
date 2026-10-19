@@ -23,9 +23,10 @@ project search; accessible project dialogs; print profile; validated contact
 message draft with copy and text download. The contact form does not send mail.
 Language, theme and ambient-motion preferences are saved in browser storage.
 The original cinematic arrival (orbits, particles and an iris reveal) has been
-adapted to the portfolio. First arrival lasts at least 10 seconds unless skipped.
+adapted to the portfolio. First arrival waits 2 seconds after all page resources have loaded and decoded.
 Use Replay intro in the footer to see it again. Completion is session-based,
-so ordinary navigation does not repeat the 10-second arrival. Motion includes
+so ordinary navigation uses a compact cyber-blue loading screen without a hold.
+Skip bypasses animation only; assets must still be ready before entry. Motion includes
 orbital depth and shooting stars, education paths and parallax, distinct project
 transitions, interactive product photos, a local flash demo and skill filtering.
 The footer pauses animations. All motion respects reduced-motion preferences.
@@ -68,7 +69,7 @@ VARIED PRESENTATION
 Education uses a campus image and connected timeline; projects use distinct image
 spreads and open specifications. Experience follows a continuous journey, skills
 use typographic rows, and contact uses a letter-style form. assets/editorial.css
-contains page-specific layouts. Shared card reveals and page overlays are removed.
+contains page-specific layouts. Shared card reveals are removed. Page loading has its own cyber-blue overlay.
 
 ANIMATION CONTROLS
 Use the footer's Pause animations button to stop motion. Education has drawn
@@ -78,4 +79,4 @@ motion and hidden-tab states stop or settle decorative movement.
 
 
 無刷新選單 / Seamless navigation
-線上版本以 Fetch + History API 切換八個獨立 HTML 頁面，支援返回／前進、頁面定位、三語介面及頁面互動。新頁面備妥後才切換，載入失敗可重試；支援 View Transitions 嘅瀏覽器使用連續轉場，其餘使用淡出／滑入，減少動態模式則直接切換。每次轉頁會清理上一頁嘅監聽、計時器及粒子動畫。解壓 ZIP 直接用 file:// 開啟時，保留一般 HTML 導覽。
+線上版本以 Fetch + History API 切換八個獨立 HTML 頁面，支援返回／前進、頁面定位、三語介面及頁面互動。新頁面備妥後才切換，載入失敗可重試；轉頁顯示藍色圓環，完整載入同解碼新頁全部圖片後先揭幕，減少動態模式亦保留素材檢查。每次轉頁會清理上一頁嘅監聽、計時器及粒子動畫。解壓 ZIP 直接用 file:// 開啟時，保留一般 HTML 導覽。

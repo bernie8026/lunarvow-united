@@ -1,7 +1,15 @@
 {
-  "version": 2,
+  "version": 3,
   "pages": {
     "about": [
+      {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
       {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
@@ -23,7 +31,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -35,7 +43,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -47,7 +55,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -76,6 +84,10 @@
       },
       {
         "url": "assets/navigation.css?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-loading.css?v=page-loading-1",
         "type": "file"
       },
       {
@@ -85,6 +97,14 @@
     ],
     "contact": [
       {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
       },
@@ -105,7 +125,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -117,7 +137,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -129,7 +149,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -161,11 +181,23 @@
         "type": "file"
       },
       {
+        "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
         "url": "assets/identity.webp?v=cyber-blue-1",
         "type": "image"
       }
     ],
     "education": [
+      {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
       {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
@@ -191,7 +223,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -207,7 +239,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -219,7 +251,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -259,11 +291,27 @@
         "type": "file"
       },
       {
+        "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/education/sfu-campus.jpg",
+        "type": "image"
+      },
+      {
         "url": "assets/identity.webp?v=cyber-blue-1",
         "type": "image"
       }
     ],
     "experience": [
+      {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
       {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
@@ -285,7 +333,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -297,7 +345,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -309,7 +357,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -338,6 +386,10 @@
       },
       {
         "url": "assets/navigation.css?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-loading.css?v=page-loading-1",
         "type": "file"
       },
       {
@@ -347,6 +399,14 @@
     ],
     "index": [
       {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
       },
@@ -371,7 +431,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -387,7 +447,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -399,7 +459,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -429,6 +489,22 @@
       {
         "url": "assets/navigation.css?v=soft-navigation-1",
         "type": "file"
+      },
+      {
+        "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/lunar-project.webp",
+        "type": "image"
+      },
+      {
+        "url": "assets/equipment/drone-reference.png",
+        "type": "image"
+      },
+      {
+        "url": "assets/equipment/nikon-d5300.jpg",
+        "type": "image"
       },
       {
         "url": "assets/identity.webp?v=cyber-blue-1",
@@ -437,6 +513,14 @@
     ],
     "projects": [
       {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
       },
@@ -461,7 +545,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -477,7 +561,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -489,7 +573,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -521,11 +605,39 @@
         "type": "file"
       },
       {
+        "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/lunar-project.webp",
+        "type": "image"
+      },
+      {
+        "url": "assets/equipment/drone-reference.png",
+        "type": "image"
+      },
+      {
+        "url": "assets/equipment/nikon-d5300.jpg",
+        "type": "image"
+      },
+      {
+        "url": "assets/equipment/godox-v480.jpg",
+        "type": "image"
+      },
+      {
         "url": "assets/identity.webp?v=cyber-blue-1",
         "type": "image"
       }
     ],
     "sitemap": [
+      {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
       {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
@@ -547,7 +659,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -559,7 +671,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -571,7 +683,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -600,6 +712,10 @@
       },
       {
         "url": "assets/navigation.css?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-loading.css?v=page-loading-1",
         "type": "file"
       },
       {
@@ -609,6 +725,14 @@
     ],
     "skills": [
       {
+        "url": "assets/page-entry.js?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/brand.svg?v=cyber-blue-1",
+        "type": "file"
+      },
+      {
         "url": "assets/site.css?v=layout-1",
         "type": "file"
       },
@@ -629,7 +753,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=soft-navigation-3",
+        "url": "assets/navigation.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -641,7 +765,7 @@
         "type": "file"
       },
       {
-        "url": "assets/preloader.js?v=report-1",
+        "url": "assets/preloader.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -653,7 +777,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=soft-navigation-1",
+        "url": "assets/motion.js?v=page-loading-1",
         "type": "file"
       },
       {
@@ -702,6 +826,10 @@
       },
       {
         "url": "assets/navigation.css?v=soft-navigation-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-loading.css?v=page-loading-1",
         "type": "file"
       },
       {

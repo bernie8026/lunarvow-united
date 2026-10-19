@@ -90,7 +90,18 @@
                         })) {
                             throw failure('manifest');
                         }
-                        resources = [...new Map(selected.map(resource => [resource.url, resource])).values()];
+                        // Include lazy and script-generated slides, even when they are
+                        // below the fold or in an unselected panel.
+                        const images = Array.from(document.images || []).flatMap(image => {
+                            image.loading = 'eager';
+                            const source = image.currentSrc || image.src;
+                            if (!source) return [];
+                            const url = new URL(source, document.baseURI || root);
+                            return url.origin === root.origin && url.pathname.startsWith(root.pathname)
+                                ? [{ url: url.href, type: 'image' }] : [];
+                        });
+                        resources = [...new Map([...selected, ...images].map(resource =>
+                            [new URL(resource.url, root).href, resource])).values()];
                     } catch (error) {
                         if (timedOut) throw failure('timeout');
                         if (error instanceof SyntaxError) throw failure('manifest');
