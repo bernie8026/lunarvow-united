@@ -11,6 +11,18 @@
   const TAU = Math.PI * 2;
   const names = ['browser', 'runtime', 'processor', 'shutter', 'framing', 'quadrotor', 'teamwork', 'clock'];
   const cleanup = [];
+  let lightTheme = document.body.dataset.theme === 'light';
+  const colorCache = new Map();
+  function paint(color) {
+    if (!lightTheme) return color;
+    if (!colorCache.has(color)) {
+      const channels = color.match(/[\d.]+/g)?.map(Number);
+      if (!channels || channels.length !== 4) return color;
+      const yellow = channels[0] === 255 && channels[1] === 250 && channels[2] === 0;
+      colorCache.set(color, yellow ? `rgba(117,104,0,${Math.min(1, channels[3] * 1.4)})` : `rgba(41,44,49,${channels[3]})`);
+    }
+    return colorCache.get(color);
+  }
   let width = 0, height = 0, centerX = 0, centerY = 0, radius = 0, copyLimit = 0;
   let frame = 0, frames = 0, previous = 0, time = 0, burst = -Infinity;
   let visible = true, paused = false, destroyed = false, wasMoving = false;
@@ -21,27 +33,27 @@
 
   const point = (angle, distance = radius) => [centerX + Math.cos(angle) * distance, centerY + Math.sin(angle) * distance];
   const line = (points, color = 'rgba(222,228,236,.13)', weight = .7) => {
-    context.strokeStyle = color;
+    context.strokeStyle = paint(color);
     context.lineWidth = weight;
     context.beginPath();
     points.forEach(([x, y], i) => i ? context.lineTo(x, y) : context.moveTo(x, y));
     context.stroke();
   };
   function circle(x, y, size, color, weight = .7) {
-    context.strokeStyle = color;
+    context.strokeStyle = paint(color);
     context.lineWidth = weight;
     context.beginPath();
     context.arc(x, y, size, 0, TAU);
     context.stroke();
   }
   function dot(x, y, size, color) {
-    context.fillStyle = color;
+    context.fillStyle = paint(color);
     context.beginPath();
     context.arc(x, y, size, 0, TAU);
     context.fill();
   }
   function arc(distance, angle, length, color, weight = 1) {
-    context.strokeStyle = color;
+    context.strokeStyle = paint(color);
     context.lineWidth = weight;
     context.beginPath();
     context.arc(centerX, centerY, distance, angle, angle + length);
@@ -83,7 +95,7 @@
       const x = centerX - r * .7, y = centerY + r * .43, cell = r * .1;
       for (let row = 0; row < 3; row++) for (let col = 0; col < 4; col++) {
         const alpha = .045 + Math.max(0, Math.sin(phase * 1.5 - row * .7 - col * .5)) * .1;
-        context.strokeStyle = `rgba(226,233,242,${alpha})`;
+        context.strokeStyle = paint(`rgba(226,233,242,${alpha})`);
         context.lineWidth = .65;
         context.strokeRect(x + col * cell, y + row * cell, cell * .7, cell * .7);
       }
@@ -182,6 +194,7 @@
     drawTheme();
     drawBurst();
     context.restore();
+    canvas.dataset.colorMode = lightTheme ? 'light' : 'dark';
     canvas.dataset.frame = String(++frames);
     canvas.dataset.theme = names[index];
     canvas.dataset.skillIndex = String(index);
@@ -255,6 +268,12 @@
   listen(window, 'portfolio:skill', select);
   listen(document, 'portfolio:skill', select);
   listen(document, 'portfolio:motion', () => sync());
+  listen(document, 'portfolio:theme', () => {
+    lightTheme = document.body.dataset.theme === 'light';
+    colorCache.clear();
+    render();
+    sync();
+  });
   listen(document, 'visibilitychange', () => sync());
   listen(reduced, 'change', () => { burst = -Infinity; sync(true); });
 

@@ -1,0 +1,77 @@
+/* Home keeps its orbital composition within the shared technical palette. */
+body[data-page=index]{--home-bg:#0b0c0f;--home-ink:#f1f1eb;--home-muted:#a9aaa5;--home-faint:#72746f;--home-line:#ffffff24;--home-signal:#fffa00;--home-signal-wash:#fffa000c}
+body[data-page=index][data-theme=light]{--home-bg:#f4f4ef;--home-ink:#151612;--home-muted:#5c5e55;--home-faint:#75766d;--home-line:#1819142b;--home-signal:#5e5c00;--home-signal-wash:#c5c3000c}
+body[data-page=index] .hero,body[data-page=index][data-theme=light] .hero{background:radial-gradient(ellipse at 77% 48%,var(--home-signal-wash),transparent 46%),var(--home-bg);color:var(--home-ink)}
+body[data-page=index] .hero:before{background-image:radial-gradient(circle,var(--home-faint) 1px,transparent 1.5px),radial-gradient(circle,var(--home-signal) .7px,transparent 1.6px);opacity:.35}
+body[data-page=index] .hero:after{border-top-color:var(--home-line);box-shadow:none}
+body[data-page=index] .hero :is(.hero-meta,.hero-description,.hero-bottom){color:var(--home-muted)}
+body[data-page=index] .hero .hero-meta i{background:var(--home-signal);box-shadow:0 0 12px var(--home-signal-wash)}
+body[data-page=index] .hero .eyebrow{color:var(--home-signal);letter-spacing:2.3px}
+body[data-page=index] .hero .eyebrow:before{background:var(--home-signal)}
+body[data-page=index] .hero-copy h1{font-family:var(--sans);font-weight:600;font-size:clamp(78px,8.8vw,147px);letter-spacing:-.075em;line-height:.95}
+body[data-page=index] .hero-copy h1 em{font-style:normal;background:none;color:var(--home-signal)}
+body[data-page=index] .hero .hero-subtitle{font-weight:400;letter-spacing:1px}
+body[data-page=index] .hero .button-primary,body[data-page=index][data-theme=light] .hero .button-primary{background:#fffa00;color:#151515;box-shadow:none}
+body[data-page=index] .hero .button-primary:hover,body[data-page=index][data-theme=light] .hero .button-primary:hover{background:#eeea29;color:#151515}
+body[data-page=index] .hero .button-line{background:transparent;border-color:var(--home-line);color:var(--home-ink)}
+body[data-page=index] .hero .button-line:hover{background:var(--home-signal-wash);border-color:var(--home-signal)}
+body[data-page=index] .hero .hero-bottom{border-color:var(--home-line)}
+body[data-page=index] .hero .hero-bottom>span{color:var(--home-faint)}
+body[data-page=index] .hero-universe:before{background:var(--home-signal-wash);box-shadow:0 0 100px var(--home-signal-wash)}
+body[data-page=index] .orbital-core{background:radial-gradient(circle at 32% 26%,#ffffff10,transparent 45%),radial-gradient(circle at 68% 80%,var(--home-signal-wash),transparent 54%),var(--home-bg);box-shadow:inset 6px 4px 28px #ffffff14,inset -18px -16px 30px #00000038,0 0 60px var(--home-signal-wash);border-color:var(--home-line)}
+body[data-page=index] .orbital-core:before{border-color:var(--home-line)}
+body[data-page=index] .orbital-core span{font-family:var(--sans);font-style:normal;font-weight:300;color:var(--home-ink);text-shadow:none}
+body[data-page=index] .orbital-ring{border-color:var(--home-line)}
+body[data-page=index] .orbital-ring:before,body[data-page=index] .orbital-ring:after,body[data-page=index] .orbital-ring.ring-two:before{background:var(--home-signal);box-shadow:0 0 14px var(--home-signal-wash)}
+body[data-page=index] .orbital-ring.ring-two{border-color:var(--home-line)}
+body[data-page=index] .orbital-ring.ring-three{border-color:var(--home-faint);box-shadow:none}
+body[data-page=index] .orbit-axis{background:linear-gradient(90deg,transparent,var(--home-line),transparent)}
+body[data-page=index] .orbit-axis:after{background:linear-gradient(90deg,transparent,var(--home-signal),transparent);opacity:.35}
+body[data-page=index] .orbit-label{color:var(--home-muted)}
+body[data-page=index] .orbit-label:before{color:var(--home-signal)}
+body[data-page=index] :is(.orbit-label span,.universe-caption,.hero-serial){color:var(--home-faint)}
+body[data-page=index] .shooting-stars span{background:linear-gradient(90deg,transparent,var(--home-signal));box-shadow:5px 0 8px var(--home-signal-wash)}
+body:is([data-page=index],[data-page=projects]) .showcase-section{--showcase-bg:#101114;--showcase-ink:#f1f1eb;--showcase-muted:#b3b4ac;--showcase-accent:#fffa00;--showcase-line:#ffffff30;--showcase-wash:#fffa000c}
+body:is([data-page=index],[data-page=projects])[data-theme=light] .showcase-section{--showcase-bg:#eeeee8;--showcase-ink:#151612;--showcase-muted:#5b5d53;--showcase-accent:#5e5c00;--showcase-line:#18191430;--showcase-wash:#c5c3000c}
+body:is([data-page=index],[data-page=projects]) .showcase-stage:before,body:is([data-page=index],[data-page=projects]) .showcase-stage[data-active-project]:before,body:is([data-page=index],[data-page=projects])[data-theme=light] .showcase-stage:before{background:radial-gradient(ellipse at 75% 26%,var(--showcase-wash),transparent 60%),linear-gradient(90deg,var(--showcase-bg),transparent 75%)}
+body:is([data-page=index],[data-page=projects]) .showcase-art:after{background:linear-gradient(90deg,var(--showcase-bg),transparent 60%);mix-blend-mode:normal}
+body:is([data-page=index],[data-page=projects]) .showcase-copy,body:is([data-page=index],[data-page=projects])[data-theme=light] .showcase-copy{background:linear-gradient(90deg,var(--showcase-bg) 20%,transparent)}
+body:is([data-page=index],[data-page=projects]) .showcase-title,body:is([data-page=index],[data-page=projects]) .showcase-panel:nth-child(2) .showcase-title{font-family:var(--sans);font-style:normal;font-weight:400;letter-spacing:-.055em}
+body:is([data-page=index],[data-page=projects]) .showcase-tab-picture{background:#1b1c1e}
+body:is([data-page=index],[data-page=projects])[data-theme=light] .showcase-tab-picture{background:#ddded6}
+body:is([data-page=index],[data-page=projects]) .showcase-tab-picture>span{background:#101114b3;color:#fff}
+body:is([data-page=index],[data-page=projects]) .showcase-arrow:hover{background:var(--showcase-wash)}
+body:is([data-page=index],[data-page=projects]) .showcase-focus{color:var(--showcase-accent)}
+
+/* The arrival remains a dark cinematic stage in both reading themes. */
+.boot-screen{--display:var(--sans);--paper:#f1f1eb;--signal:#fffa00}
+.boot-screen.boot-screen--cinematic{background:#0b0c0f;color:#f1f1eb}
+.boot-screen--cinematic:before{background:radial-gradient(ellipse at 72% 40%,#fffa0008,transparent 58%),linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px);background-size:auto,70px 70px,70px 70px}
+.boot-screen.boot-screen--cinematic:after{border-color:#ffffff1c}
+.boot-screen__ambient{background:radial-gradient(ellipse at 15% 85%,#fffa0007,transparent 45%)}
+.boot-screen--cinematic .boot-screen__masthead{color:#d1d2ca}
+.boot-screen__masthead b,.boot-screen__eyebrow{color:#fffa00}
+.boot-screen__particles i{background:#fffa00;box-shadow:0 0 12px 2px #fffa0035}
+.boot-screen .boot-screen__title{font-family:var(--sans);font-weight:500;color:#f1f1eb;text-shadow:none}
+.boot-screen .boot-screen__subtitle{color:#fffa00}
+.boot-screen .boot-screen__poem{color:#b6b7af}
+.boot-screen__signature,.boot-screen__visual-code{color:#8c8e84}
+.boot-screen__moon{background:radial-gradient(circle at 30% 28%,#ffffff18 1%,#74756c22 33%,#23251d 63%,#0b0c0f 74%);box-shadow:inset -14px -8px 50px #0b0c0f,0 0 70px #fffa000a,0 0 140px #ffffff08}
+.boot-screen__visual .boot-screen__art{filter:grayscale(1) contrast(1.05)}
+.boot-screen__orbit--outer{border-color:#d0d1c450;outline-color:#ffffff17}
+.boot-screen__orbit--outer:before,.boot-screen__orbit--outer:after{background:#fffa00;box-shadow:0 0 18px #fffa0035}
+.boot-screen__orbit--inner{border-color:#ffffff30}
+.boot-screen__orbit--inner:before{border-top-color:#fffa00a0;border-bottom-color:#ffffff40}
+.boot-screen__ring circle{stroke:#ffffff12}
+.boot-screen__ring .boot-screen__ring-progress{stroke:#fffa00}
+.boot-screen--cinematic .boot-screen__console{border-color:#ffffff25}
+.boot-screen__phase{color:#d9dad0}
+.boot-screen__percentage{color:#f1f1eb}
+.boot-screen--cinematic .boot-screen__bar{background:#ffffff19}
+.boot-screen--cinematic .boot-screen__bar span{background:#fffa00;box-shadow:0 0 18px #fffa0035}
+.boot-screen.boot-screen--cinematic .boot-screen__status{color:#b5b7ac}
+.boot-screen--cinematic .boot-screen__errors{color:#eeedb5;background:#fffa000a}
+.boot-screen__retry{border-color:#fffa00;background:#fffa00;color:#151515}
+.boot-screen--cinematic[data-phase=failed] .boot-screen__phase{color:#fffa00}
+@media(max-width:760px){body[data-page=index] .hero-copy h1{font-size:clamp(70px,16vw,116px)}body[data-page=index] .hero .eyebrow{letter-spacing:1.8px}body:is([data-page=index],[data-page=projects]) .showcase-copy,body:is([data-page=index],[data-page=projects])[data-theme=light] .showcase-copy{background:none}}
+@media print{body[data-page=index] .hero,body[data-page=index][data-theme=light] .hero{background:#fff!important;color:#000!important}body[data-page=index] .hero-copy h1 em{color:#000!important}}

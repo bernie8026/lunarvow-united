@@ -22,7 +22,7 @@ const pages = ['index','about','experience','education','skills','projects','con
     }
     await page.locator('.theme-toggle').click();
     assert.equal(await page.locator('body').getAttribute('data-theme'),'light');
-    if (name === 'index') assert.equal(await page.locator('.hero .button-primary').evaluate(el=>getComputedStyle(el).color),'rgb(20, 32, 68)','hero action text stays dark on its pale background');
+    if (name === 'index') assert.equal(await page.locator('.hero .button-primary').evaluate(el=>getComputedStyle(el).color),'rgb(21, 21, 21)','hero action text stays dark on its yellow background');
     await page.locator('.theme-toggle').click();
     for (const width of [320,390,768,1440]) {
       await page.setViewportSize({width,height:900});

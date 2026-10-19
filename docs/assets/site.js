@@ -23,7 +23,9 @@
   const masthead = document.querySelector(".masthead");
   function measureMasthead() {
     if (!masthead) return;
-    const height = `${Math.ceil(masthead.getBoundingClientRect().height)}px`;
+    const rect = masthead.getBoundingClientRect();
+    const isSideRail = getComputedStyle(masthead).position === "fixed" && rect.width <= 100;
+    const height = `${isSideRail ? 0 : Math.ceil(rect.height)}px`;
     if (document.documentElement.style.getPropertyValue("--masthead-height") !== height) document.documentElement.style.setProperty("--masthead-height", height);
   }
   measureMasthead();
@@ -49,14 +51,22 @@
     });
   }
   const themeButton = document.querySelector(".theme-toggle");
-  function setTheme(theme) {
+  function setTheme(value, persist = true) {
+    const theme = value === "light" ? "light" : "dark";
+    const changed = body.dataset.theme !== theme;
     body.dataset.theme = theme;
+    document.documentElement.dataset.theme = theme;
     themeButton?.setAttribute("aria-pressed", String(theme === "light"));
-    preference.set("theme", theme);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f7f8ff" : "#0b1022");
+    if (persist) preference.set("theme", theme);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f6f6f3" : "#0b0c0f");
+    if (changed) document.dispatchEvent(new CustomEvent("portfolio:theme", {detail:{theme}}));
   }
-  setTheme(preference.get("theme") === "light" ? "light" : "dark");
+  setTheme(preference.get("theme"), false);
   themeButton?.addEventListener("click", () => setTheme(body.dataset.theme === "light" ? "dark" : "light"));
+  addEventListener("storage", event => {
+    if (event.key === "bernie-portfolio-theme" || event.key === null) setTheme(preference.get("theme"), false);
+  });
+  addEventListener("pageshow", () => setTheme(preference.get("theme"), false));
 
   const zones = Array.from(document.querySelectorAll("[data-filter-zone]")).map(element => {
     const items = Array.from(element.querySelectorAll("[data-filter-item]"));

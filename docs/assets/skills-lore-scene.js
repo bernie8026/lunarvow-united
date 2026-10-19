@@ -9,6 +9,17 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const mobile = matchMedia('(max-width: 760px)');
   const TAU = Math.PI * 2;
+  const palettes = {
+    dark: ['rgba(180,184,190,.25)', 'rgba(207,212,218,.43)', 'rgba(235,238,242,.65)', 'rgba(255,255,255,.88)'],
+    light: ['rgba(73,78,84,.27)', 'rgba(56,61,67,.46)', 'rgba(36,41,47,.67)', 'rgba(18,23,29,.9)']
+  };
+  let colors = palettes[document.body.dataset.theme === 'light' ? 'light' : 'dark'];
+  function updateTheme() {
+    const mode = document.body.dataset.theme === 'light' ? 'light' : 'dark';
+    colors = palettes[mode];
+    canvas.dataset.colorMode = mode;
+    sync();
+  }
   const themes = ['responsive-web', 'javascript-runtime', 'processor-logic', 'dslr-photography', 'image-editing', 'quadrotor-stem', 'team-network', 'planning-communication'];
   let width = 0, height = 0, dpr = 1, count = 0;
   let scenes = [], sceneGroups = [], current, origin, destination, seeds;
@@ -252,7 +263,6 @@
     const centerX = width * (small ? .5 : .394), centerY = small ? Math.min(220, height * .512) : height * .445;
     const elapsed = Math.max(0, (now - morphStart) / 900);
     const transitioning = elapsed < 1;
-    const colors = ['rgba(177,188,205,.25)', 'rgba(204,214,225,.43)', 'rgba(233,239,246,.65)', 'rgba(255,255,255,.88)'];
     const buckets = [[], [], [], []];
     const groupMap = sceneGroups[active];
     const detailBlend = transitioning ? Math.min(1, elapsed * 1.4) : 1;
@@ -437,6 +447,7 @@
   listen(document, 'pointerleave', () => { pointerX = pointerY = 0; });
   listen(document, 'visibilitychange', sync);
   listen(document, 'portfolio:motion', sync);
+  listen(document, 'portfolio:theme', updateTheme);
   listen(reduced, 'change', sync);
   listen(mobile, 'change', resize);
   const classObserver = new MutationObserver(sync);
@@ -451,4 +462,5 @@
   visibilityObserver?.observe(canvas);
   resize();
   canvas.dataset.pointSource = 'skill';
+  canvas.dataset.colorMode = document.body.dataset.theme === 'light' ? 'light' : 'dark';
 })();

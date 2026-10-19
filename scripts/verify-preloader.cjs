@@ -25,7 +25,7 @@ function verifyManifest() {
   const manifestPath = path.join(publicRoot, 'assets/preload-manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   assert.equal(manifest.version, 2, 'Run scripts/prepare-site.cjs before this test');
-  assert.deepEqual(manifest.resources, [{url:'assets/identity.webp?v=blue-violet-2',type:'image'}], 'Existing open tabs can replay with the shared intro artwork');
+  assert.deepEqual(manifest.resources, [{url:'assets/identity.webp?v=theme-sync-1',type:'image'}], 'Existing open tabs can replay with the shared intro artwork');
   assert.deepEqual(Object.keys(manifest.pages).sort(), [...pages].sort());
   const motion = fs.readFileSync(path.join(publicRoot, 'assets/motion.js'), 'utf8');
   const introImage = motion.match(/new URL\("([^"]*identity\.webp[^"]*)",root\)/)?.[1];

@@ -41,7 +41,8 @@ async function scroll(page, destination) {
             await scroll(page,'bottom');
             const state = await page.evaluate(() => {
               const scroller = document.scrollingElement;
-              const header = document.querySelector('.masthead').getBoundingClientRect();
+              const masthead = document.querySelector('.masthead');
+              const header = masthead.getBoundingClientRect();
               const controls = [...document.querySelectorAll('.header-tools,.menu-toggle,.main-nav,.footer-links > *,.back-top')].filter(el => el.getClientRects().length);
               return {
                 bottom:scroller.scrollHeight-innerHeight-scrollY,
@@ -50,6 +51,11 @@ async function scroll(page, destination) {
                 clippedControls:controls.filter(el => {const r=el.getBoundingClientRect();return r.left < -1 || r.right > innerWidth+1;}).map(el=>el.className),
                 headerHeight:Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--masthead-height')),
                 actualHeader:header.height,
+                headerLeft:header.left,
+                headerTop:header.top,
+                headerWidth:header.width,
+                headerPosition:getComputedStyle(masthead).position,
+                verticalRail:matchMedia('(min-width:1001px)').matches,
                 journeys:[...document.querySelectorAll('.experience-entry')].map(el=>el.style.getPropertyValue('--journey')),
                 chapter:document.querySelector('.chapter-rail [aria-current]')?.getAttribute('href')
               };
@@ -59,7 +65,15 @@ async function scroll(page, destination) {
             assert.equal(state.read,1,label+' reading bar completes');
             assert.equal(state.overflow,false,label+' no page overflow');
             assert.deepEqual(state.clippedControls,[],label+' controls remain visible');
-            assert(Math.abs(state.headerHeight-state.actualHeader)<1,label+' header offset is measured');
+            if (state.verticalRail) {
+              assert.equal(state.headerPosition,'fixed',label+' desktop rail is fixed');
+              assert(Math.abs(state.headerLeft)<1 && Math.abs(state.headerTop)<1,label+' desktop rail stays at viewport edge');
+              assert(Math.abs(state.headerWidth-68)<1 && Math.abs(state.actualHeader-viewport.height)<1,label+' desktop rail fills its own column');
+              assert.equal(state.headerHeight,0,label+' side rail leaves no top header offset');
+            } else {
+              assert.equal(state.headerPosition,'sticky',label+' compact header remains sticky');
+              assert(Math.abs(state.headerHeight-state.actualHeader)<1,label+' compact header offset is measured');
+            }
             if (name==='experience') assert(state.journeys.length && state.journeys.every(value=>value==='100%'),label+' every journey segment completes');
             if (name==='index') {
               if (state.chapter!=='#chapters') console.error('Chapter diagnostics:', await page.evaluate(()=>({page:document.body.dataset.page,rail:document.querySelector('.chapter-rail')?.outerHTML,ready:document.readyState})),errors);
@@ -79,8 +93,16 @@ async function scroll(page, destination) {
         if (name==='education') {
           const top = await page.locator('.edu-course-section').evaluate(el=>el.getBoundingClientRect().top+scrollY+250);
           await scroll(page,top);
-          const sticky = await page.locator('.edu-course-section > .section-heading').evaluate(el=>({position:getComputedStyle(el).position,top:el.getBoundingClientRect().top,headerBottom:document.querySelector('.masthead').getBoundingClientRect().bottom}));
-          if (sticky.position==='sticky') assert(sticky.top>=sticky.headerBottom,'course heading stays below header');
+          const sticky = await page.locator('.edu-course-section > .section-heading').evaluate(el=>({
+            position:getComputedStyle(el).position,
+            top:el.getBoundingClientRect().top,
+            inset:Number.parseFloat(getComputedStyle(el).top),
+            headerInset:matchMedia('(min-width:1001px)').matches?0:document.querySelector('.masthead').getBoundingClientRect().bottom
+          }));
+          if (sticky.position==='sticky') {
+            assert(sticky.inset>=sticky.headerInset,'course heading sticky inset clears the top header');
+            assert(sticky.top>=sticky.headerInset,'course heading stays below the top header');
+          }
         }
         if (name==='skills' || name==='projects') {
           await scroll(page,'bottom');
