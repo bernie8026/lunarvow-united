@@ -6,10 +6,20 @@
   if (!roster || !items.length) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const labels = {
-    'zh-HK': {index:'技能索引',category:'技能分類',select:'拖動模型旋轉 · 使用箭嘴或下方刻度切換技能',previous:'上一項技能',next:'下一項技能',credit:'場景素材：'},
-    en: {index:'Skill index',category:'Skill categories',select:'Drag to rotate · Use arrows or bars to switch skills',previous:'Previous skill',next:'Next skill',credit:'Scene artwork: '},
-    'zh-CN': {index:'技能索引',category:'技能分类',select:'拖动模型旋转 · 使用箭头或下方刻度切换技能',previous:'上一项技能',next:'下一项技能',credit:'场景素材：'}
+    'zh-HK': {index:'技能索引',category:'技能分類',select:'拖動模型旋轉 · 使用箭嘴或下方刻度切換技能',previous:'上一項技能',next:'下一項技能',credit:'介面參考：'},
+    en: {index:'Skill index',category:'Skill categories',select:'Drag to rotate · Use arrows or bars to switch skills',previous:'Previous skill',next:'Next skill',credit:'Interface reference: '},
+    'zh-CN': {index:'技能索引',category:'技能分类',select:'拖动模型旋转 · 使用箭头或下方刻度切换技能',previous:'上一项技能',next:'下一项技能',credit:'界面参考：'}
   };
+  const objectNames = {
+    'zh-HK':['響應式頁面','事件與程式邏輯','運算與資料處理','相機與光學','影像編排','四旋翼無人機概念','協作網絡','溝通與時間規劃'],
+    en:['Responsive layout','Events & runtime logic','Computation & data','Camera & optics','Image composition','Quadrotor concept','Collaborative network','Communication & planning'],
+    'zh-CN':['响应式页面','事件与程序逻辑','运算与数据处理','相机与光学','影像编排','四旋翼无人机概念','协作网络','沟通与时间规划']
+  };
+  function objectCaption() {
+    const index = items.indexOf(selected);
+    zone.querySelector('[data-skill-object]').textContent = (objectNames[document.documentElement.lang] || objectNames['zh-HK'])[index];
+    zone.querySelector('[data-skill-object-index]').textContent = String(index + 1).padStart(2,'0') + ' / ';
+  }
   const t = () => labels[document.documentElement.lang] || labels['zh-HK'];
   const announcement = document.createElement('p');
   announcement.className = 'sr-only';
@@ -52,6 +62,10 @@
     zone.querySelector('[data-skill-current]').textContent = String(available().indexOf(item) + 1).padStart(2,'0');
     zone.querySelector('[data-skill-total]').textContent = String(available().length).padStart(2,'0');
     window.SkillLoreScene?.select(index);
+    const previousIndex = zone.dataset.skillIndex;
+    zone.dataset.skillIndex = String(index);
+    objectCaption();
+    if (previousIndex !== String(index)) document.dispatchEvent(new CustomEvent('portfolio:skill',{detail:{index}}));
     if (changed && animate) {
       announcement.textContent = item.querySelector('h2').textContent + ' · ' + item.querySelector('.tag').textContent;
       textAnimation?.cancel();
@@ -76,6 +90,7 @@
   }
   function translate() {
     zone.querySelectorAll('[data-skills-text]').forEach(el => {el.textContent = t()[el.dataset.skillsText] || '';});
+    objectCaption();
     roster.setAttribute('aria-label',t().index);
     roster.setAttribute('aria-orientation','horizontal');
     zone.querySelector('.filters').setAttribute('aria-label',t().category);
@@ -101,13 +116,16 @@
   const directory = zone.querySelector('.lore-directory');
   document.addEventListener('keydown',event => {if (event.key === 'Escape' && directory.open) {directory.open=false;directory.querySelector('summary').focus();}});
   function syncMotion() {
+    zone.classList.toggle('skills-motion-idle',!motionAllowed());
     window.SkillLoreScene?.pause(!motionAllowed());
+    window.SkillLoreOrbit?.pause(!motionAllowed());
     if (!motionAllowed()) textAnimation?.cancel();
   }
   document.addEventListener('portfolio:filter',event => {if(event.detail?.items?.some(item => items.includes(item))) syncFilter();});
   document.addEventListener('portfolio:language',translate);
   document.addEventListener('portfolio:motion',syncMotion);
   document.addEventListener('visibilitychange',syncMotion);
+  if ('IntersectionObserver' in window) new IntersectionObserver(entries => zone.classList.toggle('skills-offscreen',!entries[0].isIntersecting)).observe(zone);
   reduced.addEventListener('change',syncMotion);
   new MutationObserver(syncMotion).observe(document.body,{attributes:true,attributeFilter:['class']});
   zone.classList.add('skills-enhanced');

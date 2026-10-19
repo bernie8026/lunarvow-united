@@ -166,3 +166,24 @@ body[data-page="skills"] .skills-console:not(.skills-enhanced) .page-heading { t
  body[data-page="skills"] .skills-enhanced .skill-item h2 { font-size:24px; color:black; }
  body[data-page="skills"] .skills-enhanced .skill-item p,body[data-page="skills"] .skills-enhanced .skill-item a,body[data-page="skills"] .skills-enhanced .skill-top .file-label,body[data-page="skills"] .skills-enhanced .skill-top .tag { color:black; text-shadow:none; }
 }
+/* Rotating graduations, counter-rotating scan arcs and a separate orbital dust layer. */
+.lore-reticle-motion,.lore-reticle-counter { transform-box:view-box; transform-origin:center; }
+.skills-enhanced .lore-reticle-motion { animation:lore-reticle-turn 48s linear infinite; }
+.skills-enhanced .lore-reticle-counter { opacity:.65; animation:lore-reticle-turn 31s linear infinite reverse; }
+@keyframes lore-reticle-turn { to { transform:rotate(360deg); } }
+.lore-orbit { position:absolute; inset:0; z-index:2; width:100%; height:100%; pointer-events:none; }
+.lore-object-caption { position:absolute; z-index:3; left:39.4%; top:81%; width:35%; transform:translateX(-50%); text-align:center; color:#d7d9de; font:10px/1.6 var(--mono); letter-spacing:1.1px; pointer-events:none; }
+.lore-object-caption > span:first-child { color:#fffa00; }
+.skills-motion-idle .lore-reticle-motion,.skills-motion-idle .lore-reticle-counter,.skills-offscreen .lore-reticle-motion,.skills-offscreen .lore-reticle-counter,body.motion-paused .lore-reticle-motion,body.motion-paused .lore-reticle-counter,body.is-booting .lore-reticle-motion,body.is-booting .lore-reticle-counter { animation-play-state:paused; }
+.skills-console:not(.skills-enhanced) .lore-orbit,.skills-console:not(.skills-enhanced) .lore-object-caption { display:none; }
+@media(max-width:760px) {
+ .lore-object-caption { left:50%; top:390px; width:80.8%; font-size:9px; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .skills-enhanced .lore-reticle-motion,.skills-enhanced .lore-reticle-counter { animation:none; }
+}
+@media print { .lore-orbit,.lore-object-caption { display:none!important; } }
+body[data-page="skills"] .skills-enhanced .skill-item h2 { text-wrap:balance; }
+@media(min-width:761px) {
+ body[data-page="skills"] .skills-enhanced .skill-item h2:is([data-i18n="t124"],[data-i18n="t128"],[data-i18n="t136"]) { font-size:clamp(30px,3.4vw,49px); }
+}

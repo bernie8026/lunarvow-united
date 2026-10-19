@@ -557,15 +557,19 @@
         "type": "file"
       },
       {
-        "url": "assets/skills-console.css?v=lore-1",
+        "url": "assets/skills-console.css?v=skills-particles-2",
         "type": "file"
       },
       {
-        "url": "assets/skills-lore-scene.js?v=lore-1",
+        "url": "assets/skills-lore-scene.js?v=skills-particles-2",
         "type": "file"
       },
       {
-        "url": "assets/skills-console.js?v=lore-1",
+        "url": "assets/skills-lore-orbit.js?v=skills-particles-2",
+        "type": "file"
+      },
+      {
+        "url": "assets/skills-console.js?v=skills-particles-2",
         "type": "file"
       },
       {
