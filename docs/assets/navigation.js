@@ -241,7 +241,10 @@
     try {
       const parsed = parsePage(await getPage(url), url);
       const styleURLs = [...parsed.querySelectorAll('link[rel="stylesheet"]')].map(link => assetURL(link.getAttribute("href")));
-      const scripts = [...parsed.querySelectorAll('script[src]')].map(script => assetURL(script.getAttribute("src")));
+      // Never evaluate a second router from fetched HTML, including an older
+      // cached version that predates the singleton guard above.
+      const routerPath = new URL("assets/navigation.js", root).pathname;
+      const scripts = [...parsed.querySelectorAll('script[src]')].map(script => assetURL(script.getAttribute("src"))).filter(src => new URL(src).pathname !== routerPath);
       const styles = await Promise.all(styleURLs.map(loadStyle));
       if (ticket !== sequence) return;
       preparing = true;
