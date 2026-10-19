@@ -3,10 +3,10 @@
   const root = new URL("../", document.currentScript.src);
   const pages = ["index", "about", "experience", "education", "skills", "projects", "contact", "sitemap"];
   const modules = new Map(), mounted = [], memories = new Map(), pageStates = new Map();
-  const documents = new Map(), scriptLoads = new Map(), styleLoads = new Map();
+  const documents = new Map(), scriptLoads = new Map(), styleLoads = new Map(), scrollPositions = new Map();
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   let preparing = false, sequence = 0, currentURL = new URL(location.href), activeTransition;
-  let routeAnimation = null, latestRequest = null;
+  let routeAnimation = null, latestRequest = null, currentEntry = null;
   const native = {
     frame: window.requestAnimationFrame.bind(window), cancelFrame: window.cancelAnimationFrame.bind(window),
     timeout: window.setTimeout.bind(window), clearTimeout: window.clearTimeout.bind(window),
@@ -103,8 +103,15 @@
   attachChrome();
 
   function stateId() { return "route-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8); }
+  const scrollKey = (entry, url) => entry + "|" + url.href;
   function rememberScroll() {
-    try { history.replaceState({...history.state, portfolioRoute:history.state?.portfolioRoute || stateId(), scroll:[scrollX, scrollY]}, "", location.href); } catch {}
+    currentEntry ||= history.state?.portfolioRoute || stateId();
+    const scroll = [scrollX, scrollY];
+    scrollPositions.set(scrollKey(currentEntry, currentURL), scroll);
+    // During popstate, history already points to the destination. Keep the old
+    // entry's last position in memory without overwriting the destination state.
+    if (location.href !== currentURL.href || (history.state?.portfolioRoute && history.state.portfolioRoute !== currentEntry)) return;
+    try { history.replaceState({...history.state, portfolioRoute:currentEntry, scroll}, "", location.href); } catch {}
   }
   function rememberPage() {
     const main = document.querySelector("main");
@@ -244,7 +251,7 @@
       }
       if (ticket !== sequence) return;
       rememberPage();
-      if (!back) rememberScroll();
+      rememberScroll();
       const animate = motionEnabled();
       document.documentElement.dataset.routeDirection = back || pages.indexOf(pageName(url)) < pages.indexOf(pageName(from)) ? "back" : "forward";
       document.documentElement.dataset.routeScene = pageName(url) === "skills" ? "focus" : pageName(url) === "projects" ? "reveal" : "slide";
@@ -254,6 +261,7 @@
         document.getAnimations().forEach(animation => { if (animation.effect?.target instanceof Element) animation.cancel(); });
         if (!back) history.pushState({portfolioRoute:stateId(), scroll:[0,0]}, "", url);
         currentURL = new URL(location.href);
+        currentEntry = history.state?.portfolioRoute || stateId();
         const theme = document.body.dataset.theme;
         parsed.body.querySelectorAll("script").forEach(script => script.remove());
         document.body.replaceChildren(...[...parsed.body.childNodes].map(node => document.importNode(node, true)));
@@ -292,7 +300,7 @@
     } catch (error) {
       if (ticket !== sequence) return;
       console.error("Portfolio navigation:", error);
-      if (back) { history.replaceState({...history.state, portfolioRoute:stateId()}, "", from); currentURL = from; }
+      if (back) { currentEntry = stateId(); history.replaceState({...history.state, portfolioRoute:currentEntry}, "", from); currentURL = from; }
       showError();
     } finally {
       if (ticket === sequence) { preparing = false; busy(false); routeAnimation = null; activeTransition = null; }
@@ -308,7 +316,14 @@
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute("download") || (link.target && link.target !== "_self")) return;
     const url = new URL(link.href, currentURL);
     if (!pageName(url)) return;
-    if (pageName(url) === pageName(currentURL) && url.search === currentURL.search) return;
+    if (pageName(url) === pageName(currentURL) && url.search === currentURL.search) {
+      if (!url.hash || url.hash === currentURL.hash) {
+        event.preventDefault();
+        if (document.documentElement.dataset.navigationState === "loading") navigate(url);
+        else if (!url.hash) positionPage(url);
+      } else rememberScroll();
+      return;
+    }
     event.preventDefault();
     navigate(url);
   });
@@ -324,12 +339,18 @@
   window.addEventListener("popstate", event => {
     const url = new URL(location.href);
     if (!pageName(url)) return;
-    if (pageName(url) === pageName(currentURL) && url.search === currentURL.search) {
-      currentURL = url; positionPage(url, event.state?.scroll); return;
+    rememberScroll();
+    const scroll = scrollPositions.get(scrollKey(event.state?.portfolioRoute, url)) || event.state?.scroll;
+    if (pageName(url) === pageName(currentURL) && url.search === currentURL.search && document.documentElement.dataset.navigationState !== "loading") {
+      currentURL = url; currentEntry = event.state?.portfolioRoute || stateId();
+      positionPage(url, scroll); return;
     }
-    navigate(url, {history:"pop", scroll:event.state?.scroll});
+    navigate(url, {history:"pop", scroll});
   });
-  window.addEventListener("hashchange", () => { currentURL = new URL(location.href); });
+  window.addEventListener("hashchange", () => {
+    if (currentURL.href === location.href) return;
+    currentURL = new URL(location.href); currentEntry = stateId(); rememberScroll();
+  });
   document.addEventListener("portfolio:language", () => { queueMicrotask(() => { currentURL = new URL(location.href); }); });
   window.addEventListener("pagehide", rememberScroll);
 })();
