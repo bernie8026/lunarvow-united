@@ -557,16 +557,16 @@
         "type": "file"
       },
       {
-        "url": "assets/skills-console.css?v=endfield-1",
+        "url": "assets/skills-console.css?v=lore-1",
         "type": "file"
       },
       {
-        "url": "assets/skills-console.js?v=endfield-1",
+        "url": "assets/skills-lore-scene.js?v=lore-1",
         "type": "file"
       },
       {
-        "url": "assets/skills-diagram-web.svg?v=endfield-1",
-        "type": "image"
+        "url": "assets/skills-console.js?v=lore-1",
+        "type": "file"
       },
       {
         "url": "assets/identity.webp?v=blue-violet-2",
