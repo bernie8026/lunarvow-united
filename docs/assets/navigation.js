@@ -1,5 +1,8 @@
 "use strict";
 (() => {
+  // A page fetched by an already-open tab may reference a newer router URL.
+  // Keep one router per document; the next full load picks up the new version.
+  if (window.PORTFOLIO_PAGES) return;
   const root = new URL("../", document.currentScript.src);
   const pages = ["index", "about", "experience", "education", "skills", "projects", "contact", "sitemap"];
   const modules = new Map(), mounted = [], memories = new Map(), pageStates = new Map();
