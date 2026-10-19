@@ -31,7 +31,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -55,7 +55,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -88,6 +88,10 @@
       },
       {
         "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-scenes.css?v=page-motion-1",
         "type": "file"
       },
       {
@@ -125,7 +129,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -149,7 +153,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -182,6 +186,10 @@
       },
       {
         "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-scenes.css?v=page-motion-1",
         "type": "file"
       },
       {
@@ -223,7 +231,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -251,7 +259,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -295,6 +303,10 @@
         "type": "file"
       },
       {
+        "url": "assets/page-scenes.css?v=page-motion-1",
+        "type": "file"
+      },
+      {
         "url": "assets/education/sfu-campus.jpg",
         "type": "image"
       },
@@ -333,7 +345,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -357,7 +369,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -390,6 +402,10 @@
       },
       {
         "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-scenes.css?v=page-motion-1",
         "type": "file"
       },
       {
@@ -431,7 +447,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -459,7 +475,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -492,6 +508,10 @@
       },
       {
         "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-scenes.css?v=page-motion-1",
         "type": "file"
       },
       {
@@ -545,7 +565,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -573,7 +593,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -606,6 +626,10 @@
       },
       {
         "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-scenes.css?v=page-motion-1",
         "type": "file"
       },
       {
@@ -659,7 +683,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -683,7 +707,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -716,6 +740,10 @@
       },
       {
         "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-scenes.css?v=page-motion-1",
         "type": "file"
       },
       {
@@ -753,7 +781,7 @@
         "type": "file"
       },
       {
-        "url": "assets/navigation.js?v=page-loading-1",
+        "url": "assets/navigation.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -777,7 +805,7 @@
         "type": "file"
       },
       {
-        "url": "assets/motion.js?v=page-loading-1",
+        "url": "assets/motion.js?v=page-motion-1",
         "type": "file"
       },
       {
@@ -830,6 +858,10 @@
       },
       {
         "url": "assets/page-loading.css?v=page-loading-1",
+        "type": "file"
+      },
+      {
+        "url": "assets/page-scenes.css?v=page-motion-1",
         "type": "file"
       },
       {

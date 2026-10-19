@@ -274,6 +274,7 @@
     routeAnimation?.cancel();
     notice.hidden = true;
     busy(true);
+    document.documentElement.dataset.navigationStartedAt=String(performance.now());
     const from = new URL(currentURL), back = options.history === "pop";
     document.dispatchEvent(new CustomEvent("portfolio:navigation-start", {detail:{from:from.href, to:url.href}}));
     try {
@@ -302,7 +303,7 @@
       document.documentElement.dataset.routeScene = pageName(url) === "skills" ? "focus" : pageName(url) === "projects" ? "reveal" : "slide";
       const focusPage = () => {
         positionPage(url, options.scroll);
-        const target = document.querySelector("main h1") || document.querySelector("main");
+        const target = document.querySelector("main");
         target?.setAttribute("tabindex", "-1");
         target?.focus({preventScroll:true});
         announcement.textContent = document.title;
@@ -310,7 +311,9 @@
       const commit = () => {
         if (ticket !== sequence) return;
         mounted.splice(0).reverse().forEach(scope => scope.dispose());
-        document.getAnimations().forEach(animation => { if (animation.effect?.target instanceof Element) animation.cancel(); });
+        // Scoped modules stop their own motion. Removing the old children also
+        // disposes their CSS effects; cancelling document-wide animations here
+        // would permanently stop animations on the retained body and root.
         if (!back) history.pushState({portfolioRoute:stateId(), scroll:[0,0]}, "", url);
         currentURL = new URL(location.href);
         currentEntry = history.state?.portfolioRoute || stateId();
@@ -361,7 +364,7 @@
       document.dispatchEvent(new CustomEvent("portfolio:navigation-error", {detail:{from:from.href, to:url.href}}));
       showError();
     } finally {
-      if (ticket === sequence) { preparing = false; busy(false); routeAnimation = null; activeTransition = null; }
+      if (ticket === sequence) { preparing = false; busy(false); routeAnimation = null; activeTransition = null; delete document.documentElement.dataset.navigationStartedAt; }
     }
   }
   retry.addEventListener("click", () => { if (latestRequest) navigate(latestRequest.url, {...latestRequest.options, history:"push"}); });

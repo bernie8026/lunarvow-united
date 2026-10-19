@@ -110,11 +110,20 @@ Tello EDU 只作 Aerovate 概念參考；相機圖中的鏡頭不代表使用者
 ```sh
 node scripts/verify-preloader.cjs
 node scripts/verify-navigation-loading.cjs
+node scripts/verify-page-motion.cjs
 node scripts/verify-report-improvements.cjs
 node scripts/verify-site-layout.cjs
 ```
 
-瀏覽器驗證沿用 `PORTFOLIO_BASE_URL`；後兩項需要 Playwright 及 Chrome。
+瀏覽器驗證沿用 `PORTFOLIO_BASE_URL`；除預載器檢查外，其餘項目需要 Playwright 及 Chrome。
+
+## 轉頁與內容動畫修正（2026-10-20）
+
+載入完成後，各頁以標題、個人標誌、工作記錄、技能介面、信箋或目錄等原有內容播放進場。
+首頁章節入口、作品按鈕、文字連結、網站地圖及頁尾補齊滑鼠與鍵盤互動。
+轉頁只清理上一頁所屬動畫，避免全域取消保留元素的效果；焦點移至主要內容，保留標題進場。
+已快取頁面的載入畫面亦保留短暫可見時間，首次入站仍維持素材完成後等待 2 秒。
+`assets/page-scenes.css` 處理連結回饋；暫停動畫及系統減少動態設定仍然生效。
 
 
 無刷新選單 / Seamless navigation

@@ -1,0 +1,222 @@
+/* Links respond to their role: chapter scan, launch arrow, map marker and footer underline. */
+body[data-page="index"] #chapters .navigation-row {
+    position: relative;
+    padding-inline-end: 8px;
+    -webkit-tap-highlight-color: #00d5ff24;
+}
+
+body[data-page="index"] #chapters .navigation-row::after {
+    content: "";
+    position: absolute;
+    inset: -1px 0 auto;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 380ms cubic-bezier(.2,.7,.2,1);
+    pointer-events: none;
+}
+
+body[data-page="index"] #chapters .navigation-row h3 {
+    min-width: 0;
+    transition: color 180ms ease, transform 300ms cubic-bezier(.2,.7,.2,1);
+}
+
+body[data-page="index"] #chapters .navigation-row .row-number {
+    font-variant-numeric: tabular-nums;
+    transition: color 180ms ease, text-shadow 220ms ease;
+}
+
+body[data-page="index"] #chapters .navigation-row > span:last-child {
+    display: inline-block;
+    flex: none;
+    transition: transform 300ms cubic-bezier(.2,.7,.2,1), color 180ms ease;
+}
+
+body[data-page="index"] #chapters .navigation-row:is(:hover,:focus-visible,:active)::after {
+    transform: scaleX(1);
+}
+
+body[data-page="index"] #chapters .navigation-row:is(:hover,:focus-visible,:active) h3 {
+    color: var(--accent);
+    transform: translateX(6px);
+}
+
+body[data-page="index"] #chapters .navigation-row:is(:hover,:focus-visible,:active) .row-number {
+    color: var(--accent);
+    text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+body[data-page="index"] #chapters .navigation-row:is(:hover,:focus-visible,:active) > span:last-child {
+    color: var(--accent);
+    transform: translate(4px,-4px);
+}
+
+/* Buttons keep a stable hit area while only their direction marker travels. */
+body[data-page] .hero-actions a.button > [aria-hidden="true"]:last-child,
+body[data-page] a.text-link > [aria-hidden="true"]:last-child {
+    display: inline-block;
+    flex: none;
+    transition: transform 240ms cubic-bezier(.2,.7,.2,1);
+}
+
+body[data-page] .hero-actions a.button-primary:is(:hover,:focus-visible,:active) > [aria-hidden="true"]:last-child,
+body[data-page] a.text-link:is(:hover,:focus-visible,:active) > [aria-hidden="true"]:last-child {
+    transform: translate(4px,-3px);
+}
+
+body[data-page] .hero-actions a.button-line:is(:hover,:focus-visible,:active) > [aria-hidden="true"]:last-child {
+    transform: translateX(5px);
+}
+
+body[data-page] a.text-link {
+    position: relative;
+    max-width: 100%;
+}
+
+body[data-page] a.text-link::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -1px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 260ms cubic-bezier(.2,.7,.2,1);
+    pointer-events: none;
+}
+
+body[data-page] a.text-link:is(:hover,:focus-visible,:active)::after {
+    transform: scaleX(1);
+}
+
+/* A short vertical launch marker belongs to the large project stage. */
+body[data-page] .showcase-link {
+    position: relative;
+    max-width: 100%;
+    gap: 42px;
+    transition: color 180ms ease, border-color 180ms ease;
+}
+
+body[data-page] .showcase-link::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    width: 2px;
+    height: 16px;
+    margin-top: -8px;
+    background: var(--showcase-accent, var(--accent));
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 220ms ease;
+    pointer-events: none;
+}
+
+body[data-page] .showcase-link > span:last-child {
+    display: inline-block;
+    transition: transform 280ms cubic-bezier(.2,.7,.2,1);
+}
+
+body[data-page] .showcase-link:is(:hover,:focus-visible,:active) {
+    gap: 42px;
+    color: var(--showcase-accent, var(--accent));
+}
+
+body[data-page] .showcase-link:is(:hover,:focus-visible,:active)::before {
+    transform: scaleY(1);
+}
+
+body[data-page] .showcase-link:is(:hover,:focus-visible,:active) > span:last-child {
+    transform: translate(4px,-4px);
+}
+
+/* The map activates a location marker without turning entries into cards. */
+body[data-page] .sitemap-entry {
+    position: relative;
+    min-width: 0;
+    padding-inline-end: 6px;
+}
+
+body[data-page] .sitemap-entry::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 29px;
+    width: 4px;
+    height: 4px;
+    background: var(--accent);
+    opacity: 0;
+    transform: rotate(45deg) scale(.4);
+    transition: opacity 180ms ease, transform 220ms ease;
+    pointer-events: none;
+}
+
+body[data-page] .sitemap-entry :is(h3,.row-number,code) {
+    transition: color 180ms ease;
+}
+
+body[data-page] .sitemap-entry > span:last-child {
+    transition: transform 240ms ease;
+}
+
+body[data-page] .sitemap-entry:is(:hover,:focus-visible,:active)::before {
+    opacity: 1;
+    transform: rotate(45deg) scale(1);
+}
+
+body[data-page] .sitemap-entry:is(:hover,:focus-visible,:active) :is(h3,.row-number,code) {
+    color: var(--accent);
+}
+
+body[data-page] .sitemap-entry:is(:hover,:focus-visible,:active) > span:last-child {
+    transform: translateY(-3px);
+}
+
+body[data-page] .footer a.footer-link {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+    transition: color 180ms ease, text-decoration-color 180ms ease;
+}
+
+body[data-page] .footer a.footer-link:is(:hover,:focus-visible,:active) {
+    text-decoration-color: currentColor;
+}
+
+body[data-page] :is(#chapters .navigation-row,.hero-actions a.button,a.text-link,.showcase-link,.sitemap-entry):focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 5px;
+}
+
+body[data-page] .footer a.footer-link:focus-visible {
+    outline: 2px solid #006cbb;
+    outline-offset: 5px;
+}
+
+/* Motion preferences keep all color, marker and focus feedback available. */
+body.motion-paused :is(#chapters .navigation-row,.hero-actions a.button,a.text-link,.showcase-link,.sitemap-entry,.footer a.footer-link),
+body.motion-paused :is(#chapters .navigation-row,.hero-actions a.button,a.text-link,.showcase-link,.sitemap-entry) *,
+body.motion-paused :is(#chapters .navigation-row,a.text-link)::after,
+body.motion-paused :is(.showcase-link,.sitemap-entry)::before {
+    transition: none !important;
+}
+
+body.motion-paused #chapters .navigation-row h3,
+body.motion-paused :is(#chapters .navigation-row,.hero-actions a.button,a.text-link,.showcase-link,.sitemap-entry) > [aria-hidden="true"]:last-child {
+    transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body[data-page] :is(#chapters .navigation-row,.hero-actions a.button,a.text-link,.showcase-link,.sitemap-entry,.footer a.footer-link),
+    body[data-page] :is(#chapters .navigation-row,.hero-actions a.button,a.text-link,.showcase-link,.sitemap-entry) *,
+    body[data-page] :is(#chapters .navigation-row,a.text-link)::after,
+    body[data-page] :is(.showcase-link,.sitemap-entry)::before {
+        transition: none !important;
+    }
+    body[data-page] #chapters .navigation-row h3,
+    body[data-page] :is(#chapters .navigation-row,.hero-actions a.button,a.text-link,.showcase-link,.sitemap-entry) > [aria-hidden="true"]:last-child {
+        transform: none !important;
+    }
+}

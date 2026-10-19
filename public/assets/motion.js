@@ -15,16 +15,77 @@ window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
   let motionAllowed = false;
   const states = new WeakMap();
   const elements = new Set();
-  // Animate only selected moments. Reading, filtering and navigation remain immediate.
-  const selector = "[data-motion], body[data-page=index] .hero-copy h1";
+  // Give each chapter a few recognisable movements, using its existing content
+  // rather than wrapping every section in the same animated panel.
   const scenes = {
     "title": {frames:[{opacity:.35,transform:"translateY(18px)"},{opacity:1,transform:"none"}],duration:650},
-    "image-wipe": {frames:[{clipPath:"inset(0 12% 0 0)",opacity:.6},{clipPath:"inset(0 0 0 0)",opacity:1}],duration:950},
-    "photo-focus": {frames:[{opacity:.65,transform:"scale(.97)"},{opacity:1,transform:"scale(1)"}],duration:850}
+    "chapter-title": {frames:[{opacity:.2,transform:"translateY(25px)"},{opacity:1,transform:"none"}],duration:780},
+    "image-wipe": {frames:[{clipPath:"inset(0 12% 0 0)",opacity:.6},{clipPath:"inset(0 0 0 0)",opacity:1}],duration:850,clips:true},
+    "photo-focus": {frames:[{opacity:.65,transform:"scale(.97)"},{opacity:1,transform:"scale(1)"}],duration:850},
+    "identity-focus": {frames:[{opacity:.3,transform:"scale(.94)",filter:"blur(3px)"},{opacity:1,transform:"scale(1)",filter:"blur(0px)"}],duration:900},
+    "principle-line": {frames:[{opacity:.3,clipPath:"inset(0 55% 0 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],duration:760,clips:true},
+    "journey-heading": {frames:[{opacity:.2,transform:"translateX(-25px)"},{opacity:1,transform:"none"}],duration:800},
+    "study-heading": {frames:[{opacity:.3,transform:"translateY(16px)"},{opacity:1,transform:"none"}],duration:740},
+    "console-title": {frames:[{opacity:.2,clipPath:"inset(0 85% 0 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],duration:760,clips:true},
+    "console-lines": {frames:[{opacity:0,clipPath:"inset(50% 0 50% 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],duration:950,clips:true},
+    "console-caption": {frames:[{opacity:0},{opacity:1}],duration:800},
+    "project-heading": {frames:[{opacity:.25,transform:"translateX(22px)"},{opacity:1,transform:"none"}],duration:780},
+    "spec-heading": {frames:[{opacity:.25,clipPath:"inset(0 45% 0 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],duration:700,clips:true},
+    "letter-unfold": {frames:[{opacity:.4,clipPath:"inset(0 0 35% 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],duration:850,clips:true},
+    "directory-line": {frames:[{opacity:.25,transform:"translateX(-18px)"},{opacity:1,transform:"none"}],duration:700},
+    "chapter-link": {frames:[{opacity:.25,clipPath:"inset(0 70% 0 0)"},{opacity:1,clipPath:"inset(0 0 0 0)"}],duration:740,clips:true}
   };
+  const stagger = new WeakMap();
+  function bind(selector, scene, step=0) {
+    document.querySelectorAll(selector).forEach((element,index) => {
+      if (!element.dataset.motion) element.dataset.motion=scene;
+      stagger.set(element,Math.min(index*step,240));
+    });
+  }
+  bind("main > .page-heading h1, .skills-console > .page-heading h1","chapter-title");
+  const chapterScenes = {
+    index:()=>{
+      bind(".hero-copy h1","title");
+      bind("#explore .section-heading h2, #chapters .section-heading h2","study-heading");
+      bind("#chapters .navigation-row","chapter-link",45);
+    },
+    about:()=>{
+      bind(".profile-image img","identity-focus");
+      bind(".about-layout h2","title");
+      bind(".principles article h3","principle-line",90);
+    },
+    experience:()=>{
+      bind(".experience-aside h2","journey-heading",90);
+      bind(".experience-entry h3","study-heading",80);
+    },
+    education:()=>{
+      bind(".edu-study-intro h2, .edu-campus-heading h2, .edu-course-section h2, .edu-cycle-section h2","study-heading",45);
+    },
+    skills:()=>{
+      const title=document.querySelector(".skills-console > .page-heading h1");
+      if(title)title.dataset.motion="console-title";
+      bind(".lore-guides","console-lines");
+      bind(".lore-object-caption, .lore-navigation","console-caption",90);
+    },
+    projects:()=>{
+      bind(".project-copy h2","project-heading",70);
+      bind(".gear-heading h3, .gear-flash-copy h3","spec-heading",60);
+    },
+    contact:()=>{
+      bind(".contact-layout > div:first-child h2","journey-heading");
+      bind(".contact-panel","letter-unfold");
+    },
+    sitemap:()=>{
+      bind(".sitemap-root h2","title");
+      bind(".sitemap-entry h3","directory-line",45);
+    }
+  };
+  chapterScenes[body.dataset.page]?.();
   function reveal(element) {
     const state = states.get(element);
     if (!state || !motionAllowed || state.revealed || element.hidden) return;
+    const rect=element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
     state.revealed = true;
     observer?.unobserve(element);
     element.dataset.motionState = "ready";
@@ -32,7 +93,7 @@ window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
     const scene = scenes[element.dataset.motion] || scenes.title;
     try {
       element.dataset.motionState = "revealing";
-      const animation = element.animate(scene.frames,{duration:scene.duration,easing:"cubic-bezier(.2,.7,.3,1)"});
+      const animation = element.animate(scene.frames,{duration:scene.duration,delay:stagger.get(element)||0,fill:"backwards",easing:"cubic-bezier(.2,.7,.3,1)"});
       state.animation = animation;
       animation.finished.catch(() => {}).then(() => {
         if (state.animation !== animation) return;
@@ -44,7 +105,7 @@ window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
   const observer = "IntersectionObserver" in window ? new IntersectionObserver(entries => {
     entries.forEach(entry => {if(entry.isIntersecting) reveal(entry.target);});
   },{threshold:.12}) : null;
-  document.querySelectorAll(selector).forEach(element => {
+  document.querySelectorAll("[data-motion]").forEach(element => {
     states.set(element,{revealed:false,animation:null});
     elements.add(element);
     observer?.observe(element);
@@ -60,7 +121,12 @@ window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
     let element=event.target;
     while(element && element!==body){
       const state=states.get(element);
-      if(state){state.animation?.cancel();state.animation=null;state.revealed=true;element.dataset.motionState="ready";}
+      // Ordinary focus after navigation must not cancel a visible title's
+      // entrance. Only finish a clipping reveal that could hide the focus ring.
+      if(state && (!state.revealed || scenes[element.dataset.motion]?.clips)){
+        state.animation?.cancel();state.animation=null;state.revealed=true;
+        observer?.unobserve(element);element.dataset.motionState="ready";
+      }
       element=element.parentElement;
     }
   });
@@ -82,9 +148,14 @@ window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
 
   function showArrival(mode="intro") {
     if(activeArrival)return;
+    const openedAt=performance.now();
+    const navigationAt=Number(document.documentElement.dataset.navigationStartedAt);
+    const visibleSince=mode==="page"&&body.dataset.navigation==="soft"&&Number.isFinite(navigationAt)&&navigationAt>0?navigationAt:openedAt;
+    const minimumVisibleMs=mode==="page"&&!reduced.matches&&!body.classList.contains("motion-paused")?420:0;
     const screen=document.createElement("div");
     screen.className="boot-screen boot-screen--cinematic";
     screen.dataset.mode=mode;
+    screen.dataset.minimumVisibleMs=String(minimumVisibleMs);
     screen.setAttribute("role","dialog");screen.setAttribute("aria-modal","true");screen.setAttribute("tabindex","-1");
     screen.innerHTML=`<div class="boot-screen__masthead" aria-hidden="true"><span><b>BL</b><span>BERNIE LEUNG</span></span><span>PERSONAL ARCHIVE / 2026</span></div>
       <div class="boot-screen__cinema"><div class="boot-screen__ambient" aria-hidden="true"></div><div class="boot-screen__particles" aria-hidden="true">${Array.from({length:14},(_,i)=>`<i style="--x:${(i*29+7)%100}%;--y:${(i*17+13)%100}%;--delay:${-i*.7}s;--duration:${7+i%5}s"></i>`).join("")}</div>
@@ -149,11 +220,12 @@ window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
     function leave() {
       if(finished||leaving||mode==="departure")return;
       if(!preloadReady||!pageReady||readyAt===null||performance.now()-readyAt<(holdSkipped?0:holdMs))return;
+      if(performance.now()-visibleSince<minimumVisibleMs)return;
       leaving=true;render();
       if(reduced.matches||body.classList.contains("motion-paused")){finish();return;}
       screen.classList.add("is-unveiling");
-      if(mode==="intro")screen.style.animationDuration="320ms";
-      exitTimer=setTimeout(finish,mode==="intro"?320:240);
+      screen.style.animationDuration="320ms";
+      exitTimer=setTimeout(finish,320);
     }
     function skipAnimation() {
       holdSkipped=true;render();leave();
@@ -233,5 +305,13 @@ window.PORTFOLIO_PAGES.register("motion", document.currentScript.src, scope => {
   window.BHR_LOADING=loading;
   scope.on(document,"portfolio:navigation-start",()=>showArrival("departure"));
   scope.on(document,"portfolio:navigation-error",()=>activeArrival?.cancel());
-  scope.cleanup(()=>{activeArrival?.cancel();if(window.BHR_LOADING===loading)delete window.BHR_LOADING;});
+  scope.cleanup(()=>{
+    activeArrival?.cancel();
+    elements.forEach(element=>{
+      const state=states.get(element);state.animation?.cancel();state.animation=null;
+      element.dataset.motionState="ready";
+    });
+    observer?.disconnect();
+    if(window.BHR_LOADING===loading)delete window.BHR_LOADING;
+  });
 });
