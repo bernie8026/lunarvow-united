@@ -10,8 +10,8 @@
   const mobile = matchMedia('(max-width: 760px)');
   const TAU = Math.PI * 2;
   const palettes = {
-    dark: ['rgba(180,184,190,.25)', 'rgba(207,212,218,.43)', 'rgba(235,238,242,.65)', 'rgba(255,255,255,.88)'],
-    light: ['rgba(73,78,84,.27)', 'rgba(56,61,67,.46)', 'rgba(36,41,47,.67)', 'rgba(18,23,29,.9)']
+    dark: ['rgba(0,124,191,.28)', 'rgba(0,184,232,.48)', 'rgba(94,223,255,.72)', 'rgba(220,248,255,.92)'],
+    light: ['rgba(42,104,151,.3)', 'rgba(0,91,158,.5)', 'rgba(0,68,131,.7)', 'rgba(5,36,78,.92)']
   };
   let colors = palettes[document.body.dataset.theme === 'light' ? 'light' : 'dark'];
   function updateTheme() {

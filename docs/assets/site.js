@@ -58,7 +58,7 @@
     document.documentElement.dataset.theme = theme;
     themeButton?.setAttribute("aria-pressed", String(theme === "light"));
     if (persist) preference.set("theme", theme);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f6f6f3" : "#0b0c0f");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f2f8fc" : "#070d18");
     if (changed) document.dispatchEvent(new CustomEvent("portfolio:theme", {detail:{theme}}));
   }
   setTheme(preference.get("theme"), false);

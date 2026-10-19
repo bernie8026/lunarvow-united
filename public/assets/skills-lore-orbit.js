@@ -18,8 +18,8 @@
     if (!colorCache.has(color)) {
       const channels = color.match(/[\d.]+/g)?.map(Number);
       if (!channels || channels.length !== 4) return color;
-      const yellow = channels[0] === 255 && channels[1] === 250 && channels[2] === 0;
-      colorCache.set(color, yellow ? `rgba(117,104,0,${Math.min(1, channels[3] * 1.4)})` : `rgba(41,44,49,${channels[3]})`);
+      const signal = channels[0] === 0 && channels[1] === 213 && channels[2] === 255;
+      colorCache.set(color, signal ? `rgba(0,108,187,${Math.min(1, channels[3] * 1.4)})` : `rgba(23,59,91,${channels[3]})`);
     }
     return colorCache.get(color);
   }
@@ -72,15 +72,15 @@
       const distance = radius * (.87 + ((i * 37) % 17) / 100);
       const [x, y] = point(angle, distance);
       const alpha = .16 + (Math.sin(phase * .8 + i) + 1) * .1;
-      dot(x, y, i % 9 === 0 ? 1.35 : .7, `rgba(238,242,248,${alpha})`);
-      if (i % 9 === 0 && !reduced.matches) arc(distance, angle - .025, .02, 'rgba(236,241,248,.14)', .7);
+      dot(x, y, i % 9 === 0 ? 1.35 : .7, `rgba(135,218,255,${alpha})`);
+      if (i % 9 === 0 && !reduced.matches) arc(distance, angle - .025, .02, 'rgba(110,216,255,.14)', .7);
     }
     const sweep = phase * (.13 + index * .008) - Math.PI / 2;
-    arc(radius * .986, sweep, .19, 'rgba(236,241,248,.24)', 1.1);
-    arc(radius * .935, -sweep - 1.1, .085, 'rgba(255,250,0,.42)', 1.2);
+    arc(radius * .986, sweep, .19, 'rgba(110,216,255,.24)', 1.1);
+    arc(radius * .935, -sweep - 1.1, .085, 'rgba(0,213,255,.42)', 1.2);
     if (!reduced.matches) {
       const [x, y] = point(-sweep - 1.015, radius * .935);
-      dot(x, y, 1.25, 'rgba(255,250,0,.65)');
+      dot(x, y, 1.25, 'rgba(0,213,255,.65)');
     }
   }
 
@@ -88,7 +88,7 @@
     const phase = reduced.matches ? 0 : time;
     const pulse = .5 + .5 * Math.sin(phase * 1.6);
     const white = 'rgba(224,231,239,.13)';
-    const yellow = 'rgba(255,250,0,.28)';
+    const signal = 'rgba(0,213,255,.28)';
     const r = radius;
     if (index === 0) {
       // Thin browser grid fragments grow and subside along the lower left rim.
@@ -100,14 +100,14 @@
         context.strokeRect(x + col * cell, y + row * cell, cell * .7, cell * .7);
       }
       const cellIndex = Math.floor(phase * .8) % 4;
-      line([[x + cellIndex * cell, y - 5], [x + cellIndex * cell + cell * .65, y - 5]], yellow, 1.2);
+      line([[x + cellIndex * cell, y - 5], [x + cellIndex * cell + cell * .65, y - 5]], signal, 1.2);
     } else if (index === 1) {
       // Runtime current travels as a short, angular trace around the rim.
       const head = phase * .38 + .3;
       const points = Array.from({ length: 12 }, (_, i) => point(head - i * .023, r * (.91 + (i % 3 === 1 ? .025 : 0))));
-      line(points, 'rgba(255,250,0,.36)', .8);
+      line(points, 'rgba(0,213,255,.36)', .8);
       const [x, y] = points[0];
-      dot(x, y, 1.6, 'rgba(255,250,0,.75)');
+      dot(x, y, 1.6, 'rgba(0,213,255,.75)');
       arc(r * .9, head - .36, .08, white, .6);
     } else if (index === 2) {
       // Orthogonal tracks and a travelling signal suggest a circuit, rather than a ring.
@@ -118,7 +118,7 @@
         nodes.slice(1).forEach(([a, b]) => circle(a, b, 1.6, white));
         const p = ((phase * .25 + (side > 0 ? .5 : 0)) % 1) * 3;
         const n = Math.floor(p), t = p - n, a = nodes[n], b = nodes[n + 1];
-        dot(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 1.4, yellow);
+        dot(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, 1.4, signal);
       }
     } else if (index === 3) {
       // Six aperture blades breathe quietly; the flash stays on the reticle edge.
@@ -128,7 +128,7 @@
         line([point(a, aperture), point(a + .48, aperture * 1.17), point(a + .85, aperture * .92)], white, .55);
       }
       const flash = Math.pow(Math.max(0, Math.cos(phase * .72)), 24);
-      arc(r * .96, -.95, .15, `rgba(255,250,0,${.1 + flash * .4})`, 1.2);
+      arc(r * .96, -.95, .15, `rgba(0,213,255,${.1 + flash * .4})`, 1.2);
     } else if (index === 4) {
       // Four photographic frame corners shift inward together to find a crop.
       const halfX = r * (.58 + pulse * .025), halfY = r * .43, length = r * .11;
@@ -137,7 +137,7 @@
         line([[px - x * length, py], [px, py], [px, py - y * length]], white, .8);
       }
       const [x, y] = point(phase * .14 + 1.4, r * .86);
-      dot(x, y, 1, yellow);
+      dot(x, y, 1, signal);
     } else if (index === 5) {
       // Four separate rotor orbits make the quadrotor accent unmistakable.
       for (let i = 0; i < 4; i++) {
@@ -146,7 +146,7 @@
         const size = r * .105;
         circle(x, y, size, white);
         const rotor = phase * (i % 2 ? -1.7 : 1.7) + a;
-        dot(x + Math.cos(rotor) * size, y + Math.sin(rotor) * size, 1.1, i === 0 ? yellow : 'rgba(236,241,248,.28)');
+        dot(x + Math.cos(rotor) * size, y + Math.sin(rotor) * size, 1.1, i === 0 ? signal : 'rgba(110,216,255,.28)');
       }
     } else if (index === 6) {
       // Three connected nodes share a pulse around the triangle.
@@ -154,7 +154,7 @@
       line([...nodes, nodes[0]], 'rgba(222,230,240,.09)', .6);
       nodes.forEach(([x, y], i) => {
         circle(x, y, 3 + Math.sin(phase * 1.7 - i * 2.1) * .6, white);
-        dot(x, y, 1.2, i === Math.floor(phase * .55) % 3 ? yellow : 'rgba(236,241,248,.2)');
+        dot(x, y, 1.2, i === Math.floor(phase * .55) % 3 ? signal : 'rgba(110,216,255,.2)');
       });
     } else {
       // A restrained clock sweep passes twelve individual minute marks.
@@ -163,7 +163,7 @@
       const hand = phase * .15 - Math.PI / 2;
       line([point(hand + Math.PI, r * .055), point(hand, clockRadius * .85)], 'rgba(224,232,242,.11)', .65);
       const [x, y] = point(hand, clockRadius);
-      dot(x, y, 1.25, yellow);
+      dot(x, y, 1.25, signal);
     }
   }
 
@@ -176,7 +176,7 @@
       const distance = radius * (.95 + Math.sin(progress * Math.PI / 2) * (.09 + (i % 3) * .014));
       const [x, y] = point(angle, distance);
       const alpha = (1 - progress) * (i % 4 === 0 ? .5 : .25);
-      dot(x, y, i % 4 === 0 ? 1.1 : .7, i % 4 === 0 ? `rgba(255,250,0,${alpha})` : `rgba(238,242,248,${alpha})`);
+      dot(x, y, i % 4 === 0 ? 1.1 : .7, i % 4 === 0 ? `rgba(0,213,255,${alpha})` : `rgba(135,218,255,${alpha})`);
     }
   }
 

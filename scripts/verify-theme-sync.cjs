@@ -31,13 +31,13 @@ const frames = page => page.evaluate(() => new Promise(resolve => requestAnimati
               footer:getComputedStyle(document.querySelector('.footer')).backgroundColor};
           });
           const label = `${name}/${width}/${theme}`;
-          assert.equal(state.bg,theme==='dark'?'rgb(11, 12, 15)':'rgb(246, 246, 243)',label+' body palette');
-          assert.equal(state.ink,theme==='dark'?'rgb(243, 244, 243)':'rgb(26, 28, 31)',label+' text palette');
-          assert.equal(state.accent,'#fffa00',label+' shared signal');
-          assert.equal(state.nav,'rgb(250, 250, 247)',label+' shared navigation');
-          assert.equal(state.footer,'rgb(246, 246, 243)',label+' shared footer');
+          assert.equal(state.bg,theme==='dark'?'rgb(7, 13, 24)':'rgb(242, 248, 252)',label+' body palette');
+          assert.equal(state.ink,theme==='dark'?'rgb(237, 247, 255)':'rgb(16, 34, 56)',label+' text palette');
+          assert.equal(state.accent,'#00d5ff',label+' shared signal');
+          assert.equal(state.nav,'rgb(247, 251, 255)',label+' shared navigation');
+          assert.equal(state.footer,'rgb(242, 248, 252)',label+' shared footer');
           assert.equal(state.pressed,String(theme==='light'),label+' toggle state');
-          assert.equal(state.themeColor,theme==='light'?'#f6f6f3':'#0b0c0f',label+' browser theme');
+          assert.equal(state.themeColor,theme==='light'?'#f2f8fc':'#070d18',label+' browser theme');
           assert.equal(state.overflow,false,label+' no overflow');
           if(width>1000) {assert.equal(state.width,68,label+' side rail');assert.equal(state.headerOffset,0,label+' rail is not top inset');}
           else {

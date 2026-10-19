@@ -8,8 +8,8 @@ const motionAssets=new Set(['motion.css','motion.js','immersive.css','immersive.
 const layoutAssets=new Set(["site.css", "site.js", "editorial.css", "education.css", "education-motion.js", "showcase.css", "immersive.css", "immersive.js", "interactions.js"].map(file=>'assets/'+file));
 const contentVersions={'assets/skills-console.css':'skills-particles-2','assets/skills-console.js':'skills-particles-2','assets/skills-lore-scene.js':'skills-particles-2','assets/skills-lore-orbit.js':'skills-particles-2','assets/skills-diagram.svg':'endfield-1','assets/education-content.js':'education-1','assets/equipment-content.js':'research-1'};
 const reportAssets=new Set(['site.js','interactions.js','showcase.js','motion.js','preloader.js','seo.js'].map(file=>'assets/'+file));
-const themeAssets=new Set(['theme.css','theme-home.css','theme-skills.css','site.js','motion.js','brand.svg','identity.webp','skills-lore-scene.js','skills-lore-orbit.js'].map(file=>'assets/'+file));
-const versionFor=url=>themeAssets.has(url)?'theme-sync-1':url==='assets/editorial.css'?'numbers-1':url==='assets/interactions.js'?'console-1':reportAssets.has(url)?'report-1':layoutAssets.has(url)?'layout-1':contentVersions[url]|| (motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'');
+const themeAssets=new Set(['skills-console.css','theme.css','theme-home.css','theme-skills.css','site.js','motion.js','brand.svg','identity.webp','skills-lore-scene.js','skills-lore-orbit.js'].map(file=>'assets/'+file));
+const versionFor=url=>themeAssets.has(url)?'cyber-blue-1':url==='assets/editorial.css'?'numbers-1':url==='assets/interactions.js'?'console-1':reportAssets.has(url)?'report-1':layoutAssets.has(url)?'layout-1':contentVersions[url]|| (motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'');
 // Only the active page's scripts, styles and eager imagery belong to its intro.
 // Lazy images, other HTML pages and sharing artwork remain outside this queue.
 const pages={};
@@ -35,7 +35,7 @@ for(const file of fs.readdirSync(publicRoot).filter(file=>file.endsWith('.html')
 }
 // Existing open tabs use the old schema when replaying the intro; retain its
 // shared artwork entry without restoring the previous whole-site download.
-const resources=[{url:'assets/identity.webp?v=theme-sync-1',type:'image'}];
+const resources=[{url:'assets/identity.webp?v=cyber-blue-1',type:'image'}];
 fs.writeFileSync(path.join(publicRoot,'assets/preload-manifest.json'),JSON.stringify({version:2,pages,resources},null,2)+'\n');
 fs.rmSync(dist,{recursive:true,force:true});
 fs.cpSync(publicRoot,dist,{recursive:true});
