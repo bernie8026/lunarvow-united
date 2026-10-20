@@ -1,130 +1,80 @@
-# Bernie Leung 個人作品集
+# Password-protected portfolio
 
-由月下整合版複製網站改建的八頁個人作品集，用於 CIS222 / CIS282 個人網站功課。
-採用深藍底、藍紫漸變、星空軌道及檔案庫視覺風格，內容為自我介紹與求職作品集。
+The existing GitHub Pages address and page routes are retained. The published
+`docs/` directory contains a password gate, its runtime, and one encrypted site
+archive. Original pages, scripts, styles and images are inside that archive.
 
-## 網站頁面
+## Local source and password
 
-`index.html`、`about.html`、`experience.html`、`education.html`、`skills.html`、
-`projects.html`、`contact.html`、`sitemap.html`。
+`public/` is the editable local source. `source/` contains the older reference
+snapshot. Both directories are ignored and removed from the current GitHub tree;
+keep local backups before moving to another computer. Historical public commits
+remain public and are not protected by this deployment.
 
-支援香港繁體中文、英文、簡體中文；手機導覽、深淺主題、作品搜尋與分類、
-技能分類、項目詳情、可展開的學習記錄，以及聯絡訊息草稿。
-保留原站入站動畫：旋轉光環、粒子、素材完整載入後等待 2 秒、Skip 與揭幕，頁尾可重播。
-頁內動態按內容設計，包括首頁景深與流星、教育時間線、作品專屬轉場、器材互動及技能篩選。
-頁尾可暫停動畫；每次轉頁顯示藍色圓環載入畫面，當頁素材全部準備好才揭幕。
-進度來自實際素材載入，尊重減少動態設定。
-聯絡表格只整理、複製或下載訊息，不會直接發送。網站不需後端或外部依賴。
+The default password file is `../lunarvow-private/access-password.txt`, outside
+this repository. It must contain one password line. Keep it private and backed up.
+Set `PORTFOLIO_PASSWORD_FILE` to use a different private file. Never put a password
+or a decryption key in Git, HTML, JavaScript, a URL or a build log.
 
-## 原始檔與發佈
+## Build and preview
 
-- `public/`：可直接開啟的完整個人作品集原始檔
-- `docs/`：GitHub Pages 發佈版本；包含舊版網址的導向頁面
-- `source/lunarvow/`：原月下網站的來源快照，供保留歷史；不會複製進新發佈網站
-- `scripts/prepare-site.cjs`：由 `public/` 產生 `docs/`
-
-更新 `public/` 後執行：
+With Node.js installed, run:
 
 ```sh
 node scripts/prepare-site.cjs
+node scripts/serve-preview.cjs
 ```
 
-GitHub Pages 保持 **main /docs**。可提交 ZIP 只需包含完整 `public/` 內容，
-放在同一個根資料夾；解壓後開啟 `index.html` 即可。
+Open `http://127.0.0.1:8766/lunarvow-united/`. HTTPS or localhost, JavaScript,
+Web Crypto, service workers and gzip decompression are required. Opening a
+published HTML file directly from disk does not unlock it.
 
-## 內容與圖片
+The build validates the password file before changing public output. It prepares
+plaintext content only in the ignored `.private/plain-site/` directory, then
+replaces `docs/` with the verified encrypted deployment. A missing password or
+failed build does not publish plaintext. GitHub Pages remains **main /docs**.
+Publish only the protected `docs/` output and the public build/runtime files.
 
-個人內容以已提供的學生、兼職、網站、攝影及 STEM 項目背景整理；
-未列未確認的工作日期、成績或證書。提交及求職前可再更新個人資料。
-自製向量示意圖不當作真人肖像、已完成產品或實拍攝影作品。
-月下項目所用遊戲插畫版權屬原權利持有人，原素材來源記錄保留於
-`public/assets/LUNAR-ART-CREDITS.md`。
+The encrypted archive uses AES-256-GCM with a fresh random salt and IV for each
+build. A key is derived with PBKDF2-HMAC-SHA256 and 600,000 iterations. The
+password is not included in the archive or public output. Changing the password
+file and rebuilding changes the access password for the new deployment.
 
-## 沉浸式作品展示
+## Browser behaviour and limits
 
-首頁加入全屏星空、旋轉軌道、滑鼠分層效果及四個章節標記。首頁與作品頁設有
-大型作品展示，三個作品可透過縮圖、前後按鈕、方向鍵、Home / End 或手機橫掃切換。
-展示區沿用原有作品內容與圖片，沒有自動輪播；作品頁仍可搜尋、篩選及閱讀詳情。
-頁尾可暫停動畫；系統的減少動態設定亦會生效。八個 HTML 頁面、三語及離線開啟方式維持。
+After a successful unlock, the original site is served at its existing URLs from
+service-worker memory. Decrypted files and keys are not saved to CacheStorage,
+IndexedDB or browser storage. The footer lock button clears that memory and locks
+all open portfolio tabs. Browser worker eviction or a new browser session can
+require the password again.
 
-版面參考：
-- [原神角色頁](https://genshin.hoyoverse.com/zh-tw/character/mondstadt?char=8)：大型圖像、資料與縮圖切換。
-- [星穹鐵道首頁](https://hsr.hoyoverse.com/zh-tw/home)：星空氛圍、序號與分層動態。
-- [崩壞 3 首頁](https://honkaiimpact3.hoyoverse.com/global/en-us/home)：章節導覽、軌道與介面線條。
+An authorised viewer can inspect and save the content and code after unlocking.
+Encryption cannot revoke older public commits, downloads, browser copies or
+already unlocked sessions on another device. This static deployment has no
+server-side account system or password-attempt rate limiting; use a strong,
+unique password.
 
-這次更新只參考展示方式，使用本作品集已有的圖片與資料。
+## Verification and recovery
 
-## 驗證
-
-執行 `node scripts/serve-preview.cjs` 可在本機 `http://127.0.0.1:8766/` 預覽。
-以靜態伺服器服務 `public/`，在有 Playwright 及 Chrome 的環境執行
-`node scripts/verify-portfolio.cjs`。預設位址為 `http://127.0.0.1:8765/`，
-可用 `PORTFOLIO_BASE_URL` 覆寫。檢查八頁、三語、四種闊度、深淺主題、
-資源與連結、搜尋、對話框、聯絡草稿、入場動畫及手機選單。
-
-## 院校與器材資料（2026-10-15）
-
-教育頁加入聖方濟各大學官方校園圖片、歷程、地址交通及獨立標示的 HDAI-ICT 公開課程參考。
-作品頁加入 Nikon D5300 相機、Godox V480N 閃光燈及 Ryze Tello EDU 四旋翼無人機參考圖與規格。
-Tello EDU 只作 Aerovate 概念參考；相機圖中的鏡頭不代表使用者的鏡頭型號。
-來源連結及圖片署名隨頁面顯示，詳細記錄在 `public/assets/education/asset-credits.md`
-與 `public/assets/equipment/asset-credits.md`。新增內容支援三語及離線開啟。
-
-## 多樣化排版
-
-各頁按內容採用不同形式：教育頁的校園長圖及時間線、作品頁的圖像專題與器材規格、
-工作經驗的連續記錄、技能的文字目錄，以及信箋式聯絡表格。取消通用段落滑入及模糊揭幕，
-保留少量與圖像內容有關的動態。轉頁使用獨立的素材載入遮罩。`assets/editorial.css` 處理頁面各自的排版。
-
-## 動畫互動
-
-首頁加入疏落流星、軌道浮動及捲動景深；教育頁加入校園照片視差、時間線描繪、
-學習節點及課程展開動畫。三個作品分別以揭幕、飛行落位及光圈對焦轉場。器材照片
-支援滑鼠景深，閃光燈圖片旁有「試閃動畫」；技能篩選使用位置過渡，聯絡表單加入
-底線筆觸及草稿展開。全站暫停、系統減少動態及隱藏分頁均會停止相應動畫。
-
-## 網站改善報告套用（2026-10-17）
-
-以《網站改善報告.md》為參考，將適用建議套用到現行八頁作品集。原報告審查的
-舊月下新聞模組及 Python 抓取程式不在目前發佈版本內。
-
-- 八頁加入獨立描述、Open Graph、Twitter 分享資料、canonical 及三語 hreflang。
-  `assets/seo.js` 在瀏覽器切換語言時同步 metadata；不執行 JavaScript 的分享爬蟲
-  會讀取 HTML 內預設的香港繁體中文資料。
-- 原創 `assets/social-preview.png` 為 1200 × 630，使用絕對網址供分享服務讀取。
-  可用安裝了 Pillow 的 Python 執行 `scripts/create-social-preview.py` 重新產生。
-- `sitemap.xml` 列出八頁的三個語言網址，共 24 個 URL。`robots.txt` 包含 sitemap
-  位置；GitHub Pages 專案子路徑中的 robots.txt 不控制整個 github.io 網域，
-  如日後移到自訂網域，應將 robots.txt 放在該網域根目錄。
-- 保留現有圖片說明及 favicon，補齊非同步解碼與作品展示圖片的實際尺寸。
-  HTML 保留圖片懶載入標記；啟用 JavaScript 後，載入畫面會提前準備當頁所有圖片。
-- 入站預載清單依當頁產生，包含程式、樣式、圖示、所有內容圖片及隱藏作品投影片。
-  不會預先下載其他 HTML 頁面或社交分享圖。圖片須完成解碼，頁面及字體須準備好才進入。
-  首次入站改為完成載入後等待 2 秒；後續轉頁不加等待。Skip 只跳過動畫，載入失敗可重試
-  或明確選擇繼續。停用 JavaScript 時仍可直接閱讀。
-- 補齊目前頁面的導覽標記；缺譯時保留可讀文字，重選同一語言不重繪，
-  搜尋文字快取，並為非 Element 事件目標及不完整篩選事件加入保護。
-
-完成產生發佈檔案後，可額外執行：
+With Playwright and Chrome available, run against the protected local preview:
 
 ```sh
-node scripts/verify-preloader.cjs
-node scripts/verify-navigation-loading.cjs
-node scripts/verify-page-motion.cjs
-node scripts/verify-report-improvements.cjs
-node scripts/verify-site-layout.cjs
+node scripts/verify-protection.cjs
 ```
 
-瀏覽器驗證沿用 `PORTFOLIO_BASE_URL`；除預載器檢查外，其餘項目需要 Playwright 及 Chrome。
+The suite checks locked routes and assets, wrong passwords, authenticated archive
+integrity, the original eight pages, images, animations, navigation, languages,
+mobile layout, storage, cross-tab locking and worker restarts. Its original-source
+comparison uses the local pre-protection snapshot; set `PORTFOLIO_SOURCE_DIR` to
+an equivalent baseline directory if needed. Set `PORTFOLIO_BASE_URL` to test a
+different protected deployment.
 
-## 轉頁與內容動畫修正（2026-10-20）
+To recover the encrypted publication into a **new local directory**:
 
-載入完成後，各頁以標題、個人標誌、工作記錄、技能介面、信箋或目錄等原有內容播放進場。
-首頁章節入口、作品按鈕、文字連結、網站地圖及頁尾補齊滑鼠與鍵盤互動。
-轉頁只清理上一頁所屬動畫，避免全域取消保留元素的效果；焦點移至主要內容，保留標題進場。
-已快取頁面的載入畫面亦保留短暫可見時間，首次入站仍維持素材完成後等待 2 秒。
-`assets/page-scenes.css` 處理連結回饋；暫停動畫及系統減少動態設定仍然生效。
+```sh
+node scripts/prepare-protected-site.cjs --decrypt docs/protected-site.json --output ../recovered-portfolio
+```
 
-
-無刷新選單 / Seamless navigation
-線上版本以 Fetch + History API 切換八個獨立 HTML 頁面，支援返回／前進、頁面定位、三語介面及頁面互動。新頁面備妥後才切換，載入失敗可重試；轉頁顯示藍色圓環，完整載入同解碼新頁全部圖片後先揭幕，減少動態模式亦保留素材檢查。每次轉頁會清理上一頁嘅監聽、計時器及粒子動畫。解壓 ZIP 直接用 file:// 開啟時，保留一般 HTML 導覽。
+The private password file is still required. Recovery does not publish anything;
+keep recovered plaintext outside the repository. There is no password reset that
+can recover the encrypted archive without its password or a plaintext backup.

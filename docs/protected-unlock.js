@@ -1,0 +1,109 @@
+"use strict";
+(() => {
+  const base = new URL("./", document.currentScript.src);
+  const form = document.getElementById("unlock-form");
+  const input = document.getElementById("site-password");
+  const submit = document.getElementById("unlock-button");
+  const show = document.getElementById("show-password");
+  const status = document.getElementById("gate-status");
+  const dictionary = {
+    "zh-HK": {title:"網站已鎖定",intro:"輸入存取密碼，開啟個人作品集。",heading:"解鎖作品集",description:"有存取密碼？喺下面輸入就可以繼續。",label:"存取密碼",show:"顯示",hide:"隱藏",unlock:"解鎖網站",preparing:"正在準備安全解鎖…",ready:"準備好後，輸入密碼即可解鎖。",decrypting:"正在解鎖網站，請稍等…",opening:"已解鎖，正在開啟網站…",wrong:"密碼唔正確，或者加密檔案已損壞。請再試一次。",failed:"暫時未能載入網站。請檢查連線後重新整理。",unsupported:"請使用支援安全解鎖嘅新版瀏覽器，並透過 HTTPS 開啟網站。",session:"密碼唔會由網站儲存。閒置或關閉瀏覽器後，可能需要重新解鎖。",footer:"只向持有密碼嘅訪客開放"},
+    en: {title:"This site is locked",intro:"Enter the access password to open the portfolio.",heading:"Unlock the portfolio",description:"Have an access password? Enter it below to continue.",label:"Access password",show:"Show",hide:"Hide",unlock:"Unlock website",preparing:"Preparing secure access…",ready:"Enter the password when you are ready.",decrypting:"Unlocking the website. Please wait…",opening:"Unlocked. Opening the website…",wrong:"The password is incorrect, or the encrypted file is damaged. Please try again.",failed:"The website could not be loaded. Check your connection and refresh.",unsupported:"Use a modern browser with secure access support and open this site over HTTPS.",session:"The website does not save your password. You may need to unlock it again after inactivity or closing the browser.",footer:"Access is limited to visitors with the password"},
+    "zh-CN": {title:"网站已锁定",intro:"输入访问密码，打开个人作品集。",heading:"解锁作品集",description:"有访问密码？在下方输入即可继续。",label:"访问密码",show:"显示",hide:"隐藏",unlock:"解锁网站",preparing:"正在准备安全解锁…",ready:"准备好后，输入密码即可解锁。",decrypting:"正在解锁网站，请稍候…",opening:"已解锁，正在打开网站…",wrong:"密码不正确，或加密文件已损坏。请重试。",failed:"暂时无法加载网站。请检查连接后刷新。",unsupported:"请使用支持安全解锁的新版浏览器，并通过 HTTPS 打开网站。",session:"网站不会保存密码。闲置或关闭浏览器后，可能需要重新解锁。",footer:"仅向持有密码的访客开放"}
+  };
+  let language = new URL(location.href).searchParams.get("lang");
+  if (!dictionary[language]) language = "zh-HK";
+  let state = "preparing", kind = "", busy = false, worker;
+  function render() {
+    const text = dictionary[language];
+    document.documentElement.lang = language;
+    document.title = text.heading + " · Bernie Leung";
+    document.querySelectorAll("[data-gate-copy]").forEach(node => {node.textContent = text[node.dataset.gateCopy] || "";});
+    show.textContent = input.type === "password" ? text.show : text.hide;
+    status.textContent = text[state];
+    status.dataset.kind = kind;
+    document.querySelectorAll("[data-gate-language]").forEach(button => button.setAttribute("aria-pressed",String(button.dataset.gateLanguage === language)));
+  }
+  function setStatus(value, error=false) {state=value;kind=error?"error":"";render();}
+  function setBusy(value) {busy=value;form.setAttribute("aria-busy",String(value));input.disabled=value;show.disabled=value;submit.disabled=value;}
+  document.querySelectorAll("[data-gate-language]").forEach(button => button.addEventListener("click",() => {
+    language=button.dataset.gateLanguage;
+    const url=new URL(location.href);url.searchParams.set("lang",language);history.replaceState(null,"",url);render();
+  }));
+  show.addEventListener("click",() => {input.type=input.type==="password"?"text":"password";show.setAttribute("aria-pressed",String(input.type==="text"));render();});
+  function request(message, transfer=[]) {
+    return new Promise((resolve,reject) => {
+      const channel=new MessageChannel();
+      const timeout=setTimeout(() => {channel.port1.close();reject(new Error("Worker unavailable"));},15000);
+      channel.port1.onmessage=event => {clearTimeout(timeout);channel.port1.close();event.data?.ok?resolve(event.data):reject(new Error("Worker rejected archive"));};
+      worker.postMessage(message,[channel.port2,...transfer]);
+    });
+  }
+  function bytes(value) {
+    if(typeof value!=="string"||value.length>40000000||! /^[A-Za-z0-9+/]*={0,2}$/.test(value)) throw new Error("Invalid encrypted data");
+    const decoded=atob(value),result=new Uint8Array(decoded.length);
+    for(let i=0;i<decoded.length;i++)result[i]=decoded.charCodeAt(i);
+    return result;
+  }
+  function targetFor(paths) {
+    let path;
+    try {path=decodeURIComponent(location.pathname.slice(base.pathname.length));}catch{path="";}
+    if(!path||path.endsWith("/"))path+="index.html";
+    const target=paths.has(path)?new URL(location.href):new URL("index.html"+location.search+location.hash,base);
+    return target.href;
+  }
+  async function decrypt(password) {
+    const response=await fetch(new URL("protected-site.json",base),{cache:"no-store",credentials:"same-origin"});
+    if(!response.ok)throw new Error("Load failed");
+    const envelope=await response.json();
+    if(envelope.version!==1||envelope.kdf!=="PBKDF2-SHA-256"||envelope.iterations!==600000||envelope.compression!=="gzip")throw new Error("Invalid envelope");
+    const salt=bytes(envelope.salt),iv=bytes(envelope.iv),ciphertext=bytes(envelope.ciphertext);
+    if(salt.length!==32||iv.length!==12||ciphertext.length<17)throw new Error("Invalid envelope");
+    const encoded=new TextEncoder().encode(password);
+    const material=await crypto.subtle.importKey("raw",encoded,"PBKDF2",false,["deriveKey"]);encoded.fill(0);
+    const key=await crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt,iterations:envelope.iterations},material,{name:"AES-GCM",length:256},false,["decrypt"]);
+    let compressed;
+    try {compressed=await crypto.subtle.decrypt({name:"AES-GCM",iv,tagLength:128},key,ciphertext);}catch{throw new DOMException("Password or archive invalid","OperationError");}
+    const unpacked=new Uint8Array(await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
+    new Uint8Array(compressed).fill(0);
+    const archive=JSON.parse(new TextDecoder().decode(unpacked));unpacked.fill(0);
+    if(archive.version!==1||!Array.isArray(archive.files)||archive.files.length>4096)throw new Error("Invalid archive");
+    const paths=new Set();let size=0;
+    const files=archive.files.map(file => {
+      if(typeof file.path!=="string"||! /^(?:[A-Za-z0-9_.-]+\/)*[A-Za-z0-9_.-]+$/.test(file.path)||file.path.split("/").some(part=>part==="."||part==="..")||paths.has(file.path)||typeof file.type!=="string"||/[\r\n]/.test(file.type))throw new Error("Invalid file");
+      paths.add(file.path);const data=bytes(file.data);size+=data.byteLength;if(size>64000000)throw new Error("Archive too large");
+      return {path:file.path,type:file.type,data:data.buffer};
+    });
+    if(!paths.has("index.html"))throw new Error("Missing homepage");
+    return {files,paths};
+  }
+  form.addEventListener("submit",async event => {
+    event.preventDefault();if(busy||!worker||!input.value)return;
+    const password=input.value;setBusy(true);setStatus("decrypting");
+    try {
+      const {files,paths}=await decrypt(password);
+      input.value="";input.type="password";
+      await request({type:"UNLOCK",files},files.map(file=>file.data));
+      setStatus("opening");location.replace(targetFor(paths));
+    } catch(error) {
+      setBusy(false);setStatus(error.name==="OperationError"?"wrong":"failed",true);input.focus();
+    }
+  });
+  async function initialise() {
+    render();
+    if(!isSecureContext||!crypto.subtle||!navigator.serviceWorker||!window.DecompressionStream){setStatus("unsupported",true);return;}
+    await navigator.serviceWorker.register(new URL("protected-worker.js",base),{scope:base.pathname,updateViaCache:"none"});
+    await navigator.serviceWorker.ready;
+    const correct=()=>navigator.serviceWorker.controller?.scriptURL===new URL("protected-worker.js",base).href;
+    if(!correct())await new Promise((resolve,reject) => {
+      const timer=setTimeout(() => {navigator.serviceWorker.removeEventListener("controllerchange",check);reject(new Error("Control unavailable"));},10000);
+      function check(){if(correct()){clearTimeout(timer);navigator.serviceWorker.removeEventListener("controllerchange",check);resolve();}}
+      navigator.serviceWorker.addEventListener("controllerchange",check);check();
+    });
+    worker=navigator.serviceWorker.controller;
+    const session=await request({type:"STATE"});
+    if(session.unlocked){setStatus("opening");location.replace(location.href);return;}
+    setBusy(false);setStatus("ready");
+  }
+  initialise().catch(() => setStatus("failed",true));
+})();

@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://bernie8026.github.io/lunarvow-united/sitemap.xml

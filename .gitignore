@@ -2,3 +2,12 @@ node_modules/
 test-results/
 .DS_Store
 *.tar.gz
+
+# Plaintext working files stay on this computer; publish only the encrypted site.
+/public/
+/source/
+/.private/
+*.password
+access-password.txt
+.env
+.env.*
