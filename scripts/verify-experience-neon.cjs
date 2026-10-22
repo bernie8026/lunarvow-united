@@ -32,6 +32,13 @@ async function contextFor(options={},theme='dark') {
     page.on('requestfailed',request=>{const failure=request.failure()?.errorText||'request failed';if(request.url().startsWith(base.href)&&!/ERR_ABORTED/.test(failure))errors.push(failure+': '+request.url());});
   });
   await context.addInitScript(theme=>{try{if(!localStorage.getItem('bernie-portfolio-theme'))localStorage.setItem('bernie-portfolio-theme',theme);}catch{}},theme);
+  await context.addInitScript(()=>{
+    window.__workQaSignalEvents=[];
+    new MutationObserver(records=>records.forEach(record=>{
+      const node=record.target;
+      if(node instanceof Element&&node.matches('.work-signal-text.is-signal-burst')&&!String(record.oldValue||'').split(/\s+/).includes('is-signal-burst'))window.__workQaSignalEvents.push({node,time:performance.now(),connected:node.isConnected});
+    })).observe(document,{subtree:true,attributes:true,attributeFilter:['class'],attributeOldValue:true});
+  });
   return context;
 }
 async function top(page) { await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await frames(page); }
@@ -58,6 +65,13 @@ async function content(page,language='zh-HK') {
   for(let number=55;number<=74;number++){
     const key='t'+String(number).padStart(3,'0'),node=translations.find(item=>item.key===key);
     assert(node&&node.text&&node.text===node.expected,'original work content is retained and translated: '+key);
+  }
+  await frames(page);
+  const echoes=await page.locator('.work-signal-text').evaluateAll(nodes=>nodes.map(node=>({text:node.textContent.trim(),echo:node.dataset.workEcho})));
+  assert(echoes.length>=8,'the main titles and handoff labels have signal treatment');
+  assert(echoes.every(node=>node.text&&node.echo===node.text),'decorative signal echoes stay in sync with unchanged readable text');
+  for(const heading of await page.locator('main :is(h1,h2,h3).work-signal-text').all()){
+    const name=(await heading.textContent()).trim();assert.equal(await page.getByRole('heading',{name,exact:true}).count(),1,'decorative text does not duplicate the accessible heading name');
   }
   const width=await page.evaluate(()=>innerWidth);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),'work page has no horizontal overflow');
@@ -92,12 +106,50 @@ async function visibleContent(page){
     assert(await target.evaluate(node=>{const r=node.getBoundingClientRect();if(!r.width||!r.height)return false;for(let e=node;e instanceof Element;e=e.parentElement){const s=getComputedStyle(e);if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)===0)return false;}return true;}),'motion preferences preserve readable work content');
   }
 }
+async function signalSamples(target,count=36){
+  return target.evaluate(async(node,count)=>{
+    const samples=[];
+    for(let frame=0;frame<count;frame++){
+      const style=getComputedStyle(node),before=getComputedStyle(node,'::before'),after=getComputedStyle(node,'::after');
+      samples.push({text:node.textContent,echo:node.dataset.workEcho,burst:node.classList.contains('is-signal-burst'),transform:style.transform,translate:style.translate,shadow:style.textShadow,before:[before.transform,before.clipPath,before.textShadow,before.opacity,before.translate],after:[after.transform,after.clipPath,after.textShadow,after.opacity,after.translate]});
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+    }
+    return samples;
+  },count);
+}
+async function textStill(page){
+  await top(page);const heading=page.locator('#work-heading');await heading.hover();await frames(page);
+  assert.equal(await page.locator('.work-signal-text.is-signal-burst').count(),0,'motion preference prevents new signal bursts');
+  const samples=await signalSamples(heading,20);
+  assert.equal(new Set(samples.map(sample=>JSON.stringify([sample.transform,sample.translate,sample.shadow,sample.before,sample.after]))).size,1,'motion preference leaves all signal text styles still');
+  assert(await page.locator('.work-signal-text').evaluateAll(nodes=>nodes.every(node=>node.getAnimations().every(animation=>animation.playState!=='running'))),'no text animation keeps running after motion is disabled');
+}
 async function main(){
   assert(password.length>=12,'private password file is available');fs.mkdirSync(output,{recursive:true,mode:0o700});
   browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||'chrome',headless:true});
   const context=await contextFor(),page=await context.newPage();
   try{
     await test('Encrypted work page retains both records and every original fact on desktop dark',async()=>{await unlock(page);await content(page);await capture(page,'desktop-dark.png');});
+    await test('Signal text enters, repeats, replays on hover and moves only decorative slices',async()=>{
+      await top(page);await page.waitForFunction(()=>window.__workQaSignalEvents.some(event=>event.node===document.querySelector('#work-heading')),null,{timeout:3500});
+      const heading=page.locator('#work-heading'),original=await heading.textContent();
+      const entryCount=await page.evaluate(()=>window.__workQaSignalEvents.filter(event=>event.node===document.querySelector('#work-heading')).length);
+      await page.waitForFunction(before=>window.__workQaSignalEvents.filter(event=>event.node===document.querySelector('#work-heading')).length>before,entryCount,{timeout:7500});
+      await page.waitForFunction(()=>!document.querySelector('#work-heading').classList.contains('is-signal-burst'),null,{timeout:3500});
+      await page.mouse.move(75,5);const count=await page.evaluate(()=>window.__workQaSignalEvents.filter(event=>event.node===document.querySelector('#work-heading')).length);
+      await heading.hover();await page.waitForFunction(before=>window.__workQaSignalEvents.filter(event=>event.node===document.querySelector('#work-heading')).length>before,count,{timeout:3500});
+      const samples=await signalSamples(heading);
+      assert(samples.every(sample=>sample.text===original&&sample.echo===original.trim()),'glitch never scrambles the readable source or translation');
+      assert(new Set(samples.map(sample=>JSON.stringify([sample.transform,sample.translate,sample.shadow,sample.before,sample.after]))).size>1,'signal effect changes computed transforms, slices or shadows across frames');
+      assert(samples.some(sample=>[sample.before,sample.after].some(pseudo=>Number(pseudo[3])>0)),'decorative signal slices are visibly rendered during a burst');
+      assert.equal(await page.getByRole('heading',{name:original.trim(),exact:true}).count(),1,'active glitch leaves the heading accessible once');
+      await capture(page,'desktop-signal.png');
+      const label=page.locator('.work-track strong').first(),labelText=await label.textContent();await label.scrollIntoViewIfNeeded();await frames(page);await label.hover();
+      await page.waitForFunction(()=>document.querySelector('.work-track strong')?.classList.contains('is-signal-burst'),null,{timeout:3500});
+      const scan=await signalSamples(label);
+      assert(scan.every(sample=>sample.text===labelText&&sample.echo===labelText.trim()),'scan labels preserve their original text');
+      assert(new Set(scan.map(sample=>JSON.stringify([sample.translate,sample.shadow,sample.before,sample.after]))).size>1,'handoff labels receive a visible animated signal treatment too');
+    });
     await test('Supplied video decodes, advances, loops and supports authenticated byte ranges',async()=>{
       await videoPlaying(page);
       const video=await page.locator('.work-film').evaluate(v=>({muted:v.muted,loop:v.loop,playsInline:v.playsInline,source:v.currentSrc,duration:v.duration,width:v.videoWidth}));
@@ -117,24 +169,32 @@ async function main(){
     });
     await test('Animation pause stops the video and preserves all work content, then resumes',async()=>{
       await page.locator('.work-track').scrollIntoViewIfNeeded();await frames(page);
+      await page.waitForFunction(()=>{const heading=document.querySelector('#work-heading');return heading.getBoundingClientRect().bottom<0&&!heading.classList.contains('is-signal-burst');},null,{timeout:3500});
       const handoff=await page.locator('.work-track li').evaluateAll(nodes=>nodes.findIndex(node=>node.classList.contains('is-handoff')));
       await page.waitForFunction(before=>[...document.querySelectorAll('.work-track li')].findIndex(node=>node.classList.contains('is-handoff'))!==before,handoff,{timeout:6500});
       await videoPlaying(page);await page.locator('.ambient-toggle').click();await page.waitForFunction(()=>document.body.classList.contains('motion-paused'));await videoStill(page);
       assert(await page.locator('.work-wave i,.work-sweep').evaluateAll(nodes=>nodes.length>0&&nodes.every(node=>getComputedStyle(node).animationPlayState==='paused')),'pause also stops the waveform and shift rhythm');
-      await visibleContent(page);await page.locator('.ambient-toggle').click();await page.waitForFunction(()=>!document.body.classList.contains('motion-paused'));await videoPlaying(page);
+      await textStill(page);await visibleContent(page);await page.locator('.ambient-toggle').click();await page.waitForFunction(()=>!document.body.classList.contains('motion-paused'));await videoPlaying(page);
     });
     await test('About, Experience, Education and browser history remount without old playing media',async()=>{
-      await top(page);const token=await page.evaluate(()=>{window.__workQaDocument=Math.random();window.__workQaRetired=[];return window.__workQaDocument;});
+      await top(page);const token=await page.evaluate(()=>{window.__workQaDocument=Math.random();window.__workQaRetired=[];window.__workQaRetiredText=[];window.__workQaRetiredBursts=[];return window.__workQaDocument;});
       for(let cycle=0;cycle<2;cycle++){
-        await page.evaluate(()=>window.__workQaRetired.push(document.querySelector('.work-film')));await page.locator('.main-nav a[href*="about.html"]').click();await ready(page,'about');
+        await page.evaluate(()=>{
+          window.__workQaRetired.push(document.querySelector('.work-film'));
+          document.querySelectorAll('.work-signal-text').forEach(node=>{window.__workQaRetiredText.push(node);new MutationObserver(records=>{if(!node.isConnected&&node.classList.contains('is-signal-burst')&&records.some(record=>!String(record.oldValue||'').split(/\s+/).includes('is-signal-burst')))window.__workQaRetiredBursts.push(node);}).observe(node,{attributes:true,attributeFilter:['class'],attributeOldValue:true});});
+        });await page.locator('.main-nav a[href*="about.html"]').click();await ready(page,'about');
         assert.equal(await page.locator('.work-film').count(),0,'other page contains no work media');assert(await page.evaluate(()=>window.__workQaRetired.every(v=>v.paused&&!v.isConnected)),'disposed work media is paused');
+        assert.equal(await page.locator('.work-signal-text').count(),0,'signal styling does not spill into the next page');
+        assert(await page.evaluate(()=>window.__workQaRetiredText.every(node=>!node.isConnected&&!node.classList.contains('is-signal-burst')&&node.getAnimations().every(animation=>animation.playState!=='running'))),'retired signal targets have no active burst or animation');
         await page.locator('.main-nav a[href*="experience.html"]').click();await ready(page);await content(page);await videoPlaying(page);
         await page.evaluate(()=>window.__workQaRetired.push(document.querySelector('.work-film')));await page.locator('main a[data-internal][href*="education.html"]').last().click();await ready(page,'education');assert.equal(await page.locator('.work-film').count(),0);assert(await page.evaluate(()=>window.__workQaRetired.every(v=>v.paused&&!v.isConnected)));
         await page.goBack();await ready(page);await content(page);await videoPlaying(page);assert.equal(await page.evaluate(()=>window.__workQaDocument),token,'soft navigation and history retain one live document');
       }
+      const retiredStart=await page.evaluate(()=>performance.now());await page.waitForFunction(start=>performance.now()-start>6400,retiredStart,{timeout:8000});
+      assert.equal(await page.evaluate(()=>window.__workQaRetiredBursts.length),0,'retired timers never restart signal text on a detached page');
     });
     await test('Reduced motion shows a static hero and the complete English work page',async()=>{
-      const reduced=await contextFor({viewport:{width:390,height:844},reducedMotion:'reduce'},'light');const tab=await reduced.newPage();try{await unlock(tab,'en');await content(tab,'en');await videoStill(tab);await visibleContent(tab);}finally{await reduced.close();}
+      const reduced=await contextFor({viewport:{width:390,height:844},reducedMotion:'reduce'},'light');const tab=await reduced.newPage();try{await unlock(tab,'en');await content(tab,'en');await videoStill(tab);await textStill(tab);await visibleContent(tab);}finally{await reduced.close();}
     });
     assert.deepEqual([...new Set(errors)],[],'work page has no browser, console or scoped network errors');
     console.log(JSON.stringify({passed:results.length,screenshots:output,base:base.href}));

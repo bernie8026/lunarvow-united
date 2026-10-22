@@ -52,6 +52,10 @@ Edgerunners video in `public/assets/experience/`, with a decoded poster fallback
 The video body and poster are preloaded before entry; muted playback pauses
 outside the viewport, on the global motion control, or with reduced motion.
 Private media supports byte ranges without entering persistent browser storage.
+Headings and key labels also use brief blue signal slices and scanning echoes
+on entry, every six seconds in view, and on hover or keyboard focus. The original
+translated text remains readable and is announced once; pause, reduced motion,
+offscreen content and page disposal stop and reset these effects.
 
 The encrypted archive uses AES-256-GCM with a fresh random salt and IV for each
 build. A key is derived with PBKDF2-HMAC-SHA256 and 600,000 iterations. The
