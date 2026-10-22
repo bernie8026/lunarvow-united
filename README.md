@@ -36,8 +36,10 @@ failed build does not publish plaintext. GitHub Pages remains **main /docs**.
 Publish only the protected `docs/` output and the public build/runtime files.
 
 The homepage is authored in `public/index.html` and `public/assets/home*`.
-It uses full-width project stories, subject-specific motion, three-language
-copy and responsive light/dark layouts. These source files remain local;
+The personal profile is in `public/about.html` and `public/assets/about-apple*`;
+both pages share `public/assets/apple-shell.css` for navigation and colours.
+They use large typography, subject-specific motion, three-language copy and
+responsive light/dark layouts. These source files remain local;
 the published update is included only in the encrypted archive. Each build
 also changes the worker revision so browser update checks can discard an old
 in-memory publication and require a fresh unlock.
@@ -69,6 +71,7 @@ With Playwright and Chrome available, run against the protected local preview:
 node scripts/verify-protection.cjs
 node scripts/verify-preloader.cjs
 node scripts/verify-home.cjs
+node scripts/verify-about-apple.cjs
 ```
 
 The suite checks locked routes and assets, wrong passwords, authenticated archive
