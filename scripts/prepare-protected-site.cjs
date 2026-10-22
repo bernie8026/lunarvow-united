@@ -47,7 +47,9 @@ function encryptArchive(archive,password){
   }finally{key.fill(0);}
 }
 function base64(value,label){
-  if(typeof value!=='string'||!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value))throw new Error('Invalid '+label);
+  // A flat character check keeps multi-megabyte media bundles off the RegExp
+  // backtracking stack while preserving the required four-character padding.
+  if(typeof value!=='string'||value.length%4!==0||!/^[A-Za-z0-9+/]*={0,2}$/.test(value))throw new Error('Invalid '+label);
   return Buffer.from(value,'base64');
 }
 function validateArchive(archive){

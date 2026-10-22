@@ -1,4 +1,17 @@
 'use strict';
+function authoredResources(html){
+  const resources=[];
+  const attribute=(tag,name)=>tag.match(new RegExp('\\b'+name+'\\s*=\\s*(["\\\'])(.*?)\\1','i'))?.[2];
+  const add=(url,type)=>{if(url?.startsWith('assets/'))resources.push({url,type});};
+  for(const tag of html.match(/<(?:script|link|img|video|source)\b[^>]*>/gi)||[]){
+    if(/^<script\b/i.test(tag))add(attribute(tag,'src'),'file');
+    else if(/^<link\b/i.test(tag)&&['stylesheet','icon'].includes(attribute(tag,'rel')))add(attribute(tag,'href'),'file');
+    else if(/^<img\b/i.test(tag))add(attribute(tag,'src'),'image');
+    else if(/^<video\b/i.test(tag)){add(attribute(tag,'src'),'file');add(attribute(tag,'poster'),'image');}
+    else if(/^<source\b/i.test(tag))add(attribute(tag,'src'),'file');
+  }
+  return resources;
+}
 function prepareContent(options={}){
 const fs=require('node:fs');
 const path=require('node:path');
@@ -19,11 +32,10 @@ const navigationAssets=new Set(['assets/site.js', 'assets/showcase.js', 'assets/
 const loadingAssets=new Set(['page-entry.js','page-loading.css','motion.js','preloader.js'].map(file=>'assets/'+file));
 const pageSceneAssets=new Set(['motion.js','navigation.js'].map(file=>'assets/'+file));
 const versionFor=url=>url==='assets/page-scenes.css'?'footer-nav-1':pageSceneAssets.has(url)?'page-motion-1':loadingAssets.has(url)?'page-loading-1':url==='assets/navigation.js'?'page-loading-1':navigationAssets.has(url)?'soft-navigation-1':themeAssets.has(url)?'cyber-blue-1':url==='assets/editorial.css'?'numbers-1':url==='assets/interactions.js'?'console-1':reportAssets.has(url)?'report-1':layoutAssets.has(url)?'layout-1':contentVersions[url]|| (motionAssets.has(url)?'motion-2':editorialAssets.has(url)?'editorial-1':/assets\/(site\.css|arrival-cinematic\.css|brand\.svg|identity\.webp|drone\.webp|camera\.webp)$/.test(url)?'blue-violet-2':'');
-// Load all imagery for this destination, including hidden showcase slides.
+// Load all imagery and media for this destination, including hidden slides.
 // Other HTML documents and social sharing artwork are not page resources.
 const showcaseImages=[...fs.readFileSync(path.join(publicRoot,'assets/showcase.js'),'utf8').matchAll(/\bimage:\s*["']([^"']+)["']/g)].map(match=>'assets/'+match[1]);
 const pages={};
-const attribute=(tag,name)=>tag.match(new RegExp('\\b'+name+'=["\\\']([^"\\\']+)["\\\']','i'))?.[1];
 for(const file of fs.readdirSync(publicRoot).filter(file=>file.endsWith('.html'))){
   const html=fs.readFileSync(path.join(publicRoot,file),'utf8');
   const resources=new Map();
@@ -35,11 +47,7 @@ for(const file of fs.readdirSync(publicRoot).filter(file=>file.endsWith('.html')
     const versioned=version?pathname+'?v='+version:url;
     resources.set(versioned,{url:versioned,type});
   };
-  for(const tag of html.match(/<(?:script|link|img)\b[^>]*>/gi)||[]){
-    if(/^<script\b/i.test(tag))add(attribute(tag,'src'),'file');
-    else if(/^<link\b/i.test(tag)&&['stylesheet','icon'].includes(attribute(tag,'rel')))add(attribute(tag,'href'),'file');
-    else if(/^<img\b/i.test(tag))add(attribute(tag,'src'),'image');
-  }
+  authoredResources(html).forEach(resource=>add(resource.url,resource.type));
   if(/\bdata-project-showcase\b/.test(html))showcaseImages.forEach(url=>add(url,'image'));
   add('assets/identity.webp','image');
   pages[path.basename(file,'.html')]=[...resources.values()];
@@ -69,5 +77,5 @@ if(!options.quiet)console.log(JSON.stringify(result));
 return result;
 
 }
-module.exports={prepareContent};
+module.exports={prepareContent,authoredResources};
 if(require.main===module){try{prepareContent();}catch(error){console.error('Content build failed: '+error.message);process.exitCode=1;}}

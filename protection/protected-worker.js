@@ -93,6 +93,35 @@ function response(body, status, type, head, extra = {}) {
   }});
 }
 
+function mediaResponse(request, file, head) {
+  const size = file.data.byteLength;
+  const headers = {"Accept-Ranges":"bytes", "Content-Length":String(size)};
+  // Range applies only to GET. There are no validators for the private in-memory
+  // archive, so an If-Range request receives the complete current representation.
+  const range = head || request.headers.has("If-Range") ? null : request.headers.get("Range");
+  if (range === null) return response(file.data, 200, file.type, head, headers);
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(range.trim());
+  const invalid = () => response(null, 416, file.type, head, {
+    ...headers, "Content-Length":"0", "Content-Range":`bytes */${size}`
+  });
+  // Serve one byte range only; malformed, multipart and impossible ranges never
+  // return decrypted data or allocate a buffer based on an untrusted length.
+  if (!match || (!match[1] && !match[2]) || !size) return invalid();
+  let start, end;
+  if (!match[1]) {
+    const suffix = Number(match[2]);
+    if (!Number.isSafeInteger(suffix) || suffix <= 0) return invalid();
+    start = Math.max(0, size - suffix); end = size - 1;
+  } else {
+    start = Number(match[1]); end = match[2] ? Number(match[2]) : size - 1;
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start >= size || start > end) return invalid();
+    end = Math.min(end, size - 1);
+  }
+  return response(file.data.slice(start, end + 1), 206, file.type, head, {
+    ...headers, "Content-Length":String(end - start + 1), "Content-Range":`bytes ${start}-${end}/${size}`
+  });
+}
+
 async function gate(request, head) {
   try {
     const source = await fetch(new URL("index.html", base), {cache:"no-store", credentials:"same-origin"});
@@ -111,6 +140,7 @@ async function handle(request, path) {
   if (files !== null) {
     const file = files.get(path);
     if (!file) return response("Not found", 404, "text/plain; charset=utf-8", head);
+    if (/^(?:audio|video)\//i.test(file.type)) return mediaResponse(request, file, head);
     let body = file.data;
     if (/\.html$/i.test(path) || /^text\/html(?:;|$)/i.test(file.type)) {
       const source = new TextDecoder("utf-8", {fatal:true}).decode(body);

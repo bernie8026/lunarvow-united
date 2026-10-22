@@ -46,6 +46,13 @@ the published update is included only in the encrypted archive. Each build
 also changes the worker revision so browser update checks can discard an old
 in-memory publication and require a fresh unlock.
 
+The experience page is in `public/experience.html` and
+`public/assets/experience-neon.*`. Its blue city-poster scene uses the supplied
+Edgerunners video in `public/assets/experience/`, with a decoded poster fallback.
+The video body and poster are preloaded before entry; muted playback pauses
+outside the viewport, on the global motion control, or with reduced motion.
+Private media supports byte ranges without entering persistent browser storage.
+
 The encrypted archive uses AES-256-GCM with a fresh random salt and IV for each
 build. A key is derived with PBKDF2-HMAC-SHA256 and 600,000 iterations. The
 password is not included in the archive or public output. Changing the password
@@ -75,6 +82,8 @@ node scripts/verify-preloader.cjs
 node scripts/verify-home.cjs
 node scripts/verify-about-apple.cjs
 node scripts/verify-unified-navigation.cjs
+node scripts/verify-experience-neon.cjs
+node scripts/verify-protected-media.cjs
 ```
 
 The suite checks locked routes and assets, wrong passwords, authenticated archive

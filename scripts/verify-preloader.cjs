@@ -21,6 +21,19 @@ async function until(predicate, label) {
 function attributes(tag) {
   return Object.fromEntries([...tag.matchAll(/(?:^|\s)([\w:-]+)\s*=\s*(["'])(.*?)\2/g)].map(match => [match[1].toLowerCase(), match[3]]));
 }
+function verifyMediaDiscovery() {
+  const {authoredResources} = require('./prepare-content.cjs');
+  const discovered = authoredResources(`<script src="assets/page.js"></script><link rel="stylesheet" href="assets/page.css">
+    <img src="assets/photo.webp" loading="lazy"><video src="assets/direct.webm" poster="assets/direct-poster.webp"></video>
+    <video poster = 'assets/source-poster.webp'><source src = 'assets/alternative.mp4' type='video/mp4'><source src="assets/alternative.webm" type="video/webm"></video>
+    <video src="https://outside.test/movie.webm" poster="https://outside.test/poster.webp"></video>
+    <picture><source srcset="assets/responsive.webp 2x"></picture>`);
+  assert.deepEqual(discovered,[
+    {url:'assets/page.js',type:'file'},{url:'assets/page.css',type:'file'},{url:'assets/photo.webp',type:'image'},
+    {url:'assets/direct.webm',type:'file'},{url:'assets/direct-poster.webp',type:'image'},
+    {url:'assets/source-poster.webp',type:'image'},{url:'assets/alternative.mp4',type:'file'},{url:'assets/alternative.webm',type:'file'}
+  ],'Video bodies, alternative sources and decoded posters enter the page manifest without fetching external URLs');
+}
 function verifyManifest() {
   const manifestPath = path.join(publicRoot, 'assets/preload-manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
@@ -38,7 +51,7 @@ function verifyManifest() {
     assert.equal(attributes(html.match(/<body\b[^>]*>/i)[0])['data-page'], page);
     const expected = new Map([[introImage, 'image']]);
     const pageImages = new Set();
-    for (const tag of html.match(/<(?:script|link|img)\b[^>]*>/gi) || []) {
+    for (const tag of html.match(/<(?:script|link|img|video|source)\b[^>]*>/gi) || []) {
       const attrs = attributes(tag);
       let url;
       let type;
@@ -48,13 +61,17 @@ function verifyManifest() {
         url = attrs.src; type = 'image';
         if (url) pageImages.add(url.split('?')[0]);
       }
+      if (/^<(?:video|source)\b/i.test(tag)) { url = attrs.src; type = 'file'; }
+      if (/^<video\b/i.test(tag) && attrs.poster?.startsWith('assets/')) {
+        expected.set(attrs.poster,'image');pageImages.add(attrs.poster.split('?')[0]);
+      }
       if (url?.startsWith('assets/')) expected.set(url, type);
     }
     if (/\bdata-project-showcase\b/.test(html)) for (const image of showcaseImages) expected.set(image, 'image');
     const actual = manifest.pages[page];
     assert.ok(Array.isArray(actual) && actual.length, `${page}: resources exist`);
     assert.equal(new Set(actual.map(resource => resource.url)).size, actual.length, `${page}: no duplicates`);
-    assert.deepEqual(actual.map(resource => [resource.url, resource.type]).sort(), [...expected].sort(), `${page}: includes authored resources, lazy imagery and runtime showcase imagery with matching cache versions`);
+    assert.deepEqual(actual.map(resource => [resource.url, resource.type]).sort(), [...expected].sort(), `${page}: includes authored resources, lazy imagery, video bodies/posters and runtime showcase imagery with matching cache versions`);
     for (const image of pageImages) assert.ok(actual.some(resource => resource.type === 'image' && resource.url.split('?')[0] === image), `${page}: includes ${image} before reveal`);
     for (const resource of actual) {
       const url = new URL(resource.url, base);
@@ -63,7 +80,7 @@ function verifyManifest() {
       assert.ok(url.pathname.startsWith(new URL(base).pathname));
       assert.ok(fs.existsSync(path.join(publicRoot, filename)), `${page}: ${filename} exists`);
       assert.ok(!filename.endsWith('.html') && !filename.includes('social-preview'), `${page}: no unrelated HTML or share artwork`);
-      assert.ok(resource.type === 'image' || /\.(?:css|js|svg)$/.test(filename), `${page}: only scripts/styles, page imagery and favicon`);
+      assert.ok(resource.type === 'image' || /\.(?:css|js|svg|webm|mp4|mp3|ogg|ogv|m4a|wav|opus|aac)$/.test(filename), `${page}: only scripts/styles, page imagery, media and favicon`);
     }
   }
   const {readPasswordFile, decryptArchive} = require('./prepare-protected-site.cjs');
@@ -161,6 +178,19 @@ async function verifyRuntime() {
     assert.deepEqual(env.state.images, ['assets/eager.png']);
     assert.deepEqual(env.state.decodes, ['assets/eager.png'], 'Decodes selected image');
     assert.deepEqual(env.state.reports.at(-1), { total: 2, loaded: 2, failed: [], errors: [], running: false });
+    cases++;
+  });
+  await withHarness({ manifest:{version:3,pages:{education:[
+    {url:'assets/loop.webm',type:'file'},{url:'assets/poster.webp',type:'image'}
+  ]}},holdBodies:['assets/loop.webm'] },async env=>{
+    let settled=false;
+    const pending=env.task.run().then(result=>{settled=true;return result;});
+    await until(()=>env.bodies.has('assets/loop.webm') && env.state.decodes.includes('assets/poster.webp'),'video body and decoded poster');
+    assert.equal(settled,false,'Video headers and a decoded poster do not reveal an incomplete video body');
+    assert.equal(env.state.reports.at(-1).loaded,1,'Poster readiness is recorded separately from the video');
+    env.bodies.get('assets/loop.webm')();
+    assert.equal(await pending,true,'Reading the complete video body permits reveal');
+    assert.deepEqual(env.state.reports.at(-1),{total:2,loaded:2,failed:[],errors:[],running:false});
     cases++;
   });
   await withHarness({ noPage: true }, async env => {
@@ -274,7 +304,8 @@ async function verifyRuntime() {
   return cases;
 }
 (async () => {
-  const manifestPages = verifyManifest();
+  verifyMediaDiscovery();
+  const manifestPages = process.argv.includes('--runtime-only') ? null : verifyManifest();
   const runtimeCases = await verifyRuntime();
   console.log(JSON.stringify({ result: 'passed', manifestPages, runtimeCases, networkRequests: 0 }));
 })().catch(error => { console.error(error); process.exitCode = 1; });

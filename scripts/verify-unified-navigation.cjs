@@ -11,14 +11,49 @@ const output = path.join(root, '.private', 'navigation-qa');
 const routes = ['index','about','experience','education','skills','projects','contact','sitemap'];
 const destinations = routes.slice(1,6), languages = ['zh-HK','en','zh-CN'];
 const errors = [], results = [];
+const pendingRequests = new Map();
 let browser;
 const route = (name='index',language='zh-HK') => new URL(`${name}.html?lang=${language}`,base).href;
 const redact = error => String(error?.stack || error).split(password).join('[REDACTED]');
 async function test(label,operation) { await operation(); results.push(label); console.log('PASS '+label); }
 async function ready(page,name) {
-  await page.waitForFunction(name => document.body?.dataset.page === name && !!document.querySelector('main#main') &&
-    !document.querySelector('.boot-screen') && !document.body.classList.contains('is-booting') &&
-    !document.querySelector('main#main').inert && document.documentElement.dataset.navigationState === 'idle',name,{timeout:30000});
+  try {
+    await page.waitForFunction(name => document.body?.dataset.page === name && !!document.querySelector('main#main') &&
+      !document.querySelector('.boot-screen') && !document.body.classList.contains('is-booting') &&
+      !document.querySelector('main#main').inert && document.documentElement.dataset.navigationState === 'idle',name,{timeout:30000});
+  } catch (error) {
+    const diagnostic = await page.evaluate(async () => {
+      const boot=document.querySelector('.boot-screen'),main=document.querySelector('main#main');
+      const controller=navigator.serviceWorker?.controller;
+      let workerState=null;
+      if(controller) workerState=await new Promise(resolve=>{
+        const channel=new MessageChannel();
+        const timer=setTimeout(()=>{channel.port1.close();resolve({error:'state-timeout'});},2000);
+        channel.port1.onmessage=event=>{clearTimeout(timer);channel.port1.close();resolve({ok:event.data?.ok,unlocked:event.data?.unlocked});};
+        controller.postMessage({type:'STATE'},[channel.port2]);
+      });
+      return {
+        path:location.pathname,language:document.documentElement.lang,viewport:{width:innerWidth,height:innerHeight},
+        readyState:document.readyState,bodyPage:document.body?.dataset.page,bodyClasses:document.body?.className,
+        rootClasses:document.documentElement.className,navigationState:document.documentElement.dataset.navigationState,
+        main:!!main,inert:main?.inert,gate:!!document.querySelector('input[type="password"]'),
+        gateStatus:document.querySelector('#gate-status')?.textContent.trim().slice(0,180),
+        loader:boot?{mode:boot.dataset.mode,phase:boot.dataset.phase,progress:boot.querySelector('[role="progressbar"]')?.getAttribute('aria-valuenow'),status:boot.querySelector('.boot-screen__status')?.textContent}:null,
+        controlled:!!controller,workerState,
+        images:[...document.images].filter(image=>!image.complete||!image.naturalWidth).map(image=>new URL(image.currentSrc||image.src).pathname),
+        media:[...document.querySelectorAll('video,audio')].map(media=>({path:media.currentSrc?new URL(media.currentSrc).pathname:null,readyState:media.readyState,networkState:media.networkState,paused:media.paused,error:media.error?.code})),
+        recentResources:performance.getEntriesByType('resource').slice(-12).map(entry=>({path:new URL(entry.name).pathname,type:entry.initiatorType,duration:Math.round(entry.duration),status:entry.responseStatus}))
+      };
+    }).catch(captureError=>({captureError:captureError.message}));
+    diagnostic.expectedPage=name;
+    diagnostic.pendingRequests=[...pendingRequests].map(([request,started])=>({path:new URL(request.url()).pathname,type:request.resourceType(),elapsed:Date.now()-started}));
+    diagnostic.errors=[...new Set(errors)];
+    const stem='failure-'+Date.now()+'-'+name;
+    fs.writeFileSync(path.join(output,stem+'.json'),JSON.stringify(diagnostic,null,2));
+    await page.screenshot({path:path.join(output,stem+'.png'),timeout:5000,animations:'disabled'}).catch(()=>{});
+    error.message+='\nNavigation readiness diagnostics: '+JSON.stringify(diagnostic);
+    throw error;
+  }
 }
 async function frames(page) { await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))); }
 async function unlock(page) {
@@ -125,9 +160,11 @@ async function main() {
   browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||'chrome',headless:true});
   const context=await browser.newContext({viewport:{width:1440,height:960}});
   context.on('page',page=>{
+    page.on('request',request=>pendingRequests.set(request,Date.now()));
+    page.on('requestfinished',request=>pendingRequests.delete(request));
     page.on('pageerror',error=>errors.push(error.message));
     page.on('console',message=>{if(message.type()==='error' && message.location().url!==new URL('/favicon.ico',base).href) errors.push(message.text());});
-    page.on('requestfailed',request=>{const failure=request.failure()?.errorText||'request failed';if(request.url().startsWith(base.href)&&!/ERR_ABORTED/.test(failure))errors.push(failure+': '+request.url());});
+    page.on('requestfailed',request=>{pendingRequests.delete(request);const failure=request.failure()?.errorText||'request failed';if(request.url().startsWith(base.href)&&!/ERR_ABORTED/.test(failure))errors.push(failure+': '+request.url());});
   });
   await context.addInitScript(()=>{try{if(!localStorage.getItem('bernie-portfolio-theme'))localStorage.setItem('bernie-portfolio-theme','dark');}catch{}});
   const page=await context.newPage();
@@ -147,6 +184,7 @@ async function main() {
       for(const width of [900,768,390,360]) {
         await page.setViewportSize({width,height:844});
         for(const name of routes) {await load(page,name);for(const language of languages){await languageTo(page,language);await mobileMenu(page,name,language);}}
+        console.log(`CHECK ${width}px menus: all eight routes and three languages complete`);
         if(width===390){await load(page,'about');await capture(page,'about-390.png');}
       }
     });
