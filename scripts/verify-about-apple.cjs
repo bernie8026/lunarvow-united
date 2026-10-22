@@ -205,15 +205,12 @@ async function main() {
       await page.goForward(); await ready(page); await assertContent(page);
       assert.equal(await page.evaluate(() => window.__aboutQaDocument),token,'history remount retains the live document');
     });
-    await test('Tablet 900 and 768 layouts keep the correct navigation available', async () => {
+    await test('Tablet 900 and 768 layouts keep the shared expandable navigation available', async () => {
       for (const width of [900,768]) {
         await page.setViewportSize({width,height:1024});
         for (const language of ['zh-HK','en','zh-CN']) {
           await languageTo(page,language); await assertContent(page,language);
-          if (width > 800) {
-            assert(await page.locator('.main-nav a[href*="experience.html"]').isVisible(), 'wide tablet keeps desktop navigation visible');
-            assert(!(await page.locator('.menu-toggle').isVisible()), 'wide tablet uses the horizontal navigation');
-          } else await mobileMenu(page);
+          await mobileMenu(page);
         }
         await languageTo(page,'zh-HK'); await capture(page,`tablet-${width}.png`);
       }

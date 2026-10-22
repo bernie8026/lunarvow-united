@@ -37,7 +37,9 @@ Publish only the protected `docs/` output and the public build/runtime files.
 
 The homepage is authored in `public/index.html` and `public/assets/home*`.
 The personal profile is in `public/about.html` and `public/assets/about-apple*`;
-both pages share `public/assets/apple-shell.css` for navigation and colours.
+both pages share `public/assets/apple-shell.css` for page colours and footer type.
+All eight pages use the same navigation in `public/assets/theme.css`: a numbered
+left rail above 1000px, and an expandable top menu on narrower screens.
 They use large typography, subject-specific motion, three-language copy and
 responsive light/dark layouts. These source files remain local;
 the published update is included only in the encrypted archive. Each build
@@ -72,6 +74,7 @@ node scripts/verify-protection.cjs
 node scripts/verify-preloader.cjs
 node scripts/verify-home.cjs
 node scripts/verify-about-apple.cjs
+node scripts/verify-unified-navigation.cjs
 ```
 
 The suite checks locked routes and assets, wrong passwords, authenticated archive
