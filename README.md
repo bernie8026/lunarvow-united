@@ -35,6 +35,13 @@ replaces `docs/` with the verified encrypted deployment. A missing password or
 failed build does not publish plaintext. GitHub Pages remains **main /docs**.
 Publish only the protected `docs/` output and the public build/runtime files.
 
+The homepage is authored in `public/index.html` and `public/assets/home*`.
+It uses full-width project stories, subject-specific motion, three-language
+copy and responsive light/dark layouts. These source files remain local;
+the published update is included only in the encrypted archive. Each build
+also changes the worker revision so browser update checks can discard an old
+in-memory publication and require a fresh unlock.
+
 The encrypted archive uses AES-256-GCM with a fresh random salt and IV for each
 build. A key is derived with PBKDF2-HMAC-SHA256 and 600,000 iterations. The
 password is not included in the archive or public output. Changing the password
@@ -60,6 +67,8 @@ With Playwright and Chrome available, run against the protected local preview:
 
 ```sh
 node scripts/verify-protection.cjs
+node scripts/verify-preloader.cjs
+node scripts/verify-home.cjs
 ```
 
 The suite checks locked routes and assets, wrong passwords, authenticated archive

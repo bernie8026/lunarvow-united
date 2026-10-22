@@ -50,7 +50,7 @@ function verifyManifest() {
       }
       if (url?.startsWith('assets/')) expected.set(url, type);
     }
-    if (['index', 'projects'].includes(page)) for (const image of showcaseImages) expected.set(image, 'image');
+    if (/\bdata-project-showcase\b/.test(html)) for (const image of showcaseImages) expected.set(image, 'image');
     const actual = manifest.pages[page];
     assert.ok(Array.isArray(actual) && actual.length, `${page}: resources exist`);
     assert.equal(new Set(actual.map(resource => resource.url)).size, actual.length, `${page}: no duplicates`);
@@ -66,8 +66,15 @@ function verifyManifest() {
       assert.ok(resource.type === 'image' || /\.(?:css|js|svg)$/.test(filename), `${page}: only scripts/styles, page imagery and favicon`);
     }
   }
-  const published = path.join(root, 'docs/assets/preload-manifest.json');
-  assert.deepEqual(JSON.parse(fs.readFileSync(published, 'utf8')), manifest, 'Published manifest matches public');
+  const {readPasswordFile, decryptArchive} = require('./prepare-protected-site.cjs');
+  const password = readPasswordFile();
+  try {
+    const envelope = JSON.parse(fs.readFileSync(path.join(root, 'docs/protected-site.json'), 'utf8'));
+    const archive = decryptArchive(envelope, password);
+    const published = archive.files.find(file => file.path === 'assets/preload-manifest.json');
+    assert.ok(published, 'Encrypted publication contains the preload manifest');
+    assert.deepEqual(JSON.parse(Buffer.from(published.data, 'base64').toString('utf8')), manifest, 'Encrypted published manifest matches public');
+  } finally { password.fill(0); }
   return pages.length;
 }
 function harness(options = {}) {

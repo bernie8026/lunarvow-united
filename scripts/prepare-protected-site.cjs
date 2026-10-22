@@ -102,7 +102,11 @@ function prepareProtectedSite(options={}){
     for(const file of runtime){
       if(file.path==='index.html')continue;
       if(file.path==='protected-site.json'||file.path==='robots.txt'||file.path==='.nojekyll'||file.path.endsWith('.html'))throw new Error('Reserved protection runtime path: '+file.path);
-      writeFile(stage,file.path,fs.readFileSync(file.absolute));
+      const runtimeBytes=fs.readFileSync(file.absolute);
+      // Make a changed encrypted publication visible to the browser's worker
+      // update check. An old unlocked worker otherwise retains its old files.
+      const revision=file.path==='protected-worker.js'?'\n// Publication: '+crypto.createHash('sha256').update(envelope.ciphertext).digest('hex')+'\n':'';
+      writeFile(stage,file.path,revision?Buffer.concat([runtimeBytes,Buffer.from(revision)]):runtimeBytes);
     }
     const shellPaths=new Set(['index.html','404.html',...sources.filter(file=>file.path.endsWith('.html')).map(file=>file.path)]);
     for(const relative of shellPaths)writeFile(stage,relative,shell);
