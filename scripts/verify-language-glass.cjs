@@ -12,9 +12,12 @@ async function test(label,fn){await fn();passed++;console.log('PASS '+label);}
 async function point(page,language){const r=await page.locator(`[data-language="${language}"]`).boundingBox();return {x:r.x+r.width/2,y:r.y+r.height/2};}
 async function start(page,from,to){const a=await point(page,from),b=await point(page,to);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:6});await frames(page);return b;}
 async function selected(page,language){await page.waitForFunction(language=>document.documentElement.lang===language,language);assert.equal(await page.locator('.languages button[aria-pressed="true"]').getAttribute('data-language'),language);}
-async function closed(page){await page.waitForFunction(()=>document.querySelector('.language-lens')?.hidden&&!document.querySelector('.languages.is-glass-dragging'));assert.equal(await page.locator('[data-glass-preview]').count(),0);}
+async function closed(page){await page.waitForFunction(()=>document.querySelector('.language-lens')&&!document.querySelector('.language-lens.is-open')&&!document.querySelector('.languages.is-glass-dragging'));assert.equal(await page.locator('[data-glass-preview],[data-glass-covered]').count(),0);
+  const geometry=await page.evaluate(()=>{const node=document.querySelector('.language-lens'),lens=node.getBoundingClientRect(),button=document.querySelector('.languages button[aria-pressed="true"]').getBoundingClientRect();return {page:document.body.dataset.page,inline:node.getAttribute('style'),lens:lens.toJSON(),button:button.toJSON(),offset:Math.hypot(lens.x+lens.width/2-button.x-button.width/2,lens.y+lens.height/2-button.y-button.height/2)};});assert(geometry.offset<1,'resting glass returns to the selected option: '+JSON.stringify({geometry,errors}));}
 async function shape(page){
   assert.equal(await page.locator('.language-lens').count(),1);assert.equal(await page.locator('.header-tools button').count(),4);
+  assert.equal(await page.locator('.languages > .language-lens').count(),1,'glass stays attached to the segmented control');
+  assert.equal(await page.locator('.language-lens').getAttribute('aria-hidden'),'true');
   assert(await page.locator('.languages,.languages button,.theme-toggle').evaluateAll(nodes=>nodes.every(n=>parseFloat(getComputedStyle(n).borderTopLeftRadius)>=14)),'all controls have rounded outlines');
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'controls introduce no horizontal overflow');
 }
@@ -29,22 +32,28 @@ async function shape(page){
     const input=page.locator('input[type="password"]');await input.waitFor();
     await input.evaluate((node,value)=>{node.value=value;node.dispatchEvent(new Event('input',{bubbles:true}));},password);
     await page.locator('form button[type="submit"]').click();await ready(page,'about');
-    await test('All eight pages mount one rounded language/theme control and one hidden lens',async()=>{
+    await test('All eight pages mount one attached glass selection and rounded theme control',async()=>{
       for(const name of ['experience','education','skills','projects','contact','sitemap','index','about']){
         const selector=['experience','education','skills','projects','about'].includes(name)?`.main-nav a[href*="${name}.html"]`:name==='index'?'.brand':`.footer-links a[href*="${name}.html"]`;
         await page.locator(selector).click();await ready(page,name);await shape(page);await closed(page);
       }
     });
-    await test('Vertical drag previews real enlarged labels and commits only on release',async()=>{
+    await test('Vertical Liquid Glass drag enlarges and refracts labels, then settles on release',async()=>{
+      const resting=await page.locator('.language-lens').boundingBox();
       const b=await start(page,'zh-HK','en');await selected(page,'zh-HK');
       assert.equal(await page.locator('[data-glass-preview]').getAttribute('data-language'),'en');
       assert(await page.locator('.language-lens').isVisible());
-      assert(await page.locator('.language-lens-sheet').evaluate(n=>new DOMMatrix(getComputedStyle(n).transform).a>1.6),'lens magnifies a replica of the actual control');
+      assert(await page.locator('.language-lens-sheet').evaluate(n=>new DOMMatrix(getComputedStyle(n).transform).a>1.2),'glass magnifies the actual labels');
+      assert.equal(await page.locator('feDisplacementMap').getAttribute('scale'),'12','glass rim has an optical displacement field');
+      assert.notEqual(await page.locator('.language-lens-optics').evaluate(n=>getComputedStyle(n).filter),'none');
       const before=await page.locator('.language-lens').evaluate(n=>getComputedStyle(n).transform);
       await page.mouse.move(b.x,b.y+8);await page.waitForTimeout(40);
       const moving=await page.locator('.language-lens').evaluate(n=>getComputedStyle(n).transform);
       await page.waitForTimeout(220);const settled=await page.locator('.language-lens').evaluate(n=>getComputedStyle(n).transform);
       assert(before!==moving&&moving!==settled,'lens position settles through a spring rather than jumping');
+      const expanded=await page.locator('.language-lens').boundingBox();assert(expanded.width>resting.width+8&&expanded.height>resting.height+8,'pressed glass expands beyond the resting selection');
+      const rail=await page.locator('.masthead').boundingBox();assert(expanded.x>=rail.x&&expanded.x+expanded.width<=rail.x+rail.width,'glass stays over the rail instead of floating beside it');
+      await page.mouse.move(b.x,b.y);await page.waitForTimeout(200);
       await page.screenshot({path:path.join(output,'desktop-drag.png'),clip:{x:0,y:690,width:300,height:270}});
       await page.mouse.up();await selected(page,'en');await closed(page);
     });
@@ -56,6 +65,7 @@ async function shape(page){
     await test('Direct clicks, keyboard selection and theme toggle retain their behaviour',async()=>{
       await page.locator('[data-language="zh-HK"]').click();await selected(page,'zh-HK');
       await page.locator('[data-language="en"]').focus();await page.keyboard.press('Space');await selected(page,'en');await closed(page);
+      assert.equal(await page.getByRole('button',{name:'English',exact:true}).count(),1,'optical copy never duplicates the accessible language control');
       const before=await page.evaluate(()=>document.body.dataset.theme);await page.locator('.theme-toggle').click();assert.notEqual(await page.evaluate(()=>document.body.dataset.theme),before);
     });
     await test('Mobile horizontal mouse and touch drags keep the lens within 390/360px screens',async()=>{
@@ -85,6 +95,7 @@ async function shape(page){
       await page.evaluate(()=>{window.__retiredGlass=document.querySelector('.language-lens');document.querySelector('.main-nav a[href*="experience.html"]').click();});
       await ready(page,'experience');await page.mouse.up();await shape(page);await closed(page);
       assert(await page.evaluate(()=>!window.__retiredGlass.isConnected&&!window.__retiredGlass.classList.contains('is-open')));
+      assert.equal(await page.locator('.liquid-glass-defs').count(),1,'old refraction definitions are disposed with the page');
       await start(page,'en','zh-HK');await page.mouse.up();await selected(page,'zh-HK');await closed(page);
     });
     assert.deepEqual([...new Set(errors)],[]);console.log(JSON.stringify({passed,base:base.href,screenshots:output}));

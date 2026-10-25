@@ -47,8 +47,10 @@ also changes the worker revision so browser update checks can discard an old
 in-memory publication and require a fresh unlock.
 
 The rounded language/theme controls share `public/assets/theme.css`. All eight
-pages mount `public/assets/language-glass.js`: dragging a language shows a 1.65×
-optical preview with spring movement, then commits on release. Escape, dragging
+pages mount `public/assets/language-glass.js`: a Liquid Glass inspired selection
+stays inside the control, expands and stretches while dragging, and magnifies
+the labels through a refractive rim. It springs onto the chosen option and
+commits on release. Escape, dragging
 outside, resizing or leaving the page cancels the preview. Clicks, keyboard use
 and touch remain available; reduced motion and pause remove the spring movement.
 
