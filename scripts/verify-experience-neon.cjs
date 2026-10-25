@@ -150,10 +150,12 @@ async function main(){
       assert(scan.every(sample=>sample.text===labelText&&sample.echo===labelText.trim()),'scan labels preserve their original text');
       assert(new Set(scan.map(sample=>JSON.stringify([sample.translate,sample.shadow,sample.before,sample.after]))).size>1,'handoff labels receive a visible animated signal treatment too');
     });
-    await test('Supplied video decodes, advances, loops and supports authenticated byte ranges',async()=>{
+    await test('McDonald’s signal loop decodes, advances, loops and supports authenticated byte ranges',async()=>{
       await videoPlaying(page);
       const video=await page.locator('.work-film').evaluate(v=>({muted:v.muted,loop:v.loop,playsInline:v.playsInline,source:v.currentSrc,duration:v.duration,width:v.videoWidth}));
-      assert(video.muted&&video.loop&&video.playsInline,'hero is a silent inline loop');assert(video.width>=1000&&video.duration>5,'supplied video has decoded');
+      assert(video.muted&&video.loop&&video.playsInline,'hero is a silent inline loop');assert(video.width>=1000&&Math.abs(video.duration-6.006)<.1,'six-second logo video has decoded');
+      assert(new URL(video.source).pathname.endsWith('/mcdonalds-signal.webm'),'the hero uses the McDonald’s animation');
+      assert((await page.locator('.work-art img').getAttribute('src')).includes('mcdonalds-poster.webp'),'static fallback uses the matching logo');
       const range=await page.evaluate(async url=>{const r=await fetch(url,{headers:{Range:'bytes=8-23'}});return {status:r.status,length:(await r.arrayBuffer()).byteLength,type:r.headers.get('content-type'),range:r.headers.get('content-range'),cache:r.headers.get('cache-control')};},video.source);
       assert.equal(range.status,206);assert.equal(range.length,16);assert(range.type.startsWith('video/webm'));assert(/^bytes 8-23\//.test(range.range));assert.equal(range.cache,'no-store');
       await page.locator('.work-film').evaluate(v=>{v.currentTime=v.duration-.12;});await page.waitForFunction(()=>{const v=document.querySelector('.work-film');return !v.paused&&v.currentTime<1.5;},null,{timeout:8000});

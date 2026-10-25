@@ -55,8 +55,10 @@ outside, resizing or leaving the page cancels the preview. Clicks, keyboard use
 and touch remain available; reduced motion and pause remove the spring movement.
 
 The experience page is in `public/experience.html` and
-`public/assets/experience-neon.*`. Its blue city-poster scene uses the supplied
-Edgerunners video in `public/assets/experience/`, with a decoded poster fallback.
+`public/assets/experience-neon.*`. Its blue Golden Arches scene uses the animated
+McDonald's logo in `public/assets/experience/`, with a decoded poster fallback.
+The unchanged logo silhouette comes from [McDonald's Hong Kong](https://www.mcdonalds.com.hk/images/logo.svg),
+recoloured cyber blue with a six-second scan, displaced slices and optical echoes.
 The video body and poster are preloaded before entry; muted playback pauses
 outside the viewport, on the global motion control, or with reduced motion.
 Private media supports byte ranges without entering persistent browser storage.
