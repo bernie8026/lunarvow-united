@@ -169,4 +169,4 @@ self.addEventListener("fetch", event => {
   event.respondWith(path === null ? Promise.resolve(response("Not found", 404, "text/plain; charset=utf-8", request.method === "HEAD")) : handle(request, path));
 });
 
-// Publication: 274a09c8f1ecbdbfd2660d940874ca39047a3125885d08d4a9c5e88cc639550f
+// Publication: 3931230891d52959a952db9cab640709a471fbfc480c84a718d30f94c7cd29df

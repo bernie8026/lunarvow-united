@@ -46,6 +46,12 @@ the published update is included only in the encrypted archive. Each build
 also changes the worker revision so browser update checks can discard an old
 in-memory publication and require a fresh unlock.
 
+The rounded language/theme controls share `public/assets/theme.css`. All eight
+pages mount `public/assets/language-glass.js`: dragging a language shows a 1.65×
+optical preview with spring movement, then commits on release. Escape, dragging
+outside, resizing or leaving the page cancels the preview. Clicks, keyboard use
+and touch remain available; reduced motion and pause remove the spring movement.
+
 The experience page is in `public/experience.html` and
 `public/assets/experience-neon.*`. Its blue city-poster scene uses the supplied
 Edgerunners video in `public/assets/experience/`, with a decoded poster fallback.
@@ -87,6 +93,7 @@ node scripts/verify-home.cjs
 node scripts/verify-about-apple.cjs
 node scripts/verify-unified-navigation.cjs
 node scripts/verify-experience-neon.cjs
+node scripts/verify-language-glass.cjs
 node scripts/verify-protected-media.cjs
 ```
 
