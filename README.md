@@ -46,13 +46,16 @@ the published update is included only in the encrypted archive. Each build
 also changes the worker revision so browser update checks can discard an old
 in-memory publication and require a fresh unlock.
 
-The rounded language/theme controls share `public/assets/theme.css`. All eight
-pages mount `public/assets/language-glass.js`: a Liquid Glass inspired selection
-stays inside the control, expands and stretches while dragging, and magnifies
-the labels through a refractive rim. It springs onto the chosen option and
-commits on release. Escape, dragging
-outside, resizing or leaving the page cancels the preview. Clicks, keyboard use
-and touch remain available; reduced motion and pause remove the spring movement.
+The rounded navigation uses `public/assets/theme.css` and
+`public/assets/navigation-glass.css`. All eight pages mount
+`public/assets/language-glass.js`: moving a mouse over the numbered links,
+brand, language choices, theme control or mobile menu reveals a spring-driven
+Liquid Glass lens, magnifying the actual labels through a refractive rim.
+Hovering only previews; activation still requires a click or keyboard action.
+Moving outside, Escape, resizing or leaving the page dismisses the lens.
+Touch taps and the existing language drag selection remain available.
+Keyboard focus has the same optical feedback. Reduced motion and pause keep
+static magnification without the spring movement.
 
 All eight pages and the access gate support Hong Kong Traditional Chinese,
 English, Simplified Chinese, Japanese (`ja`), Korean (`ko`), Thai (`th`) and
@@ -106,6 +109,7 @@ node scripts/verify-about-apple.cjs
 node scripts/verify-unified-navigation.cjs
 node scripts/verify-experience-neon.cjs
 node scripts/verify-language-glass.cjs
+node scripts/verify-navigation-glass.cjs
 node scripts/verify-locales.cjs
 node scripts/verify-protected-media.cjs
 ```
