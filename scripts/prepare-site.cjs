@@ -2,9 +2,11 @@
 // Validate the password before any source build or public output mutation.
 const {readPasswordFile,prepareProtectedSite}=require('./prepare-protected-site.cjs');
 const {prepareContent}=require('./prepare-content.cjs');
+const {prepareLocales}=require('./prepare-locales.cjs');
 function prepareSite(){
   const password=readPasswordFile();
   try{
+    prepareLocales();
     const content=prepareContent({quiet:true});
     const result=prepareProtectedSite({password,sourceRoot:content.output});
     console.log(JSON.stringify(result));return result;

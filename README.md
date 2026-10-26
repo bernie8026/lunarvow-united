@@ -40,7 +40,7 @@ The personal profile is in `public/about.html` and `public/assets/about-apple*`;
 both pages share `public/assets/apple-shell.css` for page colours and footer type.
 All eight pages use the same navigation in `public/assets/theme.css`: a numbered
 left rail above 1000px, and an expandable top menu on narrower screens.
-They use large typography, subject-specific motion, three-language copy and
+They use large typography, subject-specific motion, seven-language copy and
 responsive light/dark layouts. These source files remain local;
 the published update is included only in the encrypted archive. Each build
 also changes the worker revision so browser update checks can discard an old
@@ -53,6 +53,14 @@ the labels through a refractive rim. It springs onto the chosen option and
 commits on release. Escape, dragging
 outside, resizing or leaving the page cancels the preview. Clicks, keyboard use
 and touch remain available; reduced motion and pause remove the spring movement.
+
+All eight pages and the access gate support Hong Kong Traditional Chinese,
+English, Simplified Chinese, Japanese (`ja`), Korean (`ko`), Thai (`th`) and
+Russian (`ru`). The four additional full dictionaries are editable in the local
+`public/assets/locales/` folder. `prepare-locales.cjs` checks all 460 keys and
+placeholders, then builds a single preloaded module before encryption. Each
+page reapplies its translations during soft navigation. On phones the seven
+language choices share their own row; the existing glass drag stays available.
 
 The experience page is in `public/experience.html` and
 `public/assets/experience-neon.*`. Its blue Golden Arches scene uses the animated
@@ -98,6 +106,7 @@ node scripts/verify-about-apple.cjs
 node scripts/verify-unified-navigation.cjs
 node scripts/verify-experience-neon.cjs
 node scripts/verify-language-glass.cjs
+node scripts/verify-locales.cjs
 node scripts/verify-protected-media.cjs
 ```
 

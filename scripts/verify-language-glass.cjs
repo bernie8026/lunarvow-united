@@ -15,7 +15,7 @@ async function selected(page,language){await page.waitForFunction(language=>docu
 async function closed(page){await page.waitForFunction(()=>document.querySelector('.language-lens')&&!document.querySelector('.language-lens.is-open')&&!document.querySelector('.languages.is-glass-dragging'));assert.equal(await page.locator('[data-glass-preview],[data-glass-covered]').count(),0);
   const geometry=await page.evaluate(()=>{const node=document.querySelector('.language-lens'),lens=node.getBoundingClientRect(),button=document.querySelector('.languages button[aria-pressed="true"]').getBoundingClientRect();return {page:document.body.dataset.page,inline:node.getAttribute('style'),lens:lens.toJSON(),button:button.toJSON(),offset:Math.hypot(lens.x+lens.width/2-button.x-button.width/2,lens.y+lens.height/2-button.y-button.height/2)};});assert(geometry.offset<1,'resting glass returns to the selected option: '+JSON.stringify({geometry,errors}));}
 async function shape(page){
-  assert.equal(await page.locator('.language-lens').count(),1);assert.equal(await page.locator('.header-tools button').count(),4);
+  assert.equal(await page.locator('.language-lens').count(),1);assert.equal(await page.locator('.header-tools button').count(),8);
   assert.equal(await page.locator('.languages > .language-lens').count(),1,'glass stays attached to the segmented control');
   assert.equal(await page.locator('.language-lens').getAttribute('aria-hidden'),'true');
   assert(await page.locator('.languages,.languages button,.theme-toggle').evaluateAll(nodes=>nodes.every(n=>parseFloat(getComputedStyle(n).borderTopLeftRadius)>=14)),'all controls have rounded outlines');

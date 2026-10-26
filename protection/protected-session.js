@@ -7,13 +7,34 @@
   const workerPath = new URL("protected-worker.js", base).pathname;
   const replayed = new WeakSet();
   let checking = null, redirecting = false, clickSequence = 0;
+  const sessionCopy={
+    'zh-HK':{checking:'驗證網站存取權限',locked:'網站已鎖定',ended:'網站已鎖定，請重新解鎖。',reload:'重新載入',lock:'鎖定網站'},
+    en:{checking:'Checking access',locked:'Portfolio locked',ended:'Your session ended. Reload to unlock.',reload:'Reload',lock:'Lock site'},
+    'zh-CN':{checking:'验证网站访问权限',locked:'网站已锁定',ended:'网站已锁定，请重新解锁。',reload:'重新加载',lock:'锁定网站'},
+    ja:{checking:'アクセス権限を確認しています',locked:'サイトがロックされました',ended:'セッションが終了しました。再読み込みしてロックを解除してください。',reload:'再読み込み',lock:'サイトをロック'},
+    ko:{checking:'접속 권한 확인 중',locked:'사이트가 잠겼습니다',ended:'세션이 종료되었습니다. 새로고침하여 잠금을 해제해 주세요.',reload:'새로고침',lock:'사이트 잠그기'},
+    th:{checking:'กำลังตรวจสอบสิทธิ์การเข้าถึง',locked:'เว็บไซต์ถูกล็อก',ended:'เซสชันสิ้นสุดแล้ว โปรดโหลดใหม่เพื่อปลดล็อก',reload:'โหลดใหม่',lock:'ล็อกเว็บไซต์'},
+    ru:{checking:'Проверка доступа',locked:'Сайт заблокирован',ended:'Сеанс завершён. Обновите страницу, чтобы разблокировать сайт.',reload:'Обновить',lock:'Заблокировать сайт'}
+  };
+  const sessionText=()=>{
+    let lang=document.documentElement.lang;
+    // The access check runs before the portfolio's deferred language render.
+    if(!document.body?.classList.contains('js')){
+      const requested=new URL(location.href).searchParams.get('lang');
+      if(sessionCopy[requested])lang=requested;
+      else {try{const stored=localStorage.getItem('bernie-portfolio-language');if(sessionCopy[stored])lang=stored;}catch{}}
+    }
+    return sessionCopy[lang]||sessionCopy['zh-HK'];
+  };
+  document.addEventListener('portfolio:language',()=>{document.documentElement.dataset.sessionCopy=sessionText().checking;});
 
   // This cover is independent of the site's styles and animation lifecycle.
   // It also hides a restored bfcache document until the worker confirms access.
   const style = document.createElement("style");
   style.textContent = "html.portfolio-session-checking{background:#070d18}html.portfolio-session-checking body{visibility:hidden!important}html.portfolio-session-checking::after{content:'驗證網站存取權限 / Checking access';position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#070d18;color:#8ae7ff;font:500 13px/1.6 system-ui;text-align:center;padding:24px;box-sizing:border-box}html.portfolio-session-recovery::after{display:none}";
   document.head.append(style);
-  const cover = () => document.documentElement.classList.add("portfolio-session-checking");
+  style.textContent=style.textContent.replace("'驗證網站存取權限 / Checking access'",'attr(data-session-copy)');
+  const cover = () => { document.documentElement.dataset.sessionCopy=sessionText().checking;document.documentElement.classList.add("portfolio-session-checking"); };
   const uncover = () => document.documentElement.classList.remove("portfolio-session-checking");
 
   function controller() {
@@ -63,13 +84,13 @@
     const panel = document.createElement("div");
     panel.setAttribute("role", "alertdialog");
     panel.setAttribute("aria-modal", "true");
-    panel.setAttribute("aria-label", "網站已鎖定 / Portfolio locked");
+    panel.setAttribute("aria-label", sessionText().locked);
     panel.style.cssText = "visibility:visible!important;position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#070d18;color:#d9f5ff;font:16px/1.6 system-ui;text-align:center;padding:24px;box-sizing:border-box";
     const text = document.createElement("p");
-    text.textContent = "網站已鎖定，請重新解鎖。 / Your session ended. Reload to unlock.";
+    text.textContent = sessionText().ended;
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "重新載入 / Reload";
+    button.textContent = sessionText().reload;
     button.style.cssText = "font:inherit;color:#070d18;background:#65ddff;border:0;padding:12px 24px;cursor:pointer";
     button.addEventListener("click", () => {
       try { sessionStorage.removeItem(key); } catch {}
@@ -151,8 +172,7 @@
     button.type = "button";
     button.className = "site-lock";
     function render() {
-      const lang = document.documentElement.lang;
-      button.textContent = lang === "en" ? "Lock site" : lang === "zh-CN" ? "锁定网站" : "鎖定網站";
+      button.textContent = sessionText().lock;
     }
     async function lock() {
       button.disabled = true;
