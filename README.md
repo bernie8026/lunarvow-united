@@ -175,3 +175,7 @@ Projects content and anchors remain available. Each page has seven-language copy
 its own visual layout and motion, with reduced-motion and pause support.
 The rail compacts at short desktop heights so eight entries fit beside languages.
 Only encrypted content and password gates are published.
+
+Quick preview after unlocking: [06 Photography](https://bernie8026.github.io/lunarvow-united/photography.html?lang=zh-HK),
+[07 Equipment](https://bernie8026.github.io/lunarvow-united/equipment.html?lang=zh-HK) and
+[08 STEM Lab](https://bernie8026.github.io/lunarvow-united/stem.html?lang=zh-HK).
