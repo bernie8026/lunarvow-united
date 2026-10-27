@@ -8,8 +8,8 @@ const root = path.resolve(__dirname, '..');
 const base = new URL(process.env.PORTFOLIO_BASE_URL || 'http://127.0.0.1:8766/lunarvow-united/');
 const password = fs.readFileSync(path.resolve(root, process.env.PORTFOLIO_PASSWORD_FILE || '../lunarvow-private/access-password.txt'), 'utf8').trim();
 const output = path.join(root, '.private', 'navigation-qa');
-const routes = ['index','about','experience','education','skills','projects','contact','sitemap'];
-const destinations = routes.slice(1,6), languages = ['zh-HK','en','zh-CN'];
+const routes = ['index','about','experience','education','skills','projects','photography','equipment','stem','contact','sitemap'];
+const destinations = routes.slice(1,9), languages = ['zh-HK','en','zh-CN'];
 const errors = [], results = [];
 const pendingRequests = new Map();
 let browser;
@@ -79,7 +79,7 @@ async function mountedOnce(page) {
 async function linksAndState(page,name,language) {
   assert.equal(await page.evaluate(() => document.documentElement.lang),language);
   const links = await page.locator('.main-nav > a').evaluateAll(nodes => nodes.map(node => ({href:node.href,index:node.querySelector('.nav-index')?.textContent.trim(),label:node.lastElementChild?.textContent.trim(),current:node.getAttribute('aria-current'),key:node.lastElementChild?.dataset.i18n,expected:window.PORTFOLIO_TEXT?.[node.lastElementChild?.dataset.i18n]?.[document.documentElement.lang]})));
-  assert.equal(links.length,5,'five numbered chapter links remain');
+  assert.equal(links.length,8,'eight direct numbered chapter links are available');
   for (let index=0;index<links.length;index++) {
     const link=links[index],url=new URL(link.href);
     assert.equal(url.origin,base.origin);assert.equal(url.pathname,new URL(destinations[index]+'.html',base).pathname);
@@ -101,7 +101,7 @@ async function rectsAndControls(page,mobile=false) {
     return {width:innerWidth,height:innerHeight,header:rect(document.querySelector('.masthead')),nav:rect(document.querySelector('.main-nav')),brand:rect(document.querySelector('.brand')),tools:rect(document.querySelector('.header-tools')),main:rect(document.querySelector('main#main')),padding:parseFloat(getComputedStyle(document.body).paddingLeft),position:getComputedStyle(document.querySelector('.masthead')).position,
       controls:[...document.querySelectorAll('.header-tools button'+(mobile?', .menu-toggle':''))].map(node=>({name:node.getAttribute('aria-label')||node.textContent.trim(),...rect(node)}))};
   },mobile);
-  assert.equal(geometry.controls.length,mobile?5:4,'language/theme/menu controls are available');
+  assert.equal(geometry.controls.length,mobile?9:8,'seven language choices, theme and mobile menu controls are available');
   for (const item of geometry.controls) {
     assert(item.width>0 && item.height>0,'navigation control is rendered: '+item.name);
     assert(item.x>=-1 && item.right<=geometry.width+1 && item.y>=-1 && item.bottom<=geometry.height+1,'navigation control is inside the viewport: '+item.name);
@@ -114,6 +114,7 @@ async function rectsAndControls(page,mobile=false) {
 }
 async function rail(page,name,language='zh-HK') {
   await mountedOnce(page);await linksAndState(page,name,language);await page.mouse.move(150,5);await page.locator('main#main').focus();await frames(page);
+  await page.locator('.theme-toggle').evaluate(node=>Promise.all(node.getAnimations().map(animation=>animation.finished.catch(()=>{}))));
   const geometry=await rectsAndControls(page);
   assert.equal(geometry.position,'fixed','desktop uses a fixed left rail');assert.equal(geometry.header.x,0);assert.equal(geometry.header.y,0);
   assert.equal(geometry.header.width,68);assert.equal(geometry.header.height,geometry.height);assert.equal(geometry.padding,68);
@@ -128,6 +129,9 @@ async function rail(page,name,language='zh-HK') {
   });
   // Index colour follows each page's current link, while the shared type/geometry remains identical.
   styles.find(([selector])=>selector==='.main-nav .nav-index')[1].color='current-page-dependent';
+  // The footer tools use a flex auto margin. Compare their actual rectangle above,
+  // rather than the browser's transient serialization of the resolved auto value.
+  styles.find(([selector])=>selector==='.header-tools')[1].marginTop='auto';
   return {header:geometry.header,nav:geometry.nav,brand:geometry.brand,tools:geometry.tools,styles};
 }
 async function tooltips(page) {
@@ -170,7 +174,8 @@ async function main() {
   const page=await context.newPage();
   try {
     await unlock(page);
-    for (const height of [960,600]) for (const theme of ['dark','light']) await test(`All eight ${theme} pages share the same 1440×${height} left rail`,async()=>{
+    if(!process.env.PORTFOLIO_NAV_CHAIN_ONLY) {
+    for (const height of [960,600]) for (const theme of ['dark','light']) await test(`All eleven ${theme} pages share the same 1440×${height} left rail`,async()=>{
       await page.setViewportSize({width:1440,height});await themeTo(page,theme);let baseline;
       for (const name of routes) {
         await load(page,name);const actual=await rail(page,name);
@@ -179,15 +184,16 @@ async function main() {
       }
       await tooltips(page);
     });
-    await test('All eight routes keep usable menus at 900, 768, 390 and 360 pixels in three languages',async()=>{
+    await test('All eleven routes keep usable menus at 900, 768, 390 and 360 pixels in three languages',async()=>{
       await themeTo(page,'light');
       for(const width of [900,768,390,360]) {
         await page.setViewportSize({width,height:844});
         for(const name of routes) {await load(page,name);for(const language of languages){await languageTo(page,language);await mobileMenu(page,name,language);}}
-        console.log(`CHECK ${width}px menus: all eight routes and three languages complete`);
+        console.log(`CHECK ${width}px menus: all eleven routes and three languages complete`);
         if(width===390){await load(page,'about');await capture(page,'about-390.png');}
       }
     });
+    }
     await test('Full chapter/footer route chain and browser history preserve one live document',async()=>{
       await page.setViewportSize({width:1440,height:960});await load(page,'index','en');await themeTo(page,'dark');
       const token=await page.evaluate(()=>window.__navigationQaDocument=Math.random());let baseline=await rail(page,'index','en');

@@ -14,11 +14,11 @@ async function fit(page){assert(await page.evaluate(()=>document.documentElement
  try{
   await page.goto(new URL('index.html?lang=zh-HK',base).href,{waitUntil:'domcontentloaded'});
   await page.locator('input[type=password]').fill(password);await page.locator('form button[type=submit]').click();await ready(page,'index');
-  await test('The same grouped footer and original direct 05 link survive all eight routes',async()=>{
-   for(const name of ['index','about','experience','education','skills','projects','contact','sitemap']){
+  await test('The same grouped footer and original direct 05 link survive all eleven routes',async()=>{
+   for(const name of ['index','about','experience','education','skills','projects','photography','equipment','stem','contact','sitemap']){
     if(name!=='index'){await page.locator(`.footer-directory a[href*="${name}.html"]`).first().click();await ready(page,name);}
     assert.equal(await page.locator('.footer-directory').count(),1);assert.equal(await page.locator('.footer-directory-group').count(),5);
-    assert.equal(await page.locator('.footer-directory li a').count(),18);assert.equal(await page.locator('.main-nav > a').count(),5);
+    assert.equal(await page.locator('.footer-directory li a').count(),19);assert.equal(await page.locator('.main-nav > a').count(),8);
     assert.equal(await page.locator('.project-nav-toggle,.project-subnav').count(),0);await fit(page);
    }
    await page.locator('.main-nav > a[href*="projects.html"]').hover();await page.waitForTimeout(350);
@@ -36,7 +36,7 @@ async function fit(page){assert(await page.evaluate(()=>document.documentElement
    await page.locator('[data-language="zh-HK"]').click();
   });
   await test('Footer deep links reveal real sections through the existing page transitions',async()=>{
-   for(const [name,hash] of [['projects','#camera-specs'],['projects','#flash'],['projects','#drone-reference'],['experience','#shift'],['about','#about-approach-title']]){
+   for(const [name,hash] of [['equipment','#camera-specs'],['equipment','#flash'],['stem','#drone-reference'],['experience','#shift'],['about','#about-approach-title']]){
     await page.locator(`.footer-directory a[href*="${name}.html"][href$="${hash}"]`).click();await ready(page,name);
     assert.equal(new URL(page.url()).hash,hash);assert(await page.locator(hash).isVisible());
     const y=await page.locator(hash).evaluate(n=>n.getBoundingClientRect().top);assert(y>=-2&&y<960,'target is in view');

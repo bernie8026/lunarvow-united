@@ -9,7 +9,7 @@ const bootstrap = new Set([
 ]);
 const shells = new Set([
   "index.html", "about.html", "experience.html", "education.html",
-  "skills.html", "projects.html", "contact.html", "sitemap.html", "404.html"
+  "skills.html", "projects.html", "photography.html", "equipment.html", "stem.html", "contact.html", "sitemap.html", "404.html"
 ]);
 let files = null;
 
@@ -169,4 +169,4 @@ self.addEventListener("fetch", event => {
   event.respondWith(path === null ? Promise.resolve(response("Not found", 404, "text/plain; charset=utf-8", request.method === "HEAD")) : handle(request, path));
 });
 
-// Publication: e77811a4be1c51b69be036bf248a45b29bae45f7b544bf95ec4bfdbad82de83c
+// Publication: 1b1be222d7aa394271ee5889fd9dc652dc9007cddd19a68b04f3236efddfd67d

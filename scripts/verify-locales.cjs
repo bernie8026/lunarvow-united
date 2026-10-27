@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..'),base=new URL(process.env.PORTFOLIO_BASE_URL||'http://127.0.0.1:8766/lunarvow-united/');
 const password=fs.readFileSync(path.resolve(root,'../lunarvow-private/access-password.txt'),'utf8').trim();
 const languages=['zh-HK','en','zh-CN','ja','ko','th','ru'],added=languages.slice(3);
-const pages=['index','about','experience','education','skills','projects','contact','sitemap'];
+const pages=['index','about','experience','education','skills','projects','photography','equipment','stem','contact','sitemap'];
 const output=path.join(root,'.private/localization/qa'),errors=[];let browser,passed=0;
 const url=(name,lang)=>new URL(name+'.html?lang='+lang,base).href;
 async function test(label,fn){await fn();passed++;console.log('PASS '+label);}
@@ -59,15 +59,15 @@ async function audit(page,name,lang){
       for(const lang of added){await page.locator('[data-gate-language="'+lang+'"]').click();assert.equal(await page.locator('html').getAttribute('lang'),lang);assert((await page.locator('label[for="site-password"]').innerText()).trim());await page.locator('#show-password').click();assert.equal(await page.locator('#site-password').getAttribute('type'),'text');await page.locator('#show-password').click();}
       await page.locator('[data-gate-language="ja"]').click();await page.locator('input[type="password"]').fill(password);await page.locator('form button[type="submit"]').click();await ready(page,'index');await audit(page,'index','ja');
     });
-    await test('All eight pages render every dictionary field in all seven languages without replacing the document',async()=>{
+    await test('All eleven pages render every dictionary field in all seven languages without replacing the document',async()=>{
       const token=await page.evaluate(()=>window.__localeDocument=Math.random());
       for(const name of pages){await go(page,name);for(const lang of languages){await change(page,lang);await audit(page,name,lang);}assert.equal(await page.evaluate(()=>window.__localeDocument),token);}
-      await go(page,'about');await change(page,'ru');await page.waitForFunction(()=>!document.querySelector('.language-lens.is-open'));await page.screenshot({path:path.join(output,'desktop-russian.png'),animations:'disabled'});
+      await go(page,'about');await change(page,'ru');await page.evaluate(()=>document.activeElement?.blur());await page.mouse.move(page.viewportSize().width-10,400);await page.waitForFunction(()=>!document.querySelector('.language-lens.is-open'));await page.screenshot({path:path.join(output,'desktop-russian.png'),animations:'disabled'});
     });
     await test('360px and 390px layouts keep new languages, menus and glass controls usable',async()=>{
       for(const width of [360,390]){await page.setViewportSize({width,height:844});
         for(const name of pages){await go(page,name);for(const lang of added){await change(page,lang);await audit(page,name,lang);}
-          if(width===390&&['about','experience','skills'].includes(name)){await change(page,'th');await page.waitForFunction(()=>!document.querySelector('.language-lens.is-open'));await page.screenshot({path:path.join(output,'mobile-thai-'+name+'.png'),animations:'disabled'});}
+          if(width===390&&['about','experience','skills'].includes(name)){await change(page,'th');await page.evaluate(()=>document.activeElement?.blur());await page.mouse.move(page.viewportSize().width-10,400);await page.waitForFunction(()=>!document.querySelector('.language-lens.is-open'));await page.screenshot({path:path.join(output,'mobile-thai-'+name+'.png'),animations:'disabled'});}
         }
         await page.locator('.menu-toggle').click();assert(await page.locator('.main-nav').isVisible());await page.keyboard.press('Escape');assert(!await page.locator('.main-nav').isVisible());
       }

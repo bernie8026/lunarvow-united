@@ -47,7 +47,7 @@ the first reveal; no simulated percentage or extra unlock delay is added.
 The homepage is authored in `public/index.html` and `public/assets/home*`.
 The personal profile is in `public/about.html` and `public/assets/about-apple*`;
 both pages share `public/assets/apple-shell.css` for page colours and footer type.
-All eight pages use the same navigation in `public/assets/theme.css`: a numbered
+All eleven pages use the same navigation in `public/assets/theme.css`: a numbered
 left rail above 1000px, and an expandable top menu on narrower screens.
 They use large typography, subject-specific motion, seven-language copy and
 responsive light/dark layouts. These source files remain local;
@@ -56,7 +56,7 @@ also changes the worker revision so browser update checks can discard an old
 in-memory publication and require a fresh unlock.
 
 The rounded navigation uses `public/assets/theme.css` and
-`public/assets/navigation-glass.css`. All eight pages mount
+`public/assets/navigation-glass.css`. All eleven pages mount
 `public/assets/language-glass.js`: moving a mouse over the numbered links,
 brand, language choices, theme control or mobile menu reveals a spring-driven
 Liquid Glass lens, magnifying the actual labels through a refractive rim.
@@ -66,7 +66,7 @@ Touch taps and the existing language drag selection remain available.
 Keyboard focus has the same optical feedback. Reduced motion and pause keep
 static magnification without the spring movement.
 
-The five main navigation destinations remain direct links. The Projects entry
+The eight main navigation destinations remain direct links. The Projects entry
 has no added arrow or category drawer. Every page has the same always-visible
 five-column footer directory, following the grouped sitemap layout of Queen's
 College (https://www.qc.edu.hk/). Headings group profile, work and learning,
@@ -82,10 +82,10 @@ previous/next controls, swipe input and a pause button. Autoplay waits for entry
 and stops during hover, keyboard focus, offscreen/hidden state, reduced motion
 or the global animation pause. Modules live in `public/assets/home-carousel.*`,
 `home-carousel.css` and `features-content.js`.
-The existing eight-page portfolio, access password and encrypted publication
+The existing eleven-page portfolio, access password and encrypted publication
 workflow remain in place.
 
-All eight pages and the access gate support Hong Kong Traditional Chinese,
+All eleven pages and the access gate support Hong Kong Traditional Chinese,
 English, Simplified Chinese, Japanese (`ja`), Korean (`ko`), Thai (`th`) and
 Russian (`ru`). The four additional full dictionaries are editable in the local
 `public/assets/locales/` folder. `prepare-locales.cjs` checks all 460 keys and
@@ -141,12 +141,13 @@ node scripts/verify-language-glass.cjs
 node scripts/verify-navigation-glass.cjs
 node scripts/verify-featured-navigation.cjs
 node scripts/verify-footer-directory.cjs
+node scripts/verify-expansion.cjs
 node scripts/verify-locales.cjs
 node scripts/verify-protected-media.cjs
 ```
 
 The suite checks locked routes and assets, wrong passwords, authenticated archive
-integrity, the original eight pages, images, animations, navigation, languages,
+integrity, the eleven portfolio pages, images, animations, navigation, languages,
 mobile layout, storage, cross-tab locking and worker restarts. Its original-source
 comparison uses the local pre-protection snapshot; set `PORTFOLIO_SOURCE_DIR` to
 an equivalent baseline directory if needed. Set `PORTFOLIO_BASE_URL` to test a
@@ -161,3 +162,16 @@ node scripts/prepare-protected-site.cjs --decrypt docs/protected-site.json --out
 The private password file is still required. Recovery does not publish anything;
 keep recovered plaintext outside the repository. There is no password reset that
 can recover the encrypted archive without its password or a plaintext backup.
+
+## Dedicated creative topics
+
+Pages 06–08 add `photography.html`, `equipment.html` and `stem.html` to the shared
+navigation, homepage directory, grouped footer and sitemap. Photography presents
+composition and lighting studies as explicitly labelled diagrams; no supplied
+photograph is invented. Equipment retains the existing official Nikon/Godox
+images, verified specifications and source links. STEM presents Aerovate as a
+student concept with Tello EDU as a reference, not an owned prototype. Original
+Projects content and anchors remain available. Each page has seven-language copy,
+its own visual layout and motion, with reduced-motion and pause support.
+The rail compacts at short desktop heights so eight entries fit beside languages.
+Only encrypted content and password gates are published.

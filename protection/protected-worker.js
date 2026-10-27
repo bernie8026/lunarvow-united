@@ -9,7 +9,7 @@ const bootstrap = new Set([
 ]);
 const shells = new Set([
   "index.html", "about.html", "experience.html", "education.html",
-  "skills.html", "projects.html", "contact.html", "sitemap.html", "404.html"
+  "skills.html", "projects.html", "photography.html", "equipment.html", "stem.html", "contact.html", "sitemap.html", "404.html"
 ]);
 let files = null;
 

@@ -33,7 +33,7 @@ async function shape(page){
   assert.equal(await page.locator('.language-lens').count(),1);
   assert.equal(await page.locator('.liquid-glass-defs').count(),1);
   assert(await page.locator('.navigation-lens,.language-lens').evaluateAll(nodes=>nodes.every(n=>n.inert&&n.getAttribute('aria-hidden')==='true'&&getComputedStyle(n).pointerEvents==='none')),'optical copies cannot take input or appear as duplicate controls');
-  assert.equal(await page.locator('.main-nav > a').count(),5);
+  assert.equal(await page.locator('.main-nav > a').count(),8);
   assert.equal(await page.getByRole('link',{name:'Bernie Leung Portfolio',exact:true}).count(),1);
   assert.equal(await page.locator('.languages').getByRole('button').count(),7);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'glass does not expand the document width');
@@ -70,7 +70,7 @@ async function readableCopy(page,surface){
     const input=page.locator('input[type="password"]');await input.waitFor();
     await input.evaluate((node,value)=>{node.value=value;node.dispatchEvent(new Event('input',{bubbles:true}));},password);
     await page.locator('form button[type="submit"]').click();await ready(page,'about');await leave(page);
-    await test('All five numbered links magnify on mouse hover without navigating',async()=>{
+    await test('All eight numbered links magnify on mouse hover without navigating',async()=>{
       await shape(page);const href=page.url(),current=await page.locator('.main-nav > a[aria-current="page"]').getAttribute('href');
       const positions=[];
       for(const link of await page.locator('.main-nav > a').all()){
@@ -81,8 +81,8 @@ async function readableCopy(page,surface){
         assert.equal(page.url(),href,'hover never changes the route');
         assert.equal(await page.locator('.main-nav > a[aria-current="page"]').getAttribute('href'),current,'hover never selects a different page');
       }
-      assert(new Set(positions.map(y=>Math.round(y))).size===5,'one lens moves across every numbered link');
-      await page.screenshot({path:path.join(output,'desktop-number-hover.png'),clip:{x:0,y:70,width:250,height:350}});await leave(page);
+      assert(new Set(positions.map(y=>Math.round(y))).size===8,'one lens moves across every numbered link');
+      await page.screenshot({path:path.join(output,'desktop-number-hover.png'),clip:{x:0,y:70,width:250,height:500}});await leave(page);
     });
     await test('Brand and theme control get glass on hover, with no accidental activation',async()=>{
       const href=page.url(),theme=await page.locator('body').getAttribute('data-theme');
@@ -119,10 +119,10 @@ async function readableCopy(page,surface){
     });
     await test('Every page disposes and remounts the shared navigation glass cleanly',async()=>{
       await page.evaluate(()=>window.__glassDocument=document);
-      for(const name of ['education','skills','projects','contact','sitemap','index','about','experience']){
+      for(const name of ['education','skills','projects','photography','equipment','stem','contact','sitemap','index','about','experience']){
         await hover(page,page.locator('.main-nav > a').first());await open(page,'.main-nav');
         await page.evaluate(()=>window.__retiredNavigationLenses=[...document.querySelectorAll('.navigation-lens,.language-lens')]);
-        const selector=['experience','education','skills','projects','about'].includes(name)?`.main-nav > a[href*="${name}.html"]`:name==='index'?'.brand':`.footer-links > a[href*="${name}.html"]`;
+        const selector=['experience','education','skills','projects','photography','equipment','stem','about'].includes(name)?`.main-nav > a[href*="${name}.html"]`:name==='index'?'.brand':`.footer-links > a[href*="${name}.html"]`;
         await page.locator(selector).click();await ready(page,name);await leave(page);await shape(page);
         assert(await page.evaluate(()=>window.__glassDocument===document&&window.__retiredNavigationLenses.every(n=>!n.isConnected&&!n.classList.contains('is-open'))),'old optics are removed without replacing the document');
       }

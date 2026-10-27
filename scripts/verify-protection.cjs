@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..');
 const base=new URL(process.env.PORTFOLIO_BASE_URL||'http://127.0.0.1:8766/lunarvow-united/');
 const password=fs.readFileSync(path.resolve(root,process.env.PORTFOLIO_PASSWORD_FILE||'../lunarvow-private/access-password.txt'),'utf8').trim();
 const snapshot=path.resolve(root,process.env.PORTFOLIO_SOURCE_DIR||'../lunarvow-private/before-protection-3c1dd71/docs');
-const names=['index','about','experience','education','skills','projects','contact','sitemap'];
+const names=['index','about','experience','education','skills','projects','photography','equipment','stem','contact','sitemap'];
 const route=name=>new URL(`${name}.html?lang=zh-HK`,base).href;
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
 const results=[];

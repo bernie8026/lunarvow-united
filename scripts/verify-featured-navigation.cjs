@@ -20,8 +20,8 @@ async function slide(page,index){await page.locator(`[data-slide-to="${index}"]`
   await test('Three decoded full-image stories link to the right project sections',async()=>{
    assert.equal(await page.locator('main h1').count(),1);assert.equal(await page.locator('[data-slide]').count(),3);
    assert(await page.locator('[data-slide] img').evaluateAll(nodes=>nodes.every(n=>n.complete&&n.naturalWidth)));
-   for(const [i,hash] of ['#photography','#lunar','#aerovate'].entries()){
-    await slide(page,i);assert.equal(new URL(await page.locator('.hero-project-link').getAttribute('href')).hash,hash);
+   for(const [i,target] of ['photography.html','projects.html#lunar','stem.html'].entries()){
+    await slide(page,i);const href=new URL(await page.locator('.hero-project-link').getAttribute('href'));assert.equal(href.pathname.split('/').pop()+href.hash,target);
     await fit(page);await page.screenshot({path:path.join(output,'desktop-'+i+'.png'),clip:{x:68,y:0,width:1372,height:960}});
    }
    await page.locator('[data-carousel-next]').click();assert.equal(await page.locator('[data-carousel]').getAttribute('data-active-slide'),'0');

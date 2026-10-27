@@ -8,7 +8,7 @@ const root = path.resolve(__dirname, '..');
 const publicRoot = path.join(root, 'public');
 const code = fs.readFileSync(path.join(publicRoot, 'assets/preloader.js'), 'utf8');
 const base = 'https://example.test/lunarvow-united/';
-const pages = ['index', 'about', 'experience', 'education', 'skills', 'projects', 'contact', 'sitemap'];
+const pages = ['index', 'about', 'experience', 'education', 'skills', 'projects', 'photography', 'equipment', 'stem', 'contact', 'sitemap'];
 const copy = value => JSON.parse(JSON.stringify(value));
 const tick = () => new Promise(resolve => setImmediate(resolve));
 async function until(predicate, label) {
