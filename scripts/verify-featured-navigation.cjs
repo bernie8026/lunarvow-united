@@ -9,7 +9,6 @@ async function ready(page,name){await page.waitForFunction(name=>document.body.d
 async function test(name,fn){await fn();passed++;console.log('PASS '+name);}
 async function fit(page){assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal overflow');}
 async function slide(page,index){await page.locator(`[data-slide-to="${index}"]`).click();assert.equal(await page.locator('[data-carousel]').getAttribute('data-active-slide'),String(index));assert.equal(await page.locator('.hero-slide.is-active').count(),1);assert.equal(await page.locator('.hero-pagination [aria-pressed="true"]').count(),1);await page.waitForTimeout(900);}
-async function navOpen(page){if(await page.locator('.project-subnav').isVisible())return;await page.locator('.project-nav-toggle').click();await page.locator('.project-subnav').waitFor({state:'visible'});}
 (async()=>{
  fs.mkdirSync(output,{recursive:true,mode:0o700});browser=await chromium.launch({channel:'chrome',headless:true});
  const context=await browser.newContext({viewport:{width:1440,height:960},hasTouch:true});const page=await context.newPage();
@@ -40,7 +39,7 @@ async function navOpen(page){if(await page.locator('.project-subnav').isVisible(
    await page.locator('[data-slide-to="0"]').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('[data-carousel]').getAttribute('data-active-slide'),'1');
    assert.equal(await page.locator('[data-slide-to="1"]').evaluate(n=>n===document.activeElement),true);
   });
-  await test('Seven languages update headlines, controls and category destinations',async()=>{
+  await test('Seven languages update headlines and controls',async()=>{
    for(const lang of ['zh-HK','en','zh-CN','ja','ko','th','ru']){
     await page.locator(`[data-language="${lang}"]`).click();
     await slide(page,1);
@@ -48,30 +47,11 @@ async function navOpen(page){if(await page.locator('.project-subnav').isVisible(
      const lang=document.documentElement.lang,t=window.PORTFOLIO_FEATURE_COPY[lang],h=document.querySelector('[data-hero-title]');
      return h.textContent===window.PORTFOLIO_TEXT[h.dataset.i18n][lang]&&document.querySelector('[data-carousel-next]').getAttribute('aria-label')===t.heroNext;
     });assert(valid,'localized hero in '+lang);
-    if(await page.locator('.project-subnav').isVisible())await page.keyboard.press('Escape');
-    await navOpen(page);assert.equal(await page.locator('.project-subnav a').count(),5);
-    for(const href of await page.locator('.project-subnav a').evaluateAll(nodes=>nodes.map(n=>n.href)))assert.equal(new URL(href).searchParams.get('lang'),lang);
-    await page.keyboard.press('Escape');await fit(page);
+    await fit(page);
    }
    await page.locator('[data-language="zh-HK"]').click();
   });
-  await test('Desktop categories hover open, keyboard navigate and reach exact anchors',async()=>{
-   await page.locator('.main-nav > a[href*="projects.html"]').hover();await page.locator('.project-subnav').waitFor({state:'visible'});
-   await page.screenshot({path:path.join(output,'desktop-subnav.png'),clip:{x:0,y:80,width:450,height:500}});
-   await page.keyboard.press('Escape');assert(!await page.locator('.project-subnav').isVisible());
-   await page.locator('.main-nav > a[href*="projects.html"]').focus();await page.keyboard.press('ArrowDown');
-   assert.equal(await page.locator('.project-subnav a').first().evaluate(n=>n===document.activeElement),true);
-   await page.keyboard.press('End');await page.keyboard.press('Enter');await ready(page,'projects');
-   assert.equal(new URL(page.url()).hash,'#camera-specs');assert(await page.locator('#camera-specs').isVisible());
-   assert.equal(await page.locator('.project-nav-toggle').count(),1);
-   for(const name of ['about','experience','education','skills','projects']){
-    await page.locator(`.main-nav > a[href*="${name}.html"]`).click();await ready(page,name);assert.equal(await page.locator('.project-subnav').count(),1);
-   }
-   await page.locator('.footer-links > a[href*="contact.html"]').click();await ready(page,'contact');assert.equal(await page.locator('.project-subnav').count(),1);
-   await page.locator('.footer-links > a[href*="sitemap.html"]').click();await ready(page,'sitemap');assert.equal(await page.locator('.project-subnav').count(),1);
-   await page.locator('.brand').click();await ready(page,'index');
-  });
-  await test('Mobile categories, all story languages and touch swipe stay within 360/390px',async()=>{
+  await test('Mobile stories, all story languages and touch swipe stay within 360/390px',async()=>{
    for(const width of [390,360]){
     await page.setViewportSize({width,height:844});await page.evaluate(()=>scrollTo(0,0));
     for(const lang of ['zh-HK','en','ja','ko','th','ru']){
@@ -83,11 +63,6 @@ async function navOpen(page){if(await page.locator('.project-subnav').isVisible(
     }
     await page.locator('[data-language="zh-HK"]').click();await slide(page,0);await page.evaluate(()=>document.activeElement.blur());await page.mouse.move(width-2,130);
     await page.screenshot({path:path.join(output,'mobile-'+width+'.png'),fullPage:false});
-    await page.locator('.menu-toggle').click();await navOpen(page);await page.waitForTimeout(300);
-    const menu=await page.locator('.project-subnav').boundingBox();assert(menu.x>=0&&menu.x+menu.width<=width+1);
-    await page.screenshot({path:path.join(output,'mobile-subnav-'+width+'.png'),fullPage:false});
-    await page.keyboard.press('Escape');assert(!await page.locator('.project-subnav').isVisible());assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'),'true');
-    await page.keyboard.press('Escape');assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'),'false');
     const cdp=await context.newCDPSession(page),hero=await page.locator('[data-carousel]').boundingBox();
     const y=Math.max(hero.y+80,210),a={x:width-35,y,id:1},b={x:30,y,id:1};
     await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[a]});

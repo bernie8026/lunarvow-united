@@ -67,14 +67,13 @@ Keyboard focus has the same optical feedback. Reduced motion and pause keep
 static magnification without the spring movement.
 
 The five main navigation destinations remain direct links. The Projects entry
-also has an accessible category disclosure: hover opens a full-height second
-navigation column beside the desktop rail. The page reserves that column's
-width, so titles and imagery stay visible. Its opaque surface keeps the links
-readable, and the arrow pins it until a close or outside action. On phones the
-arrow expands an indented inline list within the existing menu.
-Categories link directly to Web, Photography, STEM and equipment anchors.
-Escape, outside input and page disposal close it; keyboard arrows and Home/End
-move through its links. Copy follows all seven languages.
+has no added arrow or category drawer. Every page has the same always-visible
+five-column footer directory, following the grouped sitemap layout of Queen's
+College (https://www.qc.edu.hk/). Headings group profile, work and learning,
+projects, equipment references and contact links. It uses the existing cool blue
+palette, becomes three columns on tablets and two on phones, and follows all
+seven languages. Shared source files are `public/assets/footer-content.js` and
+`public/assets/footer-directory.css`; links use the existing navigation router.
 
 The homepage opens with a full-bleed, three-story carousel: photography equipment,
 Lunar Vow web design and the Aerovate concept. It reuses existing credited images
@@ -82,7 +81,7 @@ and translated copy, with an overlaid heading, project link, numbered topics,
 previous/next controls, swipe input and a pause button. Autoplay waits for entry
 and stops during hover, keyboard focus, offscreen/hidden state, reduced motion
 or the global animation pause. Modules live in `public/assets/home-carousel.*`,
-`project-navigation.js`, `featured-navigation.css` and `features-content.js`.
+`home-carousel.css` and `features-content.js`.
 The existing eight-page portfolio, access password and encrypted publication
 workflow remain in place.
 
@@ -141,7 +140,7 @@ node scripts/verify-experience-neon.cjs
 node scripts/verify-language-glass.cjs
 node scripts/verify-navigation-glass.cjs
 node scripts/verify-featured-navigation.cjs
-node scripts/verify-project-drawer.cjs
+node scripts/verify-footer-directory.cjs
 node scripts/verify-locales.cjs
 node scripts/verify-protected-media.cjs
 ```
