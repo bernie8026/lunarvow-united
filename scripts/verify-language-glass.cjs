@@ -34,7 +34,7 @@ async function shape(page){
     await page.locator('form button[type="submit"]').click();await ready(page,'about');
     await test('All eight pages mount one attached glass selection and rounded theme control',async()=>{
       for(const name of ['experience','education','skills','projects','contact','sitemap','index','about']){
-        const selector=['experience','education','skills','projects','about'].includes(name)?`.main-nav a[href*="${name}.html"]`:name==='index'?'.brand':`.footer-links a[href*="${name}.html"]`;
+        const selector=['experience','education','skills','projects','about'].includes(name)?`.main-nav > a[href*="${name}.html"]`:name==='index'?'.brand':`.footer-links a[href*="${name}.html"]`;
         await page.locator(selector).click();await ready(page,name);await shape(page);await closed(page);
       }
     });
@@ -92,7 +92,7 @@ async function shape(page){
     });
     await test('Navigating during drag disposes the old lens and remounts cleanly',async()=>{
       await page.setViewportSize({width:1440,height:960});await start(page,'en','zh-CN');
-      await page.evaluate(()=>{window.__retiredGlass=document.querySelector('.language-lens');document.querySelector('.main-nav a[href*="experience.html"]').click();});
+      await page.evaluate(()=>{window.__retiredGlass=document.querySelector('.language-lens');document.querySelector('.main-nav > a[href*="experience.html"]').click();});
       await ready(page,'experience');await page.mouse.up();await shape(page);await closed(page);
       assert(await page.evaluate(()=>!window.__retiredGlass.isConnected&&!window.__retiredGlass.classList.contains('is-open')));
       assert.equal(await page.locator('.liquid-glass-defs').count(),1,'old refraction definitions are disposed with the page');

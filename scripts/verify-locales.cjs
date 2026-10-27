@@ -16,7 +16,7 @@ async function go(page,name){
   let link;
   if(name==='index')link=page.locator('.brand');
   else if(['contact','sitemap'].includes(name))link=page.locator('.footer-links a[href*="'+name+'.html"]');
-  else {if(await page.locator('.menu-toggle').isVisible()&&!await page.locator('.main-nav').isVisible())await page.locator('.menu-toggle').click();link=page.locator('.main-nav a[href*="'+name+'.html"]');}
+  else {if(await page.locator('.menu-toggle').isVisible()&&!await page.locator('.main-nav').isVisible())await page.locator('.menu-toggle').click();link=page.locator('.main-nav > a[href*="'+name+'.html"]');}
   await link.click();await ready(page,name);
 }
 async function unlock(page,name='index',lang='ja'){

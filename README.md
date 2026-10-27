@@ -57,6 +57,23 @@ Touch taps and the existing language drag selection remain available.
 Keyboard focus has the same optical feedback. Reduced motion and pause keep
 static magnification without the spring movement.
 
+The five main navigation destinations remain direct links. The Projects entry
+also has an accessible category disclosure: hover unfolds a glass flyout at the
+desktop rail, while its separate arrow expands an inline list on phones.
+Categories link directly to Web, Photography, STEM and equipment anchors.
+Escape, outside input and page disposal close it; keyboard arrows and Home/End
+move through its links. Copy follows all seven languages.
+
+The homepage opens with a full-bleed, three-story carousel: photography equipment,
+Lunar Vow web design and the Aerovate concept. It reuses existing credited images
+and translated copy, with an overlaid heading, project link, numbered topics,
+previous/next controls, swipe input and a pause button. Autoplay waits for entry
+and stops during hover, keyboard focus, offscreen/hidden state, reduced motion
+or the global animation pause. Modules live in `public/assets/home-carousel.*`,
+`project-navigation.js`, `featured-navigation.css` and `features-content.js`.
+The existing eight-page portfolio, access password and encrypted publication
+workflow remain in place.
+
 All eight pages and the access gate support Hong Kong Traditional Chinese,
 English, Simplified Chinese, Japanese (`ja`), Korean (`ko`), Thai (`th`) and
 Russian (`ru`). The four additional full dictionaries are editable in the local
@@ -110,6 +127,7 @@ node scripts/verify-unified-navigation.cjs
 node scripts/verify-experience-neon.cjs
 node scripts/verify-language-glass.cjs
 node scripts/verify-navigation-glass.cjs
+node scripts/verify-featured-navigation.cjs
 node scripts/verify-locales.cjs
 node scripts/verify-protected-media.cjs
 ```

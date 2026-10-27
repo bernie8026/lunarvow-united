@@ -25,15 +25,15 @@ async function selected(page,language){
   assert.equal(await page.locator('.languages > button[aria-pressed="true"]').getAttribute('data-language'),language);
 }
 async function shape(page){
-  for(const surface of ['.main-nav','.brand','.theme-toggle','.menu-toggle']){
+  for(const surface of ['.main-nav','.brand','.theme-toggle','.menu-toggle','.project-nav-toggle']){
     const host=page.locator('.masthead '+surface),lens=host.locator(':scope > .navigation-lens');
     assert.equal(await lens.count(),1,surface+' owns exactly one glass overlay');
   }
-  assert.equal(await page.locator('.navigation-lens').count(),4);
+  assert.equal(await page.locator('.navigation-lens').count(),5);
   assert.equal(await page.locator('.language-lens').count(),1);
   assert.equal(await page.locator('.liquid-glass-defs').count(),1);
   assert(await page.locator('.navigation-lens,.language-lens').evaluateAll(nodes=>nodes.every(n=>n.inert&&n.getAttribute('aria-hidden')==='true'&&getComputedStyle(n).pointerEvents==='none')),'optical copies cannot take input or appear as duplicate controls');
-  assert.equal(await page.locator('.main-nav').getByRole('link',{includeHidden:true}).count(),5);
+  assert.equal(await page.locator('.main-nav > a').count(),5);
   assert.equal(await page.getByRole('link',{name:'Bernie Leung Portfolio',exact:true}).count(),1);
   assert.equal(await page.locator('.languages').getByRole('button').count(),7);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'glass does not expand the document width');
@@ -47,7 +47,7 @@ async function open(page,surface){
 }
 async function readableCopy(page,surface){
   const labels=await page.locator(surface).evaluate(host=>{
-    const lens=host.querySelector('.navigation-lens'),frame=lens.getBoundingClientRect();
+    const lens=host.querySelector(':scope > .navigation-lens'),frame=lens.getBoundingClientRect();
     const control=host.matches('[data-nav-glass-preview]')?host:host.querySelector('[data-nav-glass-preview]');
     return [...control.querySelectorAll('.navigation-glass-source[data-nav-glass-covered]')].map(source=>{
       const label=[...lens.querySelectorAll('.navigation-lens-sheet > span')].find(node=>node.textContent===source.textContent);

@@ -78,7 +78,7 @@ async function mountedOnce(page) {
 }
 async function linksAndState(page,name,language) {
   assert.equal(await page.evaluate(() => document.documentElement.lang),language);
-  const links = await page.locator('.main-nav a').evaluateAll(nodes => nodes.map(node => ({href:node.href,index:node.querySelector('.nav-index')?.textContent.trim(),label:node.lastElementChild?.textContent.trim(),current:node.getAttribute('aria-current'),key:node.lastElementChild?.dataset.i18n,expected:window.PORTFOLIO_TEXT?.[node.lastElementChild?.dataset.i18n]?.[document.documentElement.lang]})));
+  const links = await page.locator('.main-nav > a').evaluateAll(nodes => nodes.map(node => ({href:node.href,index:node.querySelector('.nav-index')?.textContent.trim(),label:node.lastElementChild?.textContent.trim(),current:node.getAttribute('aria-current'),key:node.lastElementChild?.dataset.i18n,expected:window.PORTFOLIO_TEXT?.[node.lastElementChild?.dataset.i18n]?.[document.documentElement.lang]})));
   assert.equal(links.length,5,'five numbered chapter links remain');
   for (let index=0;index<links.length;index++) {
     const link=links[index],url=new URL(link.href);
@@ -87,10 +87,10 @@ async function linksAndState(page,name,language) {
     assert.equal(link.index,String(index+1).padStart(2,'0'));
     assert(link.label && link.label === link.expected,'chapter label uses the active translation');
     assert.equal(link.current,destinations[index]===name ? 'page' : null,'only the matching chapter is current');
-    const accessible = await page.locator('.main-nav a').nth(index).getAttribute('aria-label') || `${link.index} ${link.label}`;
+    const accessible = await page.locator('.main-nav > a').nth(index).getAttribute('aria-label') || `${link.index} ${link.label}`;
     assert(accessible.includes(link.label),'chapter remains named for assistive technology');
   }
-  assert.equal(await page.locator('.main-nav a[aria-current="page"]').count(),destinations.includes(name)?1:0);
+  assert.equal(await page.locator('.main-nav > a[aria-current="page"]').count(),destinations.includes(name)?1:0);
   assert.equal(await page.locator(`[data-language="${language}"]`).getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.languages button[aria-pressed="true"]').count(),1);
   assert.equal(await page.locator('.brand').getAttribute('aria-current'),name==='index'?'page':null);
@@ -131,7 +131,7 @@ async function rail(page,name,language='zh-HK') {
   return {header:geometry.header,nav:geometry.nav,brand:geometry.brand,tools:geometry.tools,styles};
 }
 async function tooltips(page) {
-  for (const link of await page.locator('.main-nav a').all()) {
+  for (const link of await page.locator('.main-nav > a').all()) {
     const label=link.locator('span').last();
     await link.hover();await page.waitForFunction(node=>Number(getComputedStyle(node).opacity)>0.99,await label.elementHandle());
     assert(await label.evaluate(node=>node.getBoundingClientRect().left>=68 && node.getBoundingClientRect().width>0),'hover exposes the chapter name beside the rail');
@@ -149,7 +149,7 @@ async function mobileMenu(page,name,language) {
   const geometry=await rectsAndControls(page,true);assert.equal(geometry.position,'sticky');assert.equal(geometry.padding,0);assert(geometry.header.width<=geometry.width+1);
   const brand=geometry.brand;for (const control of geometry.controls) assert(Math.min(brand.right,control.right)-Math.max(brand.x,control.x)<=1 || Math.min(brand.bottom,control.bottom)-Math.max(brand.y,control.y)<=1,'brand does not overlap navigation controls');
   await toggle.click();await page.waitForFunction(()=>document.querySelector('.menu-toggle')?.getAttribute('aria-expanded')==='true');
-  const openLinks=await page.locator('.main-nav a').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,text:node.lastElementChild.textContent.trim(),opacity:getComputedStyle(node.lastElementChild).opacity};}));
+  const openLinks=await page.locator('.main-nav > a').evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,text:node.lastElementChild.textContent.trim(),opacity:getComputedStyle(node.lastElementChild).opacity};}));
   for (const link of openLinks) assert(link.left>=-1 && link.right<=geometry.width+1 && link.bottom>link.top && Number(link.opacity)>0,'expanded chapter is readable inside the viewport: '+link.text);
   await page.keyboard.press('Escape');await page.waitForFunction(()=>document.querySelector('.menu-toggle')?.getAttribute('aria-expanded')==='false');
   assert.equal(await page.locator('#main-nav').getAttribute('data-open'),'false');assert(await toggle.evaluate(node=>node===document.activeElement),'Escape returns keyboard focus to the menu');
@@ -192,7 +192,7 @@ async function main() {
       await page.setViewportSize({width:1440,height:960});await load(page,'index','en');await themeTo(page,'dark');
       const token=await page.evaluate(()=>window.__navigationQaDocument=Math.random());let baseline=await rail(page,'index','en');
       for(const name of [...routes.slice(1),'index']) {
-        const selector=destinations.includes(name)?`.main-nav a[href*="${name}.html"]`:name==='index'?'.brand':`.footer-links a[data-internal][href*="${name}.html"]`;
+        const selector=destinations.includes(name)?`.main-nav > a[href*="${name}.html"]`:name==='index'?'.brand':`.footer-links a[data-internal][href*="${name}.html"]`;
         await page.locator(selector).click();await ready(page,name);await frames(page);
         assert.equal(await page.evaluate(()=>window.__navigationQaDocument),token,'route change uses soft navigation');
         assert.deepEqual(await rail(page,name,'en'),baseline,'soft navigation preserves the shared rail on '+name);
