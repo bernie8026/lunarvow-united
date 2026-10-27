@@ -175,7 +175,7 @@ async function main(){
     await test('Soft navigation and all three language controls survive unlocking',async()=>{
       await page.goto(route('index'));await ready(page,'index');
       const token=await page.evaluate(()=>window.__protectedDocumentToken=Math.random());
-      await page.locator('.navigation-row[href*="about.html"] span').first().click();await ready(page,'about');
+      await page.locator('.main-nav > a[href*="about.html"]').click();await ready(page,'about');
       assert.equal(await page.evaluate(()=>window.__protectedDocumentToken),token,'internal links retain the soft-navigation document');
       for(const language of ['en','zh-CN','zh-HK']){
         await page.locator(`[data-language="${language}"]`).click();
@@ -210,7 +210,7 @@ async function main(){
     await test('Worker memory loss gracefully returns to the password gate',async()=>{
       await unlock(page,'skills');
       const cdp=await context.newCDPSession(page);await cdp.send('ServiceWorker.enable');await cdp.send('ServiceWorker.stopAllWorkers');
-      await page.locator('.main-nav a[href*="about.html"]').click();await closed(page);
+      await page.locator('.main-nav > a[href*="about.html"]').click();await closed(page);
       await submit(page,password);await ready(page,'skills');
       await storageAudit(page);await cdp.detach();
     });

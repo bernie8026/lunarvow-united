@@ -35,6 +35,15 @@ replaces `docs/` with the verified encrypted deployment. A missing password or
 failed build does not publish plaintext. GitHub Pages remains **main /docs**.
 Publish only the protected `docs/` output and the public build/runtime files.
 
+Focusing or typing in the password field warms one in-memory download of the
+public ciphertext. Submitting immediately opens the blue loading animation:
+known-length downloads report actual byte progress; unknown lengths show bytes
+received. Password verification, decompression and opening the page have distinct
+indeterminate phases. Failed downloads can be retried, and incorrect passwords
+reuse the downloaded ciphertext. Credentials and plaintext are never persisted.
+The existing page resource checks and two-second hold after readiness still gate
+the first reveal; no simulated percentage or extra unlock delay is added.
+
 The homepage is authored in `public/index.html` and `public/assets/home*`.
 The personal profile is in `public/about.html` and `public/assets/about-apple*`;
 both pages share `public/assets/apple-shell.css` for page colours and footer type.
@@ -120,6 +129,7 @@ With Playwright and Chrome available, run against the protected local preview:
 
 ```sh
 node scripts/verify-protection.cjs
+node scripts/verify-unlock-loading.cjs
 node scripts/verify-preloader.cjs
 node scripts/verify-home.cjs
 node scripts/verify-about-apple.cjs

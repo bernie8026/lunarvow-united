@@ -6,6 +6,10 @@
   const submit = document.getElementById("unlock-button");
   const show = document.getElementById("show-password");
   const status = document.getElementById("gate-status");
+  const loading = document.getElementById("gate-loading");
+  const loadingStatus = document.getElementById("gate-loading-status");
+  const loadingBar = document.getElementById("gate-loading-progress");
+  const loadingAmount = document.getElementById("gate-loading-amount");
   const dictionary = {
     "zh-HK": {title:"網站已鎖定",intro:"輸入存取密碼，開啟個人作品集。",heading:"解鎖作品集",description:"有存取密碼？喺下面輸入就可以繼續。",label:"存取密碼",show:"顯示",hide:"隱藏",unlock:"解鎖網站",preparing:"正在準備安全解鎖…",ready:"準備好後，輸入密碼即可解鎖。",decrypting:"正在解鎖網站，請稍等…",opening:"已解鎖，正在開啟網站…",wrong:"密碼唔正確，或者加密檔案已損壞。請再試一次。",failed:"暫時未能載入網站。請檢查連線後重新整理。",unsupported:"請使用支援安全解鎖嘅新版瀏覽器，並透過 HTTPS 開啟網站。",session:"密碼唔會由網站儲存。閒置或關閉瀏覽器後，可能需要重新解鎖。",footer:"只向持有密碼嘅訪客開放"},
     en: {title:"This site is locked",intro:"Enter the access password to open the portfolio.",heading:"Unlock the portfolio",description:"Have an access password? Enter it below to continue.",label:"Access password",show:"Show",hide:"Hide",unlock:"Unlock website",preparing:"Preparing secure access…",ready:"Enter the password when you are ready.",decrypting:"Unlocking the website. Please wait…",opening:"Unlocked. Opening the website…",wrong:"The password is incorrect, or the encrypted file is damaged. Please try again.",failed:"The website could not be loaded. Check your connection and refresh.",unsupported:"Use a modern browser with secure access support and open this site over HTTPS.",session:"The website does not save your password. You may need to unlock it again after inactivity or closing the browser.",footer:"Access is limited to visitors with the password"},
@@ -17,22 +21,59 @@
     th:{title:'เว็บไซต์นี้ถูกล็อก',intro:'กรอกรหัสผ่านเพื่อเปิดแฟ้มผลงาน',heading:'ปลดล็อกแฟ้มผลงาน',description:'หากมีรหัสผ่าน ให้กรอกด้านล่างเพื่อดำเนินการต่อ',label:'รหัสผ่านเข้าเว็บไซต์',show:'แสดง',hide:'ซ่อน',unlock:'ปลดล็อกเว็บไซต์',preparing:'กำลังเตรียมการเข้าถึงอย่างปลอดภัย…',ready:'กรอกรหัสผ่านเมื่อพร้อม',decrypting:'กำลังปลดล็อกเว็บไซต์ โปรดรอสักครู่…',opening:'ปลดล็อกแล้ว กำลังเปิดเว็บไซต์…',wrong:'รหัสผ่านไม่ถูกต้องหรือไฟล์ที่เข้ารหัสเสียหาย โปรดลองอีกครั้ง',failed:'โหลดเว็บไซต์ไม่ได้ โปรดตรวจสอบการเชื่อมต่อและรีเฟรช',unsupported:'โปรดใช้เบราว์เซอร์รุ่นใหม่ที่รองรับการเข้าถึงอย่างปลอดภัย และเปิดเว็บไซต์ผ่าน HTTPS',session:'เว็บไซต์จะไม่บันทึกรหัสผ่าน คุณอาจต้องปลดล็อกอีกครั้งเมื่อไม่ได้ใช้งานนานหรือปิดเบราว์เซอร์',footer:'เฉพาะผู้เข้าชมที่มีรหัสผ่านเท่านั้น'},
     ru:{title:'Сайт заблокирован',intro:'Введите пароль доступа, чтобы открыть портфолио.',heading:'Разблокировать портфолио',description:'Если у вас есть пароль доступа, введите его ниже.',label:'Пароль доступа',show:'Показать',hide:'Скрыть',unlock:'Разблокировать сайт',preparing:'Подготовка безопасного доступа…',ready:'Введите пароль, когда будете готовы.',decrypting:'Разблокировка сайта. Подождите…',opening:'Доступ открыт. Загружаем сайт…',wrong:'Неверный пароль или повреждён зашифрованный файл. Повторите попытку.',failed:'Не удалось загрузить сайт. Проверьте соединение и обновите страницу.',unsupported:'Откройте сайт по HTTPS в современном браузере с поддержкой безопасного доступа.',session:'Сайт не сохраняет ваш пароль. После долгого бездействия или закрытия браузера может потребоваться повторная разблокировка.',footer:'Доступ только для посетителей с паролем'}
   });
+  const loadingCopy = {
+    'zh-HK':{downloading:'正在下載加密網站…',decrypting:'正在驗證密碼及解密…',unpacking:'正在準備網站內容…',opening:'正在開啟頁面及準備畫面…',download:'加密檔案下載'},
+    en:{downloading:'Downloading the encrypted website…',decrypting:'Verifying the password and decrypting…',unpacking:'Preparing the website content…',opening:'Opening the page and preparing visuals…',download:'Encrypted file download'},
+    'zh-CN':{downloading:'正在下载加密网站…',decrypting:'正在验证密码及解密…',unpacking:'正在准备网站内容…',opening:'正在打开页面并准备画面…',download:'加密文件下载'},
+    ja:{downloading:'暗号化されたサイトをダウンロード中…',decrypting:'パスワードを確認して復号中…',unpacking:'サイトのコンテンツを準備中…',opening:'ページと画面を準備中…',download:'暗号化ファイルのダウンロード'},
+    ko:{downloading:'암호화된 웹사이트 다운로드 중…',decrypting:'비밀번호 확인 및 복호화 중…',unpacking:'웹사이트 콘텐츠 준비 중…',opening:'페이지와 화면 준비 중…',download:'암호화 파일 다운로드'},
+    th:{downloading:'กำลังดาวน์โหลดเว็บไซต์ที่เข้ารหัส…',decrypting:'กำลังตรวจสอบรหัสผ่านและถอดรหัส…',unpacking:'กำลังเตรียมเนื้อหาเว็บไซต์…',opening:'กำลังเปิดหน้าและเตรียมภาพ…',download:'ดาวน์โหลดไฟล์ที่เข้ารหัส'},
+    ru:{downloading:'Загрузка зашифрованного сайта…',decrypting:'Проверка пароля и расшифровка…',unpacking:'Подготовка содержимого сайта…',opening:'Открытие страницы и подготовка графики…',download:'Загрузка зашифрованного файла'}
+  };
   let language = new URL(location.href).searchParams.get("lang");
   if (!dictionary[language]) { try { language=localStorage.getItem('bernie-portfolio-language'); } catch {} }
   if (!dictionary[language]) language = "zh-HK";
   let state = "preparing", kind = "", busy = false, worker;
+  let archivePromise=null, download={loaded:0,total:0};
+  function renderLoading() {
+    if(!loading)return;
+    const text=loadingCopy[language];
+    const downloading=state==='downloading',known=downloading&&download.total>0;
+    loading.dataset.phase=state;
+    const phase=text[state]||text.opening;
+    if(loadingStatus.textContent!==phase)loadingStatus.textContent=phase;
+    loadingBar.dataset.determinate=String(known);
+    loadingBar.setAttribute('aria-label',text.download);
+    if(known){
+      const percent=Math.min(100,Math.floor(download.loaded/download.total*100));
+      loadingBar.setAttribute('aria-valuenow',String(percent));
+      loadingBar.style.setProperty('--loaded',percent+'%');
+      loadingAmount.textContent=percent+'%';
+    }else{
+      loadingBar.removeAttribute('aria-valuenow');
+      loadingAmount.textContent=downloading?`${(download.loaded/1048576).toFixed(1)} MB`:'';
+    }
+  }
   function render() {
     const text = dictionary[language];
     document.documentElement.lang = language;
     document.title = text.heading + " · Bernie Leung";
     document.querySelectorAll("[data-gate-copy]").forEach(node => {node.textContent = text[node.dataset.gateCopy] || "";});
     show.textContent = input.type === "password" ? text.show : text.hide;
-    status.textContent = text[state];
+    status.textContent = text[state] || loadingCopy[language][state];
     status.dataset.kind = kind;
+    renderLoading();
     document.querySelectorAll("[data-gate-language]").forEach(button => button.setAttribute("aria-pressed",String(button.dataset.gateLanguage === language)));
   }
   function setStatus(value, error=false) {state=value;kind=error?"error":"";render();}
-  function setBusy(value) {busy=value;form.setAttribute("aria-busy",String(value));input.disabled=value;show.disabled=value;submit.disabled=value;}
+  function setBusy(value) {
+    busy=value;form.setAttribute("aria-busy",String(value));input.disabled=value;show.disabled=value;submit.disabled=value;
+    if(loading){
+      loading.hidden=!value;
+      document.querySelectorAll('body > header, body > main, body > footer').forEach(node=>{node.inert=value;});
+      if(value){renderLoading();loading.focus({preventScroll:true});}
+    }
+  }
   document.querySelectorAll("[data-gate-language]").forEach(button => button.addEventListener("click",() => {
     language=button.dataset.gateLanguage;
     try { localStorage.setItem('bernie-portfolio-language', language); } catch {}
@@ -60,10 +101,45 @@
     const target=paths.has(path)?new URL(location.href):new URL("index.html"+location.search+location.hash,base);
     return target.href;
   }
+  // Warm only public ciphertext while the visitor enters a password. No key,
+  // plaintext, password or decrypted response is cached or persisted.
+  function prepareArchive() {
+    if(archivePromise)return archivePromise;
+    download={loaded:0,total:0};
+    archivePromise=(async()=>{
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),60000);
+      try{
+        const response=await fetch(new URL('protected-site.json',base),{cache:'no-store',credentials:'same-origin',signal:controller.signal});
+        if(!response.ok)throw new Error('Load failed');
+        const length=Number(response.headers.get('Content-Length'));
+        download.total=Number.isSafeInteger(length)&&length>0&&!response.headers.get('Content-Encoding')?length:0;
+        if(download.total>40000000)throw new Error('Archive too large');
+        let content;
+        if(response.body?.getReader){
+          const reader=response.body.getReader(),decoder=new TextDecoder(),parts=[];
+          try{
+            while(true){
+              const {done,value}=await reader.read();if(done)break;
+              download.loaded+=value.byteLength;
+              if(download.loaded>40000000){controller.abort();throw new Error('Archive too large');}
+              parts.push(decoder.decode(value,{stream:true}));renderLoading();
+            }
+            parts.push(decoder.decode());content=parts.join('');
+          }finally{reader.releaseLock();}
+        }else{content=await response.text();download.loaded=new TextEncoder().encode(content).length;if(download.loaded>40000000)throw new Error('Archive too large');}
+        if(download.total&&download.loaded!==download.total)throw new Error('Incomplete archive');
+        return JSON.parse(content);
+      }finally{clearTimeout(timer);}
+    })().catch(error=>{archivePromise=null;throw error;});
+    return archivePromise;
+  }
+  input.addEventListener('focus',()=>{if(kind!=='error')prepareArchive().catch(()=>{});});
+  input.addEventListener('input',()=>{prepareArchive().catch(()=>{});});
+  const paint=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
   async function decrypt(password) {
-    const response=await fetch(new URL("protected-site.json",base),{cache:"no-store",credentials:"same-origin"});
-    if(!response.ok)throw new Error("Load failed");
-    const envelope=await response.json();
+    const envelope=await prepareArchive();
+    setStatus('decrypting');await paint();
     if(envelope.version!==1||envelope.kdf!=="PBKDF2-SHA-256"||envelope.iterations!==600000||envelope.compression!=="gzip")throw new Error("Invalid envelope");
     const salt=bytes(envelope.salt),iv=bytes(envelope.iv),ciphertext=bytes(envelope.ciphertext);
     if(salt.length!==32||iv.length!==12||ciphertext.length<17)throw new Error("Invalid envelope");
@@ -72,6 +148,7 @@
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt,iterations:envelope.iterations},material,{name:"AES-GCM",length:256},false,["decrypt"]);
     let compressed;
     try {compressed=await crypto.subtle.decrypt({name:"AES-GCM",iv,tagLength:128},key,ciphertext);}catch{throw new DOMException("Password or archive invalid","OperationError");}
+    setStatus('unpacking');await paint();
     const unpacked=new Uint8Array(await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
     new Uint8Array(compressed).fill(0);
     const archive=JSON.parse(new TextDecoder().decode(unpacked));unpacked.fill(0);
@@ -87,10 +164,12 @@
   }
   form.addEventListener("submit",async event => {
     event.preventDefault();if(busy||!worker||!input.value)return;
-    const password=input.value;setBusy(true);setStatus("decrypting");
+    const password=input.value;setStatus("downloading");setBusy(true);
     try {
+      await paint();
       const {files,paths}=await decrypt(password);
       input.value="";input.type="password";
+      setStatus('opening');await paint();
       await request({type:"UNLOCK",files},files.map(file=>file.data));
       setStatus("opening");location.replace(targetFor(paths));
     } catch(error) {
