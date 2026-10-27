@@ -67,8 +67,11 @@ Keyboard focus has the same optical feedback. Reduced motion and pause keep
 static magnification without the spring movement.
 
 The five main navigation destinations remain direct links. The Projects entry
-also has an accessible category disclosure: hover unfolds a glass flyout at the
-desktop rail, while its separate arrow expands an inline list on phones.
+also has an accessible category disclosure: hover opens a full-height second
+navigation column beside the desktop rail. The page reserves that column's
+width, so titles and imagery stay visible. Its opaque surface keeps the links
+readable, and the arrow pins it until a close or outside action. On phones the
+arrow expands an indented inline list within the existing menu.
 Categories link directly to Web, Photography, STEM and equipment anchors.
 Escape, outside input and page disposal close it; keyboard arrows and Home/End
 move through its links. Copy follows all seven languages.
@@ -138,6 +141,7 @@ node scripts/verify-experience-neon.cjs
 node scripts/verify-language-glass.cjs
 node scripts/verify-navigation-glass.cjs
 node scripts/verify-featured-navigation.cjs
+node scripts/verify-project-drawer.cjs
 node scripts/verify-locales.cjs
 node scripts/verify-protected-media.cjs
 ```
