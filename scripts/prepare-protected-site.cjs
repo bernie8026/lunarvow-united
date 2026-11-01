@@ -144,7 +144,7 @@ function prepareProtectedSite(options={}){
       const revision=file.path==='protected-worker.js'?'\n// Publication: '+crypto.createHash('sha256').update(envelope.ciphertext).digest('hex')+'\n':'';
       writeFile(stage,file.path,revision?Buffer.concat([runtimeBytes,Buffer.from(revision)]):runtimeBytes);
     }
-    const shellPaths=new Set(['index.html','404.html',...sources.filter(file=>file.path.endsWith('.html')).map(file=>file.path)]);
+    const shellPaths=new Set(['index.html','404.html','unlock.html',...sources.filter(file=>file.path.endsWith('.html')).map(file=>file.path)]);
     for(const relative of shellPaths)writeFile(stage,relative,shell);
     writeFile(stage,'protected-site.json',JSON.stringify(envelope)+'\n');writeFile(stage,'robots.txt','User-agent: *\nDisallow: /\n');writeFile(stage,'.nojekyll','');
     fs.mkdirSync(path.dirname(outputRoot),{recursive:true});

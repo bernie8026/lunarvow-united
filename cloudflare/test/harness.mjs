@@ -1,5 +1,12 @@
 // Local test entrypoint only. Never upload this module to the production Worker.
-import auth, { IpAttemptGuard, normalizeIp } from '../auth-worker.mjs';
+import auth, { IpAttemptGuard, PasskeyRegistry, normalizeIp } from '../auth-worker.mjs';
+
+export class TestRegistry extends PasskeyRegistry {
+  expire(kind) {
+    if (kind === 'invitations') this.ctx.storage.sql.exec('UPDATE passkey_invitations SET expires_at=0');
+    else this.ctx.storage.sql.exec('UPDATE passkey_flows SET expires_at=0');
+  }
+}
 
 export class TestGuard extends IpAttemptGuard {
   expireCooldown() {
@@ -13,6 +20,10 @@ export class TestGuard extends IpAttemptGuard {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/__test/expire-passkeys') {
+      await env.PASSKEYS.getByName('portfolio-owner-v1').expire(url.searchParams.get('kind'));
+      return Response.json({ok:true});
+    }
     if (url.pathname === '/__test/no-ip') {
       const headers = new Headers(request.headers);
       headers.delete('CF-Connecting-IP');

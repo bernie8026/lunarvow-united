@@ -11,6 +11,21 @@
   const loadingBar = document.getElementById("gate-loading-progress");
   const loadingAmount = document.getElementById("gate-loading-amount");
   const authOrigin = document.querySelector('meta[name="portfolio-auth-origin"]')?.content;
+  const passkeyButton=document.getElementById('passkey-button');
+  const registerButton=document.getElementById('passkey-register-button');
+  const setupPanel=document.getElementById('passkey-setup');
+  const passkeySupported=!!(window.PublicKeyCredential&&navigator.credentials?.create&&navigator.credentials?.get);
+  let setupToken='';
+  try{
+    const hash=new URLSearchParams(location.hash.slice(1));
+    if(hash.has('passkey-setup')){
+      const candidate=hash.get('passkey-setup');
+      if(/^[A-Za-z0-9_-]{32,256}$/.test(candidate||''))setupToken=candidate;
+      // An invitation is a bearer credential: remove it before navigation or copying the URL.
+      history.replaceState(null,'',location.pathname+location.search);
+    }
+  }catch{}
+  if(setupPanel)setupPanel.hidden=!setupToken;
   const dictionary = {
     "zh-HK": {title:"網站已鎖定",intro:"輸入存取密碼，開啟個人作品集。",heading:"解鎖作品集",description:"有存取密碼？喺下面輸入就可以繼續。",label:"存取密碼",show:"顯示",hide:"隱藏",unlock:"解鎖網站",preparing:"正在準備安全解鎖…",ready:"準備好後，輸入密碼即可解鎖。",decrypting:"正在解鎖網站，請稍等…",opening:"已解鎖，正在開啟網站…",wrong:"密碼唔正確，或者加密檔案已損壞。請再試一次。",failed:"暫時未能載入網站。請檢查連線後重新整理。",unsupported:"請使用支援安全解鎖嘅新版瀏覽器，並透過 HTTPS 開啟網站。",session:"密碼唔會由網站儲存。閒置或關閉瀏覽器後，可能需要重新解鎖。",footer:"只向持有密碼嘅訪客開放"},
     en: {title:"This site is locked",intro:"Enter the access password to open the portfolio.",heading:"Unlock the portfolio",description:"Have an access password? Enter it below to continue.",label:"Access password",show:"Show",hide:"Hide",unlock:"Unlock website",preparing:"Preparing secure access…",ready:"Enter the password when you are ready.",decrypting:"Unlocking the website. Please wait…",opening:"Unlocked. Opening the website…",wrong:"The password is incorrect, or the encrypted file is damaged. Please try again.",failed:"The website could not be loaded. Check your connection and refresh.",unsupported:"Use a modern browser with secure access support and open this site over HTTPS.",session:"The website does not save your password. You may need to unlock it again after inactivity or closing the browser.",footer:"Access is limited to visitors with the password"},
@@ -44,6 +59,29 @@
     Object.assign(dictionary[locale],accessCopy[locale]);
     Object.assign(loadingCopy[locale],{authenticating:accessCopy[locale].authenticating,decrypting:accessCopy[locale].decrypting});
   }
+  const passkeyCopy={
+    'zh-HK':{passkey:'使用通行密鑰',passkeyHint:'使用 Face ID、Touch ID，或選擇另一部裝置。',passkeyUnavailable:'呢個瀏覽器未能使用通行密鑰，請使用密碼解鎖。',setupTitle:'新增你嘅通行密鑰',setupHelp:'呢個係擁有人提供嘅一次性登記邀請。確認後，通行密鑰會由你嘅裝置或密碼管理工具保存。',registerPasskey:'新增通行密鑰',passkeyWaiting:'請喺裝置確認通行密鑰…',registering:'請喺裝置確認新增通行密鑰…',passkeyCancelled:'已取消通行密鑰操作，或者操作已逾時。你可以重新開始，或使用密碼。',passkeyRejected:'通行密鑰未能通過驗證。請重試或使用密碼。',passkeyRegistered:'通行密鑰已新增。撳「使用通行密鑰」即可解鎖。',inviteInvalid:'登記邀請已失效或已使用，請向擁有人取得新邀請。',passkeyDuplicate:'呢部裝置已有登記嘅通行密鑰，請使用佢登入。',passkeyThrottled:'通行密鑰請求太頻密，請稍後再試。'},
+    en:{passkey:'Use a passkey',passkeyHint:'Use Face ID, Touch ID, or choose another device.',passkeyUnavailable:'Passkeys are unavailable in this browser. Use the password to unlock.',setupTitle:'Add your passkey',setupHelp:'This is a one-time invitation from the owner. Your device or password manager will save the passkey after you confirm.',registerPasskey:'Add a passkey',passkeyWaiting:'Confirm the passkey on your device…',registering:'Confirm the new passkey on your device…',passkeyCancelled:'The passkey request was cancelled or timed out. Try again or use the password.',passkeyRejected:'The passkey could not be verified. Try again or use the password.',passkeyRegistered:'Passkey added. Choose “Use a passkey” to unlock.',inviteInvalid:'The invitation has expired or was already used. Ask the owner for a new invitation.',passkeyDuplicate:'A passkey is already registered on this device. Use it to sign in.',passkeyThrottled:'Too many passkey requests. Please try again shortly.'},
+    'zh-CN':{passkey:'使用通行密钥',passkeyHint:'使用 Face ID、Touch ID，或选择另一台设备。',passkeyUnavailable:'此浏览器无法使用通行密钥，请使用密码解锁。',setupTitle:'新增你的通行密钥',setupHelp:'这是网站所有者提供的一次性登记邀请。确认后，通行密钥由你的设备或密码管理工具保存。',registerPasskey:'新增通行密钥',passkeyWaiting:'请在设备上确认通行密钥…',registering:'请在设备上确认新增通行密钥…',passkeyCancelled:'通行密钥操作已取消或超时。请重试或使用密码。',passkeyRejected:'通行密钥未能通过验证。请重试或使用密码。',passkeyRegistered:'通行密钥已新增。点击“使用通行密钥”即可解锁。',inviteInvalid:'登记邀请已失效或已使用，请向网站所有者获取新邀请。',passkeyDuplicate:'此设备已有登记的通行密钥，请使用它登录。',passkeyThrottled:'通行密钥请求过于频繁，请稍后重试。'},
+    ja:{passkey:'パスキーを使う',passkeyHint:'Face ID、Touch ID、または別のデバイスを選択します。',passkeyUnavailable:'このブラウザーではパスキーを利用できません。パスワードを使ってください。',setupTitle:'パスキーを追加',setupHelp:'管理者からの一度限りの登録招待です。確認後、デバイスまたはパスワード管理ツールがパスキーを保存します。',registerPasskey:'パスキーを追加',passkeyWaiting:'デバイスでパスキーを確認してください…',registering:'デバイスで新しいパスキーを確認してください…',passkeyCancelled:'操作がキャンセルされたか、時間切れになりました。再試行するかパスワードを使ってください。',passkeyRejected:'パスキーを確認できませんでした。再試行するかパスワードを使ってください。',passkeyRegistered:'パスキーを追加しました。「パスキーを使う」でロックを解除できます。',inviteInvalid:'招待は期限切れか使用済みです。管理者に新しい招待を依頼してください。',passkeyDuplicate:'このデバイスには登録済みのパスキーがあります。それを使ってログインしてください。',passkeyThrottled:'パスキーの要求が多すぎます。しばらくしてから再試行してください。'},
+    ko:{passkey:'패스키 사용',passkeyHint:'Face ID, Touch ID 또는 다른 기기를 선택하세요.',passkeyUnavailable:'이 브라우저에서 패스키를 사용할 수 없습니다. 비밀번호로 잠금을 해제하세요.',setupTitle:'패스키 추가',setupHelp:'관리자가 보낸 일회용 등록 초대입니다. 확인 후 기기나 비밀번호 관리자가 패스키를 저장합니다.',registerPasskey:'패스키 추가',passkeyWaiting:'기기에서 패스키를 확인해 주세요…',registering:'기기에서 새 패스키를 확인해 주세요…',passkeyCancelled:'패스키 요청을 취소했거나 시간이 초과되었습니다. 다시 시도하거나 비밀번호를 사용하세요.',passkeyRejected:'패스키를 확인하지 못했습니다. 다시 시도하거나 비밀번호를 사용하세요.',passkeyRegistered:'패스키를 추가했습니다. “패스키 사용”을 선택하여 잠금을 해제하세요.',inviteInvalid:'초대가 만료되었거나 이미 사용되었습니다. 관리자에게 새 초대를 요청하세요.',passkeyDuplicate:'이 기기에 등록된 패스키가 있습니다. 해당 패스키로 로그인하세요.',passkeyThrottled:'패스키 요청이 너무 많습니다. 잠시 후 다시 시도하세요.'},
+    th:{passkey:'ใช้พาสคีย์',passkeyHint:'ใช้ Face ID, Touch ID หรือเลือกอุปกรณ์อื่น',passkeyUnavailable:'เบราว์เซอร์นี้ใช้พาสคีย์ไม่ได้ โปรดใช้รหัสผ่านเพื่อปลดล็อก',setupTitle:'เพิ่มพาสคีย์ของคุณ',setupHelp:'นี่คือคำเชิญลงทะเบียนแบบใช้ครั้งเดียวจากเจ้าของเว็บไซต์ หลังยืนยัน อุปกรณ์หรือแอปจัดการรหัสผ่านจะบันทึกพาสคีย์',registerPasskey:'เพิ่มพาสคีย์',passkeyWaiting:'โปรดยืนยันพาสคีย์บนอุปกรณ์ของคุณ…',registering:'โปรดยืนยันพาสคีย์ใหม่บนอุปกรณ์ของคุณ…',passkeyCancelled:'ยกเลิกคำขอพาสคีย์หรือหมดเวลาแล้ว ลองอีกครั้งหรือใช้รหัสผ่าน',passkeyRejected:'ตรวจสอบพาสคีย์ไม่สำเร็จ โปรดลองอีกครั้งหรือใช้รหัสผ่าน',passkeyRegistered:'เพิ่มพาสคีย์แล้ว เลือก “ใช้พาสคีย์” เพื่อปลดล็อก',inviteInvalid:'คำเชิญหมดอายุหรือถูกใช้แล้ว โปรดขอคำเชิญใหม่จากเจ้าของเว็บไซต์',passkeyDuplicate:'อุปกรณ์นี้มีพาสคีย์ที่ลงทะเบียนแล้ว โปรดใช้พาสคีย์นั้นเข้าสู่ระบบ',passkeyThrottled:'มีคำขอพาสคีย์มากเกินไป โปรดลองอีกครั้งภายหลัง'},
+    ru:{passkey:'Войти с ключом доступа',passkeyHint:'Используйте Face ID, Touch ID или выберите другое устройство.',passkeyUnavailable:'В этом браузере ключи доступа недоступны. Используйте пароль.',setupTitle:'Добавить ключ доступа',setupHelp:'Это одноразовое приглашение от владельца. После подтверждения устройство или менеджер паролей сохранит ключ доступа.',registerPasskey:'Добавить ключ доступа',passkeyWaiting:'Подтвердите ключ доступа на устройстве…',registering:'Подтвердите новый ключ доступа на устройстве…',passkeyCancelled:'Запрос отменён или время ожидания истекло. Повторите попытку или используйте пароль.',passkeyRejected:'Не удалось проверить ключ доступа. Повторите попытку или используйте пароль.',passkeyRegistered:'Ключ доступа добавлен. Выберите «Войти с ключом доступа» для разблокировки.',inviteInvalid:'Приглашение истекло или уже использовано. Запросите новое у владельца.',passkeyDuplicate:'На этом устройстве уже есть зарегистрированный ключ доступа. Используйте его для входа.',passkeyThrottled:'Слишком много запросов ключа доступа. Попробуйте позже.'}
+  };
+  for(const locale of Object.keys(passkeyCopy)){
+    Object.assign(dictionary[locale],passkeyCopy[locale]);
+    Object.assign(loadingCopy[locale],passkeyCopy[locale]);
+  }
+  const noPasskeys={
+    'zh-HK':'目前未登記通行密鑰。請使用密碼，或用擁有人提供嘅邀請登記。',
+    en:'No passkey is registered yet. Use the password, or register with an invitation from the owner.',
+    'zh-CN':'目前尚未登记通行密钥。请使用密码，或通过网站所有者提供的邀请登记。',
+    ja:'パスキーはまだ登録されていません。パスワードを使うか、管理者からの招待で登録してください。',
+    ko:'등록된 패스키가 없습니다. 비밀번호를 사용하거나 관리자의 초대로 등록하세요.',
+    th:'ยังไม่มีพาสคีย์ที่ลงทะเบียน โปรดใช้รหัสผ่านหรือลงทะเบียนผ่านคำเชิญจากเจ้าของเว็บไซต์',
+    ru:'Ключ доступа ещё не зарегистрирован. Используйте пароль или зарегистрируйте ключ по приглашению владельца.'
+  };
+  for(const locale of Object.keys(noPasskeys))dictionary[locale].noPasskeys=noPasskeys[locale];
   let language = new URL(location.href).searchParams.get("lang");
   if (!dictionary[language]) { try { language=localStorage.getItem('bernie-portfolio-language'); } catch {} }
   if (!dictionary[language]) language = "zh-HK";
@@ -51,7 +89,11 @@
   let archivePromise=null, download={loaded:0,total:0};
   let blockedUntil=0,permanentlyBlocked=false,blockTimer;
   const isBlocked=()=>permanentlyBlocked||blockedUntil>Date.now();
-  function syncControls(){input.disabled=busy||isBlocked();show.disabled=busy||isBlocked();submit.disabled=busy||isBlocked();}
+  function syncControls(){
+    input.disabled=busy||isBlocked();show.disabled=busy||isBlocked();submit.disabled=busy||isBlocked();
+    if(passkeyButton)passkeyButton.disabled=busy||isBlocked()||!worker||!passkeySupported;
+    if(registerButton)registerButton.disabled=busy||isBlocked()||!worker||!passkeySupported||!setupToken;
+  }
   function showBlock(reply){
     permanentlyBlocked=reply.code==='permanent_lock';
     blockedUntil=permanentlyBlocked?0:Date.now()+Math.max(1,Math.min(300,Number(reply.retryAfterSeconds)||300))*1000;
@@ -86,6 +128,8 @@
     document.title = text.heading + " · Bernie Leung";
     document.querySelectorAll("[data-gate-copy]").forEach(node => {node.textContent = text[node.dataset.gateCopy] || "";});
     show.textContent = input.type === "password" ? text.show : text.hide;
+    const note=document.getElementById('passkey-note');
+    if(note)note.textContent=passkeySupported?text.passkeyHint:text.passkeyUnavailable;
     const seconds=Math.max(0,Math.ceil((blockedUntil-Date.now())/1000));
     const remaining=String(Math.floor(seconds/60))+':'+String(seconds%60).padStart(2,'0');
     status.textContent = (text[state] || loadingCopy[language][state] || '').replace('{time}',remaining);
@@ -179,14 +223,14 @@
       return reply;
     }finally{clearTimeout(timer);}
   }
-  async function decrypt(password) {
+  async function decrypt(getAccess) {
     const envelope=await prepareArchive();
     // Old password-derived bundles are never accepted by the browser runtime.
     if(envelope.version!==2||envelope.cipher!=='AES-256-GCM'||typeof envelope.archiveId!=='string'||envelope.compression!=='gzip')throw new Error('Invalid envelope');
     const iv=bytes(envelope.iv),ciphertext=bytes(envelope.ciphertext);
     if(iv.length!==12||ciphertext.length<17)throw new Error('Invalid envelope');
     setStatus('authenticating');await paint();
-    const access=await accessRequest('/v1/unlock',{password,archiveId:envelope.archiveId});
+    const access=await getAccess(envelope.archiveId);
     if(access.archiveId!==envelope.archiveId)throw new Error('Archive mismatch');
     const raw=bytes(access.key);access.key='';
     if(raw.length!==32){raw.fill(0);throw new Error('Invalid key');}
@@ -211,16 +255,99 @@
     if(!paths.has("index.html"))throw new Error("Missing homepage");
     return {files,paths};
   }
+  function webauthnBytes(value){
+    if(typeof value!=='string'||value.length>65536||!/^[A-Za-z0-9_-]+$/.test(value))throw new Error('Invalid credential data');
+    return bytes(value.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-value.length%4)%4));
+  }
+  function webauthnBase64(value){
+    if(!(value instanceof ArrayBuffer)&&!ArrayBuffer.isView(value))throw new Error('Invalid credential data');
+    const data=value instanceof ArrayBuffer?new Uint8Array(value):new Uint8Array(value.buffer,value.byteOffset,value.byteLength);
+    if(data.length>65536)throw new Error('Credential data too large');
+    let binary='';for(const byte of data)binary+=String.fromCharCode(byte);
+    return btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  function credentialOptions(options,registration){
+    if(!options||typeof options!=='object')throw new Error('Missing credential options');
+    const next={...options,challenge:webauthnBytes(options.challenge)};
+    if(registration){
+      next.user={...options.user,id:webauthnBytes(options.user?.id)};
+      next.authenticatorSelection={...options.authenticatorSelection,residentKey:'required',userVerification:'required'};
+    }else next.userVerification='required';
+    for(const field of ['allowCredentials','excludeCredentials'])if(next[field]){
+      if(!Array.isArray(next[field])||next[field].length>100)throw new Error('Invalid credential list');
+      next[field]=next[field].map(item=>({...item,id:webauthnBytes(item.id)}));
+    }
+    return next;
+  }
+  function credentialJSON(credential,registration){
+    if(!credential||credential.type!=='public-key')throw new Error('Missing credential');
+    const data=credential.response;
+    const response={clientDataJSON:webauthnBase64(data.clientDataJSON)};
+    if(registration){
+      response.attestationObject=webauthnBase64(data.attestationObject);
+      if(typeof data.getTransports==='function')response.transports=data.getTransports();
+    }else{
+      response.authenticatorData=webauthnBase64(data.authenticatorData);
+      response.signature=webauthnBase64(data.signature);
+      response.userHandle=data.userHandle?webauthnBase64(data.userHandle):null;
+    }
+    return {id:credential.id,rawId:webauthnBase64(credential.rawId),type:credential.type,response,
+      clientExtensionResults:credential.getClientExtensionResults(),
+      ...(credential.authenticatorAttachment?{authenticatorAttachment:credential.authenticatorAttachment}:{})};
+  }
+  async function openArchive(result){
+    input.value='';input.type='password';
+    setStatus('opening');await paint();
+    await request({type:'UNLOCK',files:result.files},result.files.map(file=>file.data));
+    location.replace(targetFor(result.paths));
+  }
+  function passkeyError(error){
+    setBusy(false);
+    if(['cooldown','permanent_lock'].includes(error.accessCode)){showBlock(error.accessReply);return;}
+    if(['NotAllowedError','AbortError'].includes(error.name)){setStatus('passkeyCancelled');return;}
+    if(error.name==='InvalidStateError'){setStatus('passkeyDuplicate',true);return;}
+    if(error.accessCode==='archive_mismatch'){setStatus('stale',true);return;}
+    if(error.accessCode==='no_passkeys'){setStatus('noPasskeys',true);return;}
+    if(['invalid_invitation','invitation_expired','invitation_used','invite_invalid'].includes(error.accessCode)){setStatus('inviteInvalid',true);return;}
+    if(['rate_limited','passkey_rate_limited','passkey_rate_limit','passkey_busy'].includes(error.accessCode)){setStatus('passkeyThrottled',true);return;}
+    setStatus(error.accessCode?'passkeyRejected':'failed',true);
+  }
+  passkeyButton?.addEventListener('click',async()=>{
+    if(busy||isBlocked()||!worker||!passkeySupported)return;
+    setStatus('downloading');setBusy(true);
+    try{
+      await paint();
+      const result=await decrypt(async archiveId=>{
+        const start=await accessRequest('/v1/passkeys/auth/options',{archiveId});
+        setStatus('passkeyWaiting');await paint();
+        const response=await navigator.credentials.get({publicKey:credentialOptions(start.options,false)});
+        setStatus('authenticating');await paint();
+        return accessRequest('/v1/passkeys/auth/verify',{archiveId,flowId:start.flowId,response:credentialJSON(response,false)});
+      });
+      await openArchive(result);
+    }catch(error){passkeyError(error);}
+  });
+  registerButton?.addEventListener('click',async()=>{
+    if(busy||isBlocked()||!worker||!passkeySupported||!setupToken)return;
+    setStatus('registering');setBusy(true);
+    try{
+      await paint();
+      const envelope=await prepareArchive();
+      if(envelope.version!==2||typeof envelope.archiveId!=='string')throw new Error('Invalid archive');
+      const start=await accessRequest('/v1/passkeys/register/options',{token:setupToken,archiveId:envelope.archiveId});
+      const response=await navigator.credentials.create({publicKey:credentialOptions(start.options,true)});
+      const result=await accessRequest('/v1/passkeys/register/verify',{archiveId:envelope.archiveId,flowId:start.flowId,response:credentialJSON(response,true)});
+      if(result.registered!==true)throw new Error('Registration incomplete');
+      setupToken='';setupPanel.hidden=true;setBusy(false);setStatus('passkeyRegistered');passkeyButton.focus();
+    }catch(error){passkeyError(error);}
+  });
   form.addEventListener("submit",async event => {
     event.preventDefault();if(busy||isBlocked()||!worker||!input.value)return;
     const password=input.value;setStatus("downloading");setBusy(true);
     try {
       await paint();
-      const {files,paths}=await decrypt(password);
-      input.value="";input.type="password";
-      setStatus('opening');await paint();
-      await request({type:"UNLOCK",files},files.map(file=>file.data));
-      setStatus("opening");location.replace(targetFor(paths));
+      const {files,paths}=await decrypt(archiveId=>accessRequest('/v1/unlock',{password,archiveId}));
+      await openArchive({files,paths});
     } catch(error) {
       setBusy(false);
       if(['cooldown','permanent_lock'].includes(error.accessCode)){showBlock(error.accessReply);return;}
@@ -240,7 +367,7 @@
     });
     worker=navigator.serviceWorker.controller;
     const session=await request({type:"STATE"});
-    if(session.unlocked){setStatus("opening");location.replace(location.href);return;}
+    if(session.unlocked&&!setupToken){setStatus("opening");location.replace(location.pathname.endsWith('/unlock.html')?new URL('index.html'+location.search,base).href:location.href);return;}
     setBusy(false);setStatus("ready");
     try{await accessRequest('/v1/status');}
     catch(error){if(['cooldown','permanent_lock'].includes(error.accessCode))showBlock(error.accessReply);}

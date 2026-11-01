@@ -9,7 +9,7 @@ const bootstrap = new Set([
 ]);
 const shells = new Set([
   "index.html", "about.html", "experience.html", "education.html",
-  "skills.html", "projects.html", "photography.html", "equipment.html", "stem.html", "contact.html", "sitemap.html", "404.html"
+  "skills.html", "projects.html", "photography.html", "equipment.html", "stem.html", "contact.html", "sitemap.html", "404.html", "unlock.html"
 ]);
 let files = null;
 
@@ -137,6 +137,8 @@ async function handle(request, path) {
   const head = request.method === "HEAD";
   // Public bootstrap code and ciphertext can never be shadowed by archive data.
   if (bootstrap.has(path)) return fetch(request, {cache:"no-store"});
+  // Owner invitation ceremonies always need the gate, including an already unlocked browser.
+  if (path === "unlock.html") return gate(request, head);
   if (files !== null) {
     const file = files.get(path);
     if (!file) return response("Not found", 404, "text/plain; charset=utf-8", head);

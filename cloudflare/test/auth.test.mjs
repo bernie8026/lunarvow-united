@@ -6,8 +6,10 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Miniflare, Log, LogLevel } from 'miniflare';
+import { build } from 'esbuild';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const bundled = (await build({entryPoints:[resolve(root,'test/harness.mjs')],bundle:true,format:'esm',platform:'browser',target:'es2022',external:['cloudflare:workers'],write:false})).outputFiles[0].text;
 const origin = 'https://bernie8026.github.io';
 const password = randomBytes(32).toString('base64url');
 const adminToken = randomBytes(32).toString('base64url');
@@ -24,10 +26,10 @@ function instance(overrides = {}, persist) {
   return new Miniflare({
     name: 'lunarvow-auth-test',
     modules: true,
-    scriptPath: resolve(root, 'test/harness.mjs'),
+    script: bundled,
     // Pinned workerd's newest supported date; production uses 2026-11-01.
     compatibilityDate: '2026-07-30',
-    durableObjects: { IP_GUARD: { className: 'TestGuard', useSQLite: true } },
+    durableObjects: { IP_GUARD: { className: 'TestGuard', useSQLite: true }, PASSKEYS:{className:'TestRegistry',useSQLite:true} },
     durableObjectsPersist: persist,
     bindings: { ...bindings, ...overrides },
     log: new Log(LogLevel.NONE),
