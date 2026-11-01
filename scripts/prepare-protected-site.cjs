@@ -37,13 +37,35 @@ function readPasswordFile(value){
   if(!text||/[\r\n\x00]/.test(text))throw new Error('Password file must contain one non-empty password line');
   return Buffer.from(text,'utf8');
 }
-function encryptArchive(archive,password){
-  if(!password?.length)throw new Error('An access password is required');
-  const salt=crypto.randomBytes(32),iv=crypto.randomBytes(12),key=crypto.pbkdf2Sync(password,salt,iterations,32,'sha256');
+function readAccessConfig(value=process.env.PORTFOLIO_ACCESS_CONFIG){
+  const filename=path.resolve(value||path.join(root,'..','lunarvow-private','cloudflare-access.json'));
+  assertNoSymlinks(filename);
+  if(!fs.existsSync(filename)||fs.statSync(filename).size>16384)throw new Error('Private Cloudflare access configuration is missing or invalid');
+  let config;
+  try{config=JSON.parse(fs.readFileSync(filename,'utf8'));}
+  catch{throw new Error('Private Cloudflare access configuration is invalid');}
+  return validateAccessConfig(config);
+}
+function validateAccessConfig(config){
+  let origin;
+  try{origin=new URL(config.authOrigin);}
+  catch{throw new Error('Private Cloudflare access configuration is invalid');}
+  accessKey(config).fill(0);
+  if(origin.protocol!=='https:'||origin.origin!==config.authOrigin||!origin.hostname.endsWith('.workers.dev'))throw new Error('Access API must be an exact HTTPS workers.dev origin');
+  return config;
+}
+function accessKey(config){
+  if(typeof config?.archiveId!=='string'||!/^[-a-zA-Z0-9]{16,80}$/.test(config.archiveId))throw new Error('Invalid private archive identifier');
+  const key=base64(config.archiveKeyB64,'private archive key');
+  if(key.length!==32)throw new Error('A random 256-bit archive key is required');
+  return key;
+}
+function encryptArchive(archive,config){
+  const iv=crypto.randomBytes(12),key=accessKey(config);
   try{
     const packed=zlib.gzipSync(Buffer.from(JSON.stringify(archive)),{level:9}),cipher=crypto.createCipheriv('aes-256-gcm',key,iv);
     const ciphertext=Buffer.concat([cipher.update(packed),cipher.final(),cipher.getAuthTag()]);
-    return {version:1,kdf:'PBKDF2-SHA-256',iterations,salt:salt.toString('base64'),iv:iv.toString('base64'),compression:'gzip',ciphertext:ciphertext.toString('base64')};
+    return {version:2,cipher:'AES-256-GCM',archiveId:config.archiveId,iv:iv.toString('base64'),compression:'gzip',ciphertext:ciphertext.toString('base64')};
   }finally{key.fill(0);}
 }
 function base64(value,label){
@@ -62,7 +84,7 @@ function validateArchive(archive){
   }
   return archive;
 }
-function decryptArchive(envelope,password){
+function decryptLegacyArchive(envelope,password){
   if(envelope?.version!==1||envelope.kdf!=='PBKDF2-SHA-256'||envelope.iterations!==iterations||envelope.compression!=='gzip')throw new Error('Unsupported encrypted site format');
   const salt=base64(envelope.salt,'salt'),iv=base64(envelope.iv,'IV'),ciphertext=base64(envelope.ciphertext,'ciphertext');
   if(salt.length!==32||iv.length!==12||ciphertext.length<17||ciphertext.length>maximumBytes)throw new Error('Invalid encrypted site parameters');
@@ -74,6 +96,18 @@ function decryptArchive(envelope,password){
   finally{key.fill(0);}
   return validateArchive(JSON.parse(zlib.gunzipSync(packed,{maxOutputLength:maximumBytes}).toString('utf8')));
 }
+function decryptArchive(envelope,config){
+  if(envelope?.version!==2||envelope.cipher!=='AES-256-GCM'||envelope.archiveId!==config?.archiveId||envelope.compression!=='gzip')throw new Error('Unsupported encrypted site format');
+  const iv=base64(envelope.iv,'IV'),ciphertext=base64(envelope.ciphertext,'ciphertext'),key=accessKey(config);
+  if(iv.length!==12||ciphertext.length<17||ciphertext.length>maximumBytes){key.fill(0);throw new Error('Invalid encrypted site parameters');}
+  let packed;
+  try{
+    const decipher=crypto.createDecipheriv('aes-256-gcm',key,iv);decipher.setAuthTag(ciphertext.subarray(-16));
+    packed=Buffer.concat([decipher.update(ciphertext.subarray(0,-16)),decipher.final()]);
+  }finally{key.fill(0);}
+  try{return validateArchive(JSON.parse(zlib.gunzipSync(packed,{maxOutputLength:maximumBytes}).toString('utf8')));}
+  finally{packed.fill(0);}
+}
 function normalizedBase(value=process.env.PORTFOLIO_BASE_PATH||'/lunarvow-united/'){
   if(typeof value!=='string'||!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(value))throw new Error('Base path must be an absolute directory path ending in /');return value;
 }
@@ -82,7 +116,7 @@ function writeFile(folder,relative,data){
   const target=path.join(folder,...relative.split('/'));fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,data);
 }
 function prepareProtectedSite(options={}){
-  const password=options.password;if(!password?.length)throw new Error('An access password is required');
+  const config=validateAccessConfig(options.accessConfig||readAccessConfig());
   const sourceRoot=path.resolve(options.sourceRoot||path.join(root,'.private','plain-site'));
   const protectionRoot=path.resolve(options.protectionRoot||path.join(root,'protection'));
   const outputRoot=path.resolve(options.outputRoot||path.join(root,'docs')),basePath=normalizedBase(options.basePath);assertNoSymlinks(outputRoot);
@@ -95,9 +129,9 @@ function prepareProtectedSite(options={}){
   const sources=walkFiles(sourceRoot),originalBytes=sources.reduce((sum,file)=>sum+file.size,0);
   if(originalBytes>maximumBytes)throw new Error('Site exceeds the supported size');
   const archive=validateArchive({version:1,files:sources.map(file=>({path:file.path,type:mimeTypes[path.extname(file.path).toLowerCase()]||'application/octet-stream',data:fs.readFileSync(file.absolute).toString('base64')}))});
-  const envelope=encryptArchive(archive,password),checked=decryptArchive(envelope,password);
+  const envelope=encryptArchive(archive,config),checked=decryptArchive(envelope,config);
   if(checked.files.length!==sources.length)throw new Error('Encrypted archive verification failed');
-  const shell=templateText.replaceAll('__BASE_PATH__',basePath),privateRoot=path.join(root,'.private');assertNoSymlinks(privateRoot);fs.mkdirSync(privateRoot,{recursive:true,mode:0o700});
+  const shell=templateText.replaceAll('__BASE_PATH__',basePath).replaceAll('__AUTH_ORIGIN__',config.authOrigin),privateRoot=path.join(root,'.private');assertNoSymlinks(privateRoot);fs.mkdirSync(privateRoot,{recursive:true,mode:0o700});
   const stage=fs.mkdtempSync(path.join(privateRoot,'.protected-stage-')),previous=path.join(privateRoot,'.docs-previous-'+crypto.randomUUID());
   let moved=false,installed=false;
   try{
@@ -126,12 +160,14 @@ function restoreArchive(options){
   const input=path.resolve(options.bundle),output=path.resolve(options.output);assertNoSymlinks(input);assertNoSymlinks(output);
   if(fs.existsSync(output))throw new Error('Restore output must be a new directory');
   if(fs.statSync(input).size>maximumBytes*2)throw new Error('Encrypted bundle is unexpectedly large');
-  const archive=decryptArchive(JSON.parse(fs.readFileSync(input,'utf8')),options.password);fs.mkdirSync(output,{recursive:true,mode:0o700});
+  const envelope=JSON.parse(fs.readFileSync(input,'utf8'));
+  // Legacy restoration is a private command only. The browser never accepts v1.
+  const archive=envelope.version===1?decryptLegacyArchive(envelope,options.password):decryptArchive(envelope,options.accessConfig||readAccessConfig());fs.mkdirSync(output,{recursive:true,mode:0o700});
   try{for(const file of archive.files)writeFile(output,file.path,base64(file.data,'archive data'));}
   catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
   return {restored_files:archive.files.length,output};
 }
-module.exports={assertNoSymlinks,readPasswordFile,passwordPath,walkFiles,validPath,encryptArchive,decryptArchive,prepareProtectedSite,restoreArchive};
+module.exports={assertNoSymlinks,readPasswordFile,passwordPath,readAccessConfig,walkFiles,validPath,encryptArchive,decryptArchive,decryptLegacyArchive,prepareProtectedSite,restoreArchive};
 if(require.main===module){
   let password;
   try{

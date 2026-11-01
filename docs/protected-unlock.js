@@ -10,6 +10,7 @@
   const loadingStatus = document.getElementById("gate-loading-status");
   const loadingBar = document.getElementById("gate-loading-progress");
   const loadingAmount = document.getElementById("gate-loading-amount");
+  const authOrigin = document.querySelector('meta[name="portfolio-auth-origin"]')?.content;
   const dictionary = {
     "zh-HK": {title:"網站已鎖定",intro:"輸入存取密碼，開啟個人作品集。",heading:"解鎖作品集",description:"有存取密碼？喺下面輸入就可以繼續。",label:"存取密碼",show:"顯示",hide:"隱藏",unlock:"解鎖網站",preparing:"正在準備安全解鎖…",ready:"準備好後，輸入密碼即可解鎖。",decrypting:"正在解鎖網站，請稍等…",opening:"已解鎖，正在開啟網站…",wrong:"密碼唔正確，或者加密檔案已損壞。請再試一次。",failed:"暫時未能載入網站。請檢查連線後重新整理。",unsupported:"請使用支援安全解鎖嘅新版瀏覽器，並透過 HTTPS 開啟網站。",session:"密碼唔會由網站儲存。閒置或關閉瀏覽器後，可能需要重新解鎖。",footer:"只向持有密碼嘅訪客開放"},
     en: {title:"This site is locked",intro:"Enter the access password to open the portfolio.",heading:"Unlock the portfolio",description:"Have an access password? Enter it below to continue.",label:"Access password",show:"Show",hide:"Hide",unlock:"Unlock website",preparing:"Preparing secure access…",ready:"Enter the password when you are ready.",decrypting:"Unlocking the website. Please wait…",opening:"Unlocked. Opening the website…",wrong:"The password is incorrect, or the encrypted file is damaged. Please try again.",failed:"The website could not be loaded. Check your connection and refresh.",unsupported:"Use a modern browser with secure access support and open this site over HTTPS.",session:"The website does not save your password. You may need to unlock it again after inactivity or closing the browser.",footer:"Access is limited to visitors with the password"},
@@ -30,11 +31,36 @@
     th:{downloading:'กำลังดาวน์โหลดเว็บไซต์ที่เข้ารหัส…',decrypting:'กำลังตรวจสอบรหัสผ่านและถอดรหัส…',unpacking:'กำลังเตรียมเนื้อหาเว็บไซต์…',opening:'กำลังเปิดหน้าและเตรียมภาพ…',download:'ดาวน์โหลดไฟล์ที่เข้ารหัส'},
     ru:{downloading:'Загрузка зашифрованного сайта…',decrypting:'Проверка пароля и расшифровка…',unpacking:'Подготовка содержимого сайта…',opening:'Открытие страницы и подготовка графики…',download:'Загрузка зашифрованного файла'}
   };
+  const accessCopy = {
+    'zh-HK':{authenticating:'正在驗證密碼及檢查存取權限…',decrypting:'正在解密網站…',wrong:'密碼唔正確。',cooldown:'呢個 IP 暫時鎖定，請 {time} 後再試。',permanent:'呢個 IP 累計輸錯 10 次，已永久鎖定。請聯絡網站擁有人解封。',policy:'輸錯 3 次會鎖定 IP 5 分鐘；累計輸錯 10 次會永久鎖定。',session:'密碼會透過 HTTPS 傳送至網站嘅 Cloudflare 驗證服務。網站唔會將密碼或解密金鑰寫入瀏覽器儲存空間。',stale:'網站版本已更新，請重新整理後再試。'},
+    en:{authenticating:'Verifying the password and access permissions…',decrypting:'Decrypting the website…',wrong:'The password is incorrect.',cooldown:'This IP is temporarily locked. Try again in {time}.',permanent:'This IP is permanently locked after 10 incorrect attempts. Contact the website owner to unblock it.',policy:'3 incorrect attempts lock the IP for 5 minutes; 10 cumulative incorrect attempts lock it permanently.',session:'Your password is sent over HTTPS to this website’s Cloudflare authentication service. This website does not write the password or decryption key to browser storage.',stale:'The website has been updated. Refresh the page and try again.'},
+    'zh-CN':{authenticating:'正在验证密码和访问权限…',decrypting:'正在解密网站…',wrong:'密码不正确。',cooldown:'此 IP 暂时锁定，请在 {time} 后重试。',permanent:'此 IP 累计输错 10 次，已永久锁定。请联系网站所有者解封。',policy:'输错 3 次会锁定 IP 5 分钟；累计输错 10 次会永久锁定。',session:'密码通过 HTTPS 发送至本网站的 Cloudflare 验证服务。网站不会将密码或解密密钥写入浏览器存储空间。',stale:'网站版本已更新，请刷新页面后重试。'},
+    ja:{authenticating:'パスワードとアクセス権限を確認中…',decrypting:'サイトを復号中…',wrong:'パスワードが違います。',cooldown:'このIPは一時的にロックされています。{time} 後に再試行してください。',permanent:'パスワードを合計10回間違えたため、このIPは無期限でロックされました。管理者に解除を依頼してください。',policy:'3回間違えるとIPを5分間ロックし、合計10回で無期限にロックします。',session:'パスワードはHTTPS経由でこのサイトのCloudflare認証サービスに送信されます。このサイトはブラウザーストレージにパスワードや復号鍵を書き込みません。',stale:'サイトが更新されました。ページを再読み込みしてください。'},
+    ko:{authenticating:'비밀번호와 접속 권한 확인 중…',decrypting:'웹사이트 복호화 중…',wrong:'비밀번호가 올바르지 않습니다.',cooldown:'이 IP는 일시적으로 잠겨 있습니다. {time} 후에 다시 시도해 주세요.',permanent:'비밀번호를 총 10회 틀려 이 IP가 영구적으로 잠겼습니다. 사이트 관리자에게 해제를 요청해 주세요.',policy:'3회 오류 시 IP가 5분간 잠기며, 누적 10회 오류 시 영구 잠깁니다.',session:'비밀번호는 HTTPS를 통해 이 사이트의 Cloudflare 인증 서비스로 전송됩니다. 이 사이트는 브라우저 저장소에 비밀번호나 복호화 키를 기록하지 않습니다.',stale:'사이트가 업데이트되었습니다. 페이지를 새로고침해 주세요.'},
+    th:{authenticating:'กำลังตรวจสอบรหัสผ่านและสิทธิ์เข้าถึง…',decrypting:'กำลังถอดรหัสเว็บไซต์…',wrong:'รหัสผ่านไม่ถูกต้อง',cooldown:'IP นี้ถูกล็อกชั่วคราว ลองอีกครั้งใน {time}',permanent:'IP นี้ถูกล็อกถาวรหลังกรอกรหัสผ่านผิดสะสม 10 ครั้ง โปรดติดต่อเจ้าของเว็บไซต์เพื่อปลดล็อก',policy:'กรอกรหัสผ่านผิด 3 ครั้งจะล็อก IP 5 นาที และผิดสะสม 10 ครั้งจะล็อกถาวร',session:'รหัสผ่านจะถูกส่งผ่าน HTTPS ไปยังบริการยืนยันตัวตน Cloudflare ของเว็บไซต์นี้ เว็บไซต์นี้จะไม่บันทึกรหัสผ่านหรือกุญแจถอดรหัสลงในพื้นที่จัดเก็บของเบราว์เซอร์',stale:'เว็บไซต์ได้รับการอัปเดต โปรดรีเฟรชหน้าแล้วลองอีกครั้ง'},
+    ru:{authenticating:'Проверка пароля и прав доступа…',decrypting:'Расшифровка сайта…',wrong:'Неверный пароль.',cooldown:'Этот IP временно заблокирован. Повторите через {time}.',permanent:'После 10 неверных попыток этот IP заблокирован бессрочно. Обратитесь к владельцу сайта для разблокировки.',policy:'3 неверные попытки блокируют IP на 5 минут; 10 ошибок суммарно — бессрочно.',session:'Пароль передаётся по HTTPS сервису авторизации Cloudflare этого сайта. Сайт не записывает пароль или ключ расшифровки в хранилище браузера.',stale:'Сайт обновлён. Обновите страницу и повторите попытку.'}
+  };
+  for(const locale of Object.keys(accessCopy)){
+    Object.assign(dictionary[locale],accessCopy[locale]);
+    Object.assign(loadingCopy[locale],{authenticating:accessCopy[locale].authenticating,decrypting:accessCopy[locale].decrypting});
+  }
   let language = new URL(location.href).searchParams.get("lang");
   if (!dictionary[language]) { try { language=localStorage.getItem('bernie-portfolio-language'); } catch {} }
   if (!dictionary[language]) language = "zh-HK";
   let state = "preparing", kind = "", busy = false, worker;
   let archivePromise=null, download={loaded:0,total:0};
+  let blockedUntil=0,permanentlyBlocked=false,blockTimer;
+  const isBlocked=()=>permanentlyBlocked||blockedUntil>Date.now();
+  function syncControls(){input.disabled=busy||isBlocked();show.disabled=busy||isBlocked();submit.disabled=busy||isBlocked();}
+  function showBlock(reply){
+    permanentlyBlocked=reply.code==='permanent_lock';
+    blockedUntil=permanentlyBlocked?0:Date.now()+Math.max(1,Math.min(300,Number(reply.retryAfterSeconds)||300))*1000;
+    clearInterval(blockTimer);setStatus(permanentlyBlocked?'permanent':'cooldown',true);syncControls();
+    if(!permanentlyBlocked)blockTimer=setInterval(()=>{
+      if(!isBlocked()){clearInterval(blockTimer);blockedUntil=0;syncControls();setStatus('ready');}
+      else render();
+    },1000);
+  }
   function renderLoading() {
     if(!loading)return;
     const text=loadingCopy[language];
@@ -60,14 +86,16 @@
     document.title = text.heading + " · Bernie Leung";
     document.querySelectorAll("[data-gate-copy]").forEach(node => {node.textContent = text[node.dataset.gateCopy] || "";});
     show.textContent = input.type === "password" ? text.show : text.hide;
-    status.textContent = text[state] || loadingCopy[language][state];
+    const seconds=Math.max(0,Math.ceil((blockedUntil-Date.now())/1000));
+    const remaining=String(Math.floor(seconds/60))+':'+String(seconds%60).padStart(2,'0');
+    status.textContent = (text[state] || loadingCopy[language][state] || '').replace('{time}',remaining);
     status.dataset.kind = kind;
     renderLoading();
     document.querySelectorAll("[data-gate-language]").forEach(button => button.setAttribute("aria-pressed",String(button.dataset.gateLanguage === language)));
   }
   function setStatus(value, error=false) {state=value;kind=error?"error":"";render();}
   function setBusy(value) {
-    busy=value;form.setAttribute("aria-busy",String(value));input.disabled=value;show.disabled=value;submit.disabled=value;
+    busy=value;form.setAttribute("aria-busy",String(value));syncControls();
     if(loading){
       loading.hidden=!value;
       document.querySelectorAll('body > header, body > main, body > footer').forEach(node=>{node.inert=value;});
@@ -137,15 +165,36 @@
   input.addEventListener('focus',()=>{if(kind!=='error')prepareArchive().catch(()=>{});});
   input.addEventListener('input',()=>{prepareArchive().catch(()=>{});});
   const paint=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+  async function accessRequest(path,body){
+    const origin=new URL(authOrigin);
+    if(origin.protocol!=='https:'||origin.origin!==authOrigin||!origin.hostname.endsWith('.workers.dev'))throw new Error('Invalid authentication origin');
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+    try{
+      const response=await fetch(new URL(path,origin),{method:body?'POST':'GET',mode:'cors',credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal,...(body?{headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});
+      const reply=await response.json();
+      if(!response.ok||reply.ok!==true){
+        const error=new Error('Access denied');
+        error.accessCode=reply.code;error.accessReply=reply;throw error;
+      }
+      return reply;
+    }finally{clearTimeout(timer);}
+  }
   async function decrypt(password) {
     const envelope=await prepareArchive();
+    // Old password-derived bundles are never accepted by the browser runtime.
+    if(envelope.version!==2||envelope.cipher!=='AES-256-GCM'||typeof envelope.archiveId!=='string'||envelope.compression!=='gzip')throw new Error('Invalid envelope');
+    const iv=bytes(envelope.iv),ciphertext=bytes(envelope.ciphertext);
+    if(iv.length!==12||ciphertext.length<17)throw new Error('Invalid envelope');
+    setStatus('authenticating');await paint();
+    const access=await accessRequest('/v1/unlock',{password,archiveId:envelope.archiveId});
+    if(access.archiveId!==envelope.archiveId)throw new Error('Archive mismatch');
+    const raw=bytes(access.key);access.key='';
+    if(raw.length!==32){raw.fill(0);throw new Error('Invalid key');}
+    let key;
+    try{key=await crypto.subtle.importKey('raw',raw,{name:'AES-GCM'},false,['decrypt']);}
+    finally{raw.fill(0);}
+    input.value='';input.type='password';
     setStatus('decrypting');await paint();
-    if(envelope.version!==1||envelope.kdf!=="PBKDF2-SHA-256"||envelope.iterations!==600000||envelope.compression!=="gzip")throw new Error("Invalid envelope");
-    const salt=bytes(envelope.salt),iv=bytes(envelope.iv),ciphertext=bytes(envelope.ciphertext);
-    if(salt.length!==32||iv.length!==12||ciphertext.length<17)throw new Error("Invalid envelope");
-    const encoded=new TextEncoder().encode(password);
-    const material=await crypto.subtle.importKey("raw",encoded,"PBKDF2",false,["deriveKey"]);encoded.fill(0);
-    const key=await crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt,iterations:envelope.iterations},material,{name:"AES-GCM",length:256},false,["decrypt"]);
     let compressed;
     try {compressed=await crypto.subtle.decrypt({name:"AES-GCM",iv,tagLength:128},key,ciphertext);}catch{throw new DOMException("Password or archive invalid","OperationError");}
     setStatus('unpacking');await paint();
@@ -163,7 +212,7 @@
     return {files,paths};
   }
   form.addEventListener("submit",async event => {
-    event.preventDefault();if(busy||!worker||!input.value)return;
+    event.preventDefault();if(busy||isBlocked()||!worker||!input.value)return;
     const password=input.value;setStatus("downloading");setBusy(true);
     try {
       await paint();
@@ -173,7 +222,9 @@
       await request({type:"UNLOCK",files},files.map(file=>file.data));
       setStatus("opening");location.replace(targetFor(paths));
     } catch(error) {
-      setBusy(false);setStatus(error.name==="OperationError"?"wrong":"failed",true);input.focus();
+      setBusy(false);
+      if(['cooldown','permanent_lock'].includes(error.accessCode)){showBlock(error.accessReply);return;}
+      setStatus(error.accessCode==='invalid_password'?'wrong':error.accessCode==='archive_mismatch'?'stale':'failed',true);input.focus();
     }
   });
   async function initialise() {
@@ -191,6 +242,8 @@
     const session=await request({type:"STATE"});
     if(session.unlocked){setStatus("opening");location.replace(location.href);return;}
     setBusy(false);setStatus("ready");
+    try{await accessRequest('/v1/status');}
+    catch(error){if(['cooldown','permanent_lock'].includes(error.accessCode))showBlock(error.accessReply);}
   }
   initialise().catch(() => setStatus("failed",true));
 })();

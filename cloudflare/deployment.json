@@ -1,0 +1,12 @@
+{
+  "name": "lunarvow-access",
+  "account_id": "0054778f20f99a987248d4d7b4dc5b59",
+  "auth_origin": "https://lunarvow-access.bernie-lunarvow.workers.dev",
+  "site_origin": "https://bernie8026.github.io",
+  "compatibility_date": "2026-11-01",
+  "main_module": "auth-worker.mjs",
+  "durable_object": { "binding": "IP_GUARD", "class_name": "IpAttemptGuard", "storage": "sqlite" },
+  "migration": { "new_tag": "ip-guard-v1", "new_sqlite_classes": ["IpAttemptGuard"] },
+  "observability": { "enabled": true, "redact_query_string": true, "logs": { "enabled": true, "invocation_logs": true }, "traces": { "enabled": true, "head_sampling_rate": 0.01 } },
+  "secret_names": ["AUTH_PASSWORD_SHA256", "ARCHIVE_KEY_B64", "IP_HMAC_KEY_B64", "ADMIN_TOKEN_SHA256"]
+}

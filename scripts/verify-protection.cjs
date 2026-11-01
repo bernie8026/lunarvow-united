@@ -4,11 +4,13 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
-const zlib=require('node:zlib');
 const {chromium}=require('playwright');
+const {readAccessConfig,decryptArchive}=require('./prepare-protected-site.cjs');
+const {installAuthRoute,redactProtectionError}=require('./protection-test-auth.cjs');
 const root=path.resolve(__dirname,'..');
 const base=new URL(process.env.PORTFOLIO_BASE_URL||'http://127.0.0.1:8766/lunarvow-united/');
 const password=fs.readFileSync(path.resolve(root,process.env.PORTFOLIO_PASSWORD_FILE||'../lunarvow-private/access-password.txt'),'utf8').trim();
+const access=readAccessConfig();
 const snapshot=path.resolve(root,process.env.PORTFOLIO_SOURCE_DIR||'../lunarvow-private/before-protection-3c1dd71/docs');
 const names=['index','about','experience','education','skills','projects','photography','equipment','stem','contact','sitemap'];
 const route=name=>new URL(`${name}.html?lang=zh-HK`,base).href;
@@ -20,7 +22,7 @@ function filesIn(directory,prefix=''){
   return fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?filesIn(path.join(directory,entry.name),prefix+entry.name+'/'):[prefix+entry.name]);
 }
 async function test(label,operation){await operation();results.push(label);console.log('PASS '+label);}
-function cleanError(error){return String(error?.stack||error).split(password).join('[REDACTED]');}
+function cleanError(error){return redactProtectionError(error,{config:access,password});}
 async function closed(page){
   await page.waitForFunction(()=>!!document.querySelector('input[type="password"]')&&!document.querySelector('body[data-page] main#main'),null,{timeout:15000});
   await assert.doesNotReject(()=>page.locator('input[type="password"]').waitFor({state:'visible'}));
@@ -45,6 +47,9 @@ async function unlock(page,name='index'){
 }
 async function newContext(options={}){
   const context=await browser.newContext({viewport:{width:1440,height:900},...options});
+  // Browser integration is isolated from the live counters. Real Durable Object
+  // concurrency and lock policy are covered by the backend's separate suite.
+  await installAuthRoute(context,{config:access,password});
   context.on('page',page=>page.on('pageerror',error=>errors.push(error.message)));
   return context;
 }
@@ -69,12 +74,14 @@ async function storageAudit(page){
   });
   for(const [key,value]of state.values){
     assert(!value?.includes(password),'persistent storage must not contain the password');
+    assert(!value?.includes(access.archiveKeyB64),'persistent storage must not contain the archive key');
     assert(!/password|decrypted|aes[-_]?key|archive[-_]?files/i.test(key),'persistent storage must not contain a credential or decrypted archive key');
     assert(!/<main\b|"files"\s*:\s*\[/.test(value||''),'storage must not contain plaintext portfolio content');
   }
   assert.deepEqual(state.databases,[],'the encrypted portfolio does not persist a decrypted IndexedDB database');
   for(const entry of state.cached){
     assert(!entry.body.includes(password),'CacheStorage must not contain the password');
+    assert(!entry.body.includes(access.archiveKeyB64),'CacheStorage must not contain the archive key');
     assert(!/<main\b|"files"\s*:\s*\[/.test(entry.body),'CacheStorage must not contain plaintext portfolio content');
     assert(!/\/assets\//.test(new URL(entry.url).pathname),'private assets must not be persisted in CacheStorage');
   }
@@ -90,12 +97,15 @@ async function main(){
   const envelope=JSON.parse(fs.readFileSync(path.join(root,'docs/protected-site.json'),'utf8'));
   let archive;
   await test('Authenticated archive, complete source coverage and clean public deployment',async()=>{
-    assert.equal(envelope.version,1);assert.equal(envelope.kdf,'PBKDF2-SHA-256');assert.equal(envelope.iterations,600000);assert.equal(envelope.compression,'gzip');
-    const salt=Buffer.from(envelope.salt,'base64'),iv=Buffer.from(envelope.iv,'base64'),ciphertext=Buffer.from(envelope.ciphertext,'base64');
-    assert.equal(salt.length,32);assert.equal(iv.length,12);assert(ciphertext.length>16);
-    const key=crypto.pbkdf2Sync(password,salt,envelope.iterations,32,'sha256');
-    const decipher=crypto.createDecipheriv('aes-256-gcm',key,iv);decipher.setAuthTag(ciphertext.subarray(-16));
-    archive=JSON.parse(zlib.gunzipSync(Buffer.concat([decipher.update(ciphertext.subarray(0,-16)),decipher.final()])).toString('utf8'));
+    assert.equal(envelope.version,2);assert.equal(envelope.cipher,'AES-256-GCM');assert.equal(envelope.archiveId,access.archiveId);assert.equal(envelope.compression,'gzip');
+    assert(!('kdf' in envelope)&&!('salt' in envelope)&&!('iterations' in envelope),'public ciphertext does not provide a password-derived decryption path');
+    const iv=Buffer.from(envelope.iv,'base64'),ciphertext=Buffer.from(envelope.ciphertext,'base64');
+    assert.equal(iv.length,12);assert(ciphertext.length>16);
+    archive=decryptArchive(envelope,access);
+    assert.throws(()=>decryptArchive({...envelope,version:1},access),'normal decryption must reject the legacy envelope');
+    const passwordKey=crypto.createHash('sha256').update(password).digest();
+    try{assert.throws(()=>decryptArchive(envelope,{...access,archiveKeyB64:passwordKey.toString('base64')}),'a key derived from the login password cannot decrypt the current bundle');}
+    finally{passwordKey.fill(0);}
     assert.equal(archive.version,1);assert(Array.isArray(archive.files));
     const encrypted=new Map(archive.files.map(file=>[file.path,file]));
     assert.equal(encrypted.size,archive.files.length,'archive paths must be unique');
@@ -108,6 +118,10 @@ async function main(){
     for(const file of filesIn(path.join(root,'docs'))){
       assert(file.endsWith('.html')||['protected-worker.js','protected-unlock.js','protected-session.js','protected-site.json','robots.txt','.nojekyll'].includes(file),'public deployment contains only gate runtime, ciphertext and shell routes');
       assert(!/\.(?:zip|tar|gz|map|bak|password)$/i.test(file),'deployment has no plaintext backup, source map, or password artifact');
+      const publicText=fs.readFileSync(path.join(root,'docs',file),'utf8');
+      for(const secret of [password,access.archiveKeyB64,access.ipHmacKeyB64,access.adminToken]){
+        if(secret)assert(!publicText.includes(secret),'public deployment must not contain an authentication or decryption secret');
+      }
       if(!encrypted.has(file)||file==='.nojekyll')continue;
       if(file==='robots.txt'){assert.equal(fs.readFileSync(path.join(root,'docs',file),'utf8'),'User-agent: *\nDisallow: /\n');continue;}
       assert(file.endsWith('.html'),'a private asset must not also be published as a plaintext file');
@@ -116,9 +130,10 @@ async function main(){
       assert(!/data-page=["'](?:index|about|skills)["']|id=["']main["']/.test(html),'gate HTML does not embed private content');
     }
     const corrupted=Buffer.from(ciphertext);corrupted[0]^=1;
-    const broken=crypto.createDecipheriv('aes-256-gcm',key,iv);broken.setAuthTag(corrupted.subarray(-16));
-    assert.throws(()=>{broken.update(corrupted.subarray(0,-16));broken.final();},'tampering must fail authentication');
-    key.fill(0);
+    assert.throws(()=>decryptArchive({...envelope,ciphertext:corrupted.toString('base64')},access),'tampering must fail authentication');
+    assert.throws(()=>decryptArchive({...envelope,archiveId:'different-publication'},access),'archive identity cannot be substituted');
+    const unlockRuntime=fs.readFileSync(path.join(root,'docs/protected-unlock.js'),'utf8');
+    assert(!/PBKDF2|deriveKey\(/.test(unlockRuntime),'browser runtime must have no local password decryption fallback');
   });
   browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||'chrome',headless:true});
   const context=await newContext();const page=await context.newPage();
@@ -215,7 +230,7 @@ async function main(){
       await storageAudit(page);await cdp.detach();
     });
     assert.deepEqual([...new Set(errors)],[],'protected portfolio has no uncaught browser errors');
-    console.log(JSON.stringify({passed:results.length,encryptedFiles:archive.files.length,base:base.href}));
+    console.log(JSON.stringify({passed:results.length,encryptedFiles:archive.files.length,base:base.href,authentication:'isolated browser fixture; backend policy tested separately'}));
   }finally{await context.close();await browser.close();}
 }
 main().catch(async error=>{console.error(cleanError(error));if(browser)await browser.close().catch(()=>{});process.exitCode=1;});

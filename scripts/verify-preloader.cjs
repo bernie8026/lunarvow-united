@@ -83,15 +83,12 @@ function verifyManifest() {
       assert.ok(resource.type === 'image' || /\.(?:css|js|svg|webm|mp4|mp3|ogg|ogv|m4a|wav|opus|aac)$/.test(filename), `${page}: only scripts/styles, page imagery, media and favicon`);
     }
   }
-  const {readPasswordFile, decryptArchive} = require('./prepare-protected-site.cjs');
-  const password = readPasswordFile();
-  try {
-    const envelope = JSON.parse(fs.readFileSync(path.join(root, 'docs/protected-site.json'), 'utf8'));
-    const archive = decryptArchive(envelope, password);
-    const published = archive.files.find(file => file.path === 'assets/preload-manifest.json');
-    assert.ok(published, 'Encrypted publication contains the preload manifest');
-    assert.deepEqual(JSON.parse(Buffer.from(published.data, 'base64').toString('utf8')), manifest, 'Encrypted published manifest matches public');
-  } finally { password.fill(0); }
+  const {readAccessConfig, decryptArchive} = require('./prepare-protected-site.cjs');
+  const envelope = JSON.parse(fs.readFileSync(path.join(root, 'docs/protected-site.json'), 'utf8'));
+  const archive = decryptArchive(envelope, readAccessConfig());
+  const published = archive.files.find(file => file.path === 'assets/preload-manifest.json');
+  assert.ok(published, 'Encrypted publication contains the preload manifest');
+  assert.deepEqual(JSON.parse(Buffer.from(published.data, 'base64').toString('utf8')), manifest, 'Encrypted published manifest matches public');
   return pages.length;
 }
 function harness(options = {}) {

@@ -123,15 +123,16 @@ async function main() {
   await test('A multi-megabyte media archive encrypts and restores without regex stack overflow', async () => {
     const crypto = require('node:crypto');
     const {encryptArchive, decryptArchive} = require('./prepare-protected-site.cjs');
-    const payload = crypto.randomBytes(5 * 1024 * 1024), password = crypto.randomBytes(32);
+    const payload = crypto.randomBytes(5 * 1024 * 1024), archiveKey = crypto.randomBytes(32);
+    const access = {archiveId:'media-regression-fixture',archiveKeyB64:archiveKey.toString('base64')};
     const archive = {version:1,files:[{path:'assets/large.webm',type:'video/webm',data:payload.toString('base64')}]};
     try {
-      const restored = decryptArchive(encryptArchive(archive,password),password);
+      const restored = decryptArchive(encryptArchive(archive,access),access);
       assert.deepEqual(Buffer.from(restored.files[0].data,'base64'),payload);
       for (const data of ['a','abc','ab=c','a===','!!!!']) {
-        assert.throws(() => decryptArchive(encryptArchive({version:1,files:[{path:'bad.webm',type:'video/webm',data}]},password),password), /Invalid archive data/);
+        assert.throws(() => decryptArchive(encryptArchive({version:1,files:[{path:'bad.webm',type:'video/webm',data}]},access),access), /Invalid archive data/);
       }
-    } finally { password.fill(0);payload.fill(0); }
+    } finally { archiveKey.fill(0);payload.fill(0); }
   });
   assert.equal(typeof listeners.get('message'), 'function');
   assert.equal(typeof listeners.get('fetch'), 'function');

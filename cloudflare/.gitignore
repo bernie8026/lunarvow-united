@@ -1,0 +1,4 @@
+node_modules/
+.mf/
+.env*
+secrets*.json
