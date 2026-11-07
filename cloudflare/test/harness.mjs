@@ -9,8 +9,9 @@ export class TestRegistry extends PasskeyRegistry {
 }
 
 export class TestGuard extends IpAttemptGuard {
-  expireCooldown() {
-    this.ctx.storage.sql.exec('UPDATE attempt_state SET locked_until = 0 WHERE id = 1');
+  seedLegacyLock(failures, cooldown) {
+    this.ctx.storage.sql.exec('UPDATE attempt_state SET failures = ?, locked_until = ? WHERE id = 1',
+      failures, cooldown ? Date.now() + 5 * 60 * 1000 : 0);
   }
   snapshot() {
     return this.ctx.storage.sql.exec('SELECT failures, locked_until FROM attempt_state WHERE id = 1').one();
@@ -40,7 +41,9 @@ export default {
       const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`ip-v1:${ip}`)));
       const name = Array.from(signature, byte => byte.toString(16).padStart(2, '0')).join('');
       const guard = env.IP_GUARD.getByName(name);
-      if (url.searchParams.get('expire') === '1') await guard.expireCooldown();
+      if (url.searchParams.has('failures')) {
+        await guard.seedLegacyLock(Number(url.searchParams.get('failures')), url.searchParams.get('cooldown') === '1');
+      }
       return Response.json(await guard.snapshot());
     }
     return auth.fetch(request, env);

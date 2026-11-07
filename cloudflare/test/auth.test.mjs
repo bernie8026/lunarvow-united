@@ -19,7 +19,6 @@ const bindings = {
   ARCHIVE_ID: 'c77a1599-531a-40f5-bf58-614d0aed2524',
   ARCHIVE_KEY_B64: randomBytes(32).toString('base64'),
   IP_HMAC_KEY_B64: randomBytes(32).toString('base64'),
-  AUTH_PASSWORD_SHA256: hash(password),
   ADMIN_TOKEN_SHA256: hash(adminToken),
 };
 function instance(overrides = {}, persist) {
@@ -52,8 +51,12 @@ async function call(path, { ip = '192.0.2.1', body, headers = {}, method, target
 const unlock = (ip, supplied = 'incorrect', extra = {}) => call('/v1/unlock', {
   ip, body: { password: supplied, archiveId: bindings.ARCHIVE_ID }, ...extra,
 });
-async function expire(ip, target = mf) {
-  await target.dispatchFetch(`https://auth.test/__test/state?expire=1&ip=${encodeURIComponent(ip)}`);
+async function seedLegacyLock(ip, failures, cooldown = false, target = mf) {
+  const url = new URL('https://auth.test/__test/state');
+  url.searchParams.set('ip', ip);
+  url.searchParams.set('failures', String(failures));
+  if (cooldown) url.searchParams.set('cooldown', '1');
+  assert.equal((await target.dispatchFetch(url.href)).status, 200);
 }
 function denied(result, status, code) {
   assert.equal(result.response.status, status);
@@ -63,134 +66,109 @@ function denied(result, status, code) {
   assert.match(result.response.headers.get('cache-control'), /no-store/);
 }
 
-test('correct password releases only the configured generation key; wrong password never does', async () => {
-  const good = await unlock('192.0.2.2', password);
-  assert.equal(good.response.status, 200);
-  assert.deepEqual(good.value, { ok: true, archiveId: bindings.ARCHIVE_ID, key: bindings.ARCHIVE_KEY_B64, failures: 0 });
-  assert.equal(good.response.headers.get('access-control-allow-origin'), origin);
-  assert.match(good.response.headers.get('cache-control'), /no-store/);
-  denied(await unlock('192.0.2.3'), 401, 'invalid_password');
-});
-
-test('third failure locks five minutes; blocked attempts and success do not reset lifetime count; tenth is permanent', async () => {
-  const ip = '192.0.2.10';
-  for (let failure = 1; failure <= 10; failure++) {
-    const result = await unlock(ip);
-    assert.equal(result.value.failures, failure);
-    if (failure === 10) { denied(result, 403, 'permanent_lock'); break; }
-    if (failure % 3 === 0) {
-      denied(result, 429, 'cooldown');
-      assert.ok(result.value.retryAfterSeconds >= 299 && result.value.retryAfterSeconds <= 300);
-      assert.equal(result.response.headers.get('retry-after'), String(result.value.retryAfterSeconds));
-      assert.match(result.response.headers.get('access-control-expose-headers'), /Date, Retry-After/);
-      assert.ok(Number.isFinite(Date.parse(result.response.headers.get('date'))));
-      assert.ok(result.value.lockedUntil > Date.now() + 298000);
+test('legacy password endpoint never releases a key, even if the old secret is still configured', async () => {
+  const oldBinding = instance({ AUTH_PASSWORD_SHA256: hash(password) });
+  try {
+    await oldBinding.ready;
+    for (const target of [mf, oldBinding]) {
       for (const candidate of [password, 'incorrect']) {
-        const blocked = await unlock(ip, candidate);
-        denied(blocked, 429, 'cooldown');
-        assert.equal(blocked.value.failures, failure);
+        const retired = await unlock('192.0.2.2', candidate, { target });
+        denied(retired, 410, 'passkey_required');
+        assert.equal(retired.response.headers.get('access-control-allow-origin'), origin);
       }
-      await expire(ip);
-      const success = await unlock(ip, password);
-      assert.equal(success.response.status, 200);
-      assert.equal(success.value.failures, failure);
-    } else denied(result, 401, 'invalid_password');
-  }
-  await expire(ip);
-  for (const candidate of [password, 'incorrect']) {
-    const permanent = await unlock(ip, candidate);
-    denied(permanent, 403, 'permanent_lock');
-    assert.equal(permanent.value.failures, 10);
-  }
-  const recovery = await call('/v1/admin/unblock', { ip: '192.0.2.12', body: { ip },
-    headers: { Authorization: `Bearer ${adminToken}` } });
-  assert.equal(recovery.response.status, 200);
-  assert.equal((await unlock(ip, password)).value.failures, 0);
-  const independent = await unlock('192.0.2.11', password);
-  assert.equal(independent.response.status, 200);
-  assert.equal(independent.value.failures, 0);
+      const status = await call('/v1/status', { ip: '192.0.2.2', target });
+      assert.deepEqual(status.value, { ok: true, archiveId: bindings.ARCHIVE_ID, code: 'ready', failures: 0 });
+      assert.equal(status.response.status, 200);
+    }
+  } finally { await oldBinding.dispose(); }
 });
 
-test('forty concurrent failures are serialized: exactly three counted before cooldown', async () => {
-  const results = await Promise.all(Array.from({ length: 40 }, () => unlock('192.0.2.20')));
-  assert.equal(results.filter(item => item.response.status === 401).length, 2);
-  assert.equal(results.filter(item => item.response.status === 429).length, 38);
-  assert.ok(results.every(item => item.value.failures <= 3 && !('key' in item.value)));
-  const status = await call('/v1/status', { ip: '192.0.2.20' });
+test('legacy cooldown and permanent records retain their status and expire or unblock as intended', async () => {
+  const ip = '192.0.2.10';
+  await seedLegacyLock(ip, 3, true);
+  const status = await call('/v1/status', { ip });
   denied(status, 429, 'cooldown');
   assert.equal(status.value.failures, 3);
-  denied(await unlock('192.0.2.20', password), 429, 'cooldown');
+  assert.ok(status.value.retryAfterSeconds >= 299 && status.value.retryAfterSeconds <= 300);
+  assert.equal(status.response.headers.get('retry-after'), String(status.value.retryAfterSeconds));
+  assert.match(status.response.headers.get('access-control-expose-headers'), /Date, Retry-After/);
+  await seedLegacyLock(ip, 3);
+  assert.equal((await call('/v1/status', { ip })).value.code, 'ready');
+  await seedLegacyLock(ip, 10);
+  denied(await call('/v1/status', { ip }), 403, 'permanent_lock');
+  assert.equal((await call('/v1/status', { ip: '192.0.2.11' })).value.failures, 0);
 });
 
 test('IP identity is normalized, ignores browser IP overrides, and rejects missing or invalid platform IP', async () => {
-  await unlock('2001:0DB8:0000:0000:0000:0000:0000:0001');
+  await seedLegacyLock('2001:0DB8:0000:0000:0000:0000:0000:0001', 1);
   let status = await call('/v1/status', { ip: '2001:db8::1' });
   assert.equal(status.value.failures, 1);
-  await unlock('::ffff:192.0.2.30');
+  await seedLegacyLock('::ffff:192.0.2.30', 1);
   status = await call('/v1/status', { ip: '192.0.2.30' });
   assert.equal(status.value.failures, 1);
-  await unlock('192.0.2.31', 'incorrect', { headers: { 'X-Forwarded-For': '192.0.2.32', 'X-Real-IP': '192.0.2.32' } });
-  assert.equal((await call('/v1/status', { ip: '192.0.2.31' })).value.failures, 1);
-  assert.equal((await call('/v1/status', { ip: '192.0.2.32' })).value.failures, 0);
-  denied(await unlock('invalid-ip', password), 400, 'invalid_ip');
-  denied(await unlock('192.0.2.1, 192.0.2.2', password), 400, 'invalid_ip');
+  status = await call('/v1/status', { ip: '192.0.2.30', headers: {
+    'X-Forwarded-For': '192.0.2.32', 'X-Real-IP': '192.0.2.32',
+  } });
+  assert.equal(status.value.failures, 1);
+  denied(await call('/v1/status', { ip: 'invalid-ip' }), 400, 'invalid_ip');
+  denied(await call('/v1/status', { ip: '192.0.2.1, 192.0.2.2' }), 400, 'invalid_ip');
   // Miniflare injects a platform header, so the local harness explicitly removes it.
   const missing = await mf.dispatchFetch('https://auth.test/__test/no-ip', { headers: { Origin: origin } });
   assert.equal(missing.status, 503);
 });
 
-test('stale archive, malformed and oversized requests do not count as password failures', async () => {
-  const ip = '192.0.2.40';
-  denied(await call('/v1/unlock', { ip, body: { password, archiveId: 'stale-archive-generation' } }), 409, 'archive_mismatch');
-  denied(await call('/v1/unlock', { ip, body: '{' }), 400, 'invalid_request');
-  denied(await call('/v1/unlock', { ip, body: { password: 123, archiveId: bindings.ARCHIVE_ID } }), 400, 'invalid_request');
-  denied(await call('/v1/unlock', { ip, body: { password: 'x'.repeat(3000), archiveId: bindings.ARCHIVE_ID } }), 413, 'body_too_large');
-  denied(await call('/v1/unlock', { ip, body: 'bad', headers: { 'Content-Type': 'text/plain' } }), 415, 'json_required');
+test('stale archive, malformed and oversized passkey requests fail without a key', async () => {
+  const path = '/v1/passkeys/auth/options', ip = '192.0.2.40';
+  denied(await call(path, { ip, body: { archiveId: 'stale-archive-generation' } }), 409, 'archive_mismatch');
+  denied(await call(path, { ip, body: '{' }), 400, 'invalid_request');
+  denied(await call(path, { ip, body: { archiveId: bindings.ARCHIVE_ID, other: 'x'.repeat(17000) } }), 413, 'body_too_large');
+  denied(await call(path, { ip, body: 'bad', headers: { 'Content-Type': 'text/plain' } }), 415, 'json_required');
   assert.equal((await call('/v1/status', { ip })).value.failures, 0);
 });
 
-test('only exact configured browser origins get CORS access and preflight', async () => {
-  denied(await unlock('192.0.2.50', password, { headers: { Origin: 'https://evil.test' } }), 403, 'origin_not_allowed');
-  denied(await unlock('192.0.2.50', password, { headers: { Origin: 'https://bernie8026.github.io.evil.test' } }), 403, 'origin_not_allowed');
-  const preflight = await call('/v1/unlock', { method: 'OPTIONS' });
+test('only exact configured browser origins get CORS access and the retired route has no preflight', async () => {
+  const path = '/v1/passkeys/auth/options';
+  denied(await call(path, { headers: { Origin: 'https://evil.test' }, body: {} }), 403, 'origin_not_allowed');
+  denied(await call(path, { headers: { Origin: 'https://bernie8026.github.io.evil.test' }, body: {} }), 403, 'origin_not_allowed');
+  const preflight = await call(path, { method: 'OPTIONS' });
   assert.equal(preflight.response.status, 204);
   assert.equal(preflight.response.headers.get('access-control-allow-origin'), origin);
   assert.equal(preflight.response.headers.get('access-control-allow-credentials'), null);
+  denied(await call('/v1/unlock', { method: 'OPTIONS' }), 403, 'origin_not_allowed');
   const noOrigin = await mf.dispatchFetch('https://auth.test/v1/status');
   assert.equal(noOrigin.status, 403);
 });
 
-test('manual recovery requires independent admin token; authenticated self and target-IP recovery reset persistent counters', async () => {
+test('manual recovery requires independent admin token and can reset persisted legacy locks', async () => {
   const ip = '192.0.2.60';
-  for (let i = 0; i < 3; i++) await unlock(ip);
+  await seedLegacyLock(ip, 10);
   denied(await call('/v1/admin/unblock', { ip, body: { ip: 'self' } }), 401, 'unauthorized');
   denied(await call('/v1/admin/unblock', { ip, body: { ip: 'self' }, headers: { Authorization: `Bearer ${password}` } }), 401, 'unauthorized');
-  assert.equal((await call('/v1/status', { ip })).value.failures, 3);
+  denied(await call('/v1/status', { ip }), 403, 'permanent_lock');
   const clear = await call('/v1/admin/unblock', { ip, body: { ip: 'self' }, headers: { Authorization: `Bearer ${adminToken}` } });
   assert.equal(clear.response.status, 200);
   assert.equal(clear.value.failures, 0);
   assert.ok(!('key' in clear.value));
-  assert.equal((await unlock(ip, password)).response.status, 200);
-  await unlock('2001:db8::60');
+  assert.equal((await call('/v1/status', { ip })).value.code, 'ready');
+  await seedLegacyLock('2001:db8::60', 3, true);
   const targetClear = await call('/v1/admin/unblock', { ip, body: { ip: '2001:0db8:0:0:0:0:0:60' }, headers: { Authorization: `Bearer ${adminToken}` } });
   assert.equal(targetClear.response.status, 200);
   assert.equal((await call('/v1/status', { ip: '2001:db8::60' })).value.failures, 0);
 });
 
-test('lock records survive actual workerd disposal and restart with SQLite persistence', async () => {
+test('legacy lock records survive actual workerd disposal and restart with SQLite persistence', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'lunarvow-auth-test-'));
   let persistent;
   try {
     persistent = instance({}, directory);
     await persistent.ready;
-    for (let i = 0; i < 3; i++) await unlock('192.0.2.70', 'incorrect', { target: persistent });
+    await seedLegacyLock('192.0.2.70', 3, true, persistent);
     await persistent.dispose();
     persistent = instance({}, directory);
     await persistent.ready;
     const status = await call('/v1/status', { ip: '192.0.2.70', target: persistent });
     denied(status, 429, 'cooldown');
     assert.equal(status.value.failures, 3);
-    denied(await unlock('192.0.2.70', password, { target: persistent }), 429, 'cooldown');
   } finally {
     await persistent?.dispose();
     await rm(directory, { recursive: true, force: true });
@@ -201,6 +179,6 @@ test('missing or malformed essential secret fails closed without a key', async (
   const broken = instance({ ARCHIVE_KEY_B64: '' });
   try {
     await broken.ready;
-    denied(await unlock('192.0.2.80', password, { target: broken }), 503, 'service_unavailable');
+    denied(await call('/v1/status', { target: broken }), 503, 'service_unavailable');
   } finally { await broken.dispose(); }
 });

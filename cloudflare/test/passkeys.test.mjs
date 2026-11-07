@@ -22,7 +22,7 @@ const adminToken = randomBytes(32).toString('base64url');
 const bindings = {
   SITE_ORIGIN: origin, ARCHIVE_ID: 'c77a1599-531a-40f5-bf58-614d0aed2524',
   ARCHIVE_KEY_B64: randomBytes(32).toString('base64'), IP_HMAC_KEY_B64: randomBytes(32).toString('base64'),
-  AUTH_PASSWORD_SHA256: hash(password).toString('hex'), ADMIN_TOKEN_SHA256: hash(adminToken).toString('hex'),
+  ADMIN_TOKEN_SHA256: hash(adminToken).toString('hex'),
 };
 function instance(persist) {
   return new Miniflare({ name: 'passkey-test', modules: true, script: bundled,
@@ -229,13 +229,16 @@ test('passkey abuse throttles independently and never increments lifetime passwo
 
 test('existing password IP cooldown/permanent lock also deny otherwise valid passkey proofs', async () => {
   const device = await enroll(), ip = freshIp(), flow = await authStart(ip);
-  for (let count = 0; count < 3; count++) await call('/v1/unlock', { ip, body: { archiveId: bindings.ARCHIVE_ID, password: 'wrong' } });
+  const stateUrl = new URL('https://auth.test/__test/state');
+  stateUrl.searchParams.set('ip', ip);
+  stateUrl.searchParams.set('failures', '3');
+  stateUrl.searchParams.set('cooldown', '1');
+  assert.equal((await mf.dispatchFetch(stateUrl.href)).status, 200);
   noKey(await verify(device, flow), 429, 'cooldown');
   noKey(await request('auth/options', {}, ip), 429, 'cooldown');
-  for (let count = 3; count < 10; count++) {
-    await mf.dispatchFetch(`https://auth.test/__test/state?expire=1&ip=${encodeURIComponent(ip)}`);
-    await call('/v1/unlock', { ip, body: { archiveId: bindings.ARCHIVE_ID, password: 'wrong' } });
-  }
+  stateUrl.searchParams.set('failures', '10');
+  stateUrl.searchParams.delete('cooldown');
+  assert.equal((await mf.dispatchFetch(stateUrl.href)).status, 200);
   noKey(await verify(device, flow), 403, 'permanent_lock');
 });
 
