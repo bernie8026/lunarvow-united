@@ -4,7 +4,6 @@ export { PasskeyRegistry };
 
 const encoder = new TextEncoder();
 const MAX_BODY_BYTES = 2048;
-const COOLDOWN_MS = 5 * 60 * 1000;
 const PERMANENT_THRESHOLD = 10;
 
 class HttpError extends Error {
@@ -64,8 +63,7 @@ function configuration(env) {
       typeof env.ARCHIVE_ID !== 'string' || !/^[A-Za-z0-9_-]{16,128}$/.test(env.ARCHIVE_ID)) {
     throw new HttpError(503, 'service_unavailable');
   }
-  // All secrets are required so a deployment cannot silently disable recovery or protection.
-  hexBytes(env.AUTH_PASSWORD_SHA256);
+  // Require the remaining secrets so the service cannot silently disable recovery or protection.
   hexBytes(env.ADMIN_TOKEN_SHA256);
   base64Key(env.ARCHIVE_KEY_B64);
   base64Key(env.IP_HMAC_KEY_B64);
@@ -171,7 +169,7 @@ function stateResponse(state, origin) {
     state.code === 'cooldown' ? { 'Retry-After': String(state.retryAfterSeconds) } : {});
 }
 
-/** One SQLite-backed object per HMAC-normalized IP. No IP or passwords are stored. */
+/** Passkey limits and existing lock records, keyed by HMAC-normalized IP. */
 export class IpAttemptGuard extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
@@ -202,23 +200,6 @@ export class IpAttemptGuard extends DurableObject {
   status() {
     const row = this.#read();
     return this.#blocked(row, Date.now()) || { code: 'ready', failures: row.failures };
-  }
-
-  attempt(verified) {
-    if (typeof verified !== 'boolean') throw new Error('Invalid internal verification result');
-    // No await between read, decision and persisted update. Concurrent RPCs cannot interleave here.
-    return this.ctx.storage.transactionSync(() => {
-      const now = Date.now();
-      const row = this.#read();
-      const blocked = this.#blocked(row, now);
-      if (blocked) return blocked;
-      if (verified) return { code: 'allowed', failures: row.failures };
-      const failures = row.failures + 1;
-      const lockedUntil = failures < PERMANENT_THRESHOLD && failures % 3 === 0 ? now + COOLDOWN_MS : 0;
-      this.ctx.storage.sql.exec('UPDATE attempt_state SET failures = ?, locked_until = ? WHERE id = 1',
-        failures, lockedUntil);
-      return this.#blocked({ failures, locked_until: lockedUntil }, now) || { code: 'invalid_password', failures };
-    });
   }
 
   ceremonyBudget() {
@@ -259,7 +240,7 @@ export default {
         throw new HttpError(403, 'origin_not_allowed');
       }
       if (request.method === 'OPTIONS') {
-        if (!allowedOrigin || !['/v1/unlock', '/v1/status', '/v1/admin/unblock', '/v1/passkeys/auth/options', '/v1/passkeys/auth/verify', '/v1/passkeys/register/options', '/v1/passkeys/register/verify', '/v1/admin/passkeys/invitations', '/v1/admin/passkeys', '/v1/admin/passkeys/revoke'].includes(url.pathname)) {
+        if (!allowedOrigin || !['/v1/status', '/v1/admin/unblock', '/v1/passkeys/auth/options', '/v1/passkeys/auth/verify', '/v1/passkeys/register/options', '/v1/passkeys/register/verify', '/v1/admin/passkeys/invitations', '/v1/admin/passkeys', '/v1/admin/passkeys/revoke'].includes(url.pathname)) {
           throw new HttpError(403, 'origin_not_allowed');
         }
         return json(null, 204, allowedOrigin, {
@@ -313,28 +294,13 @@ export default {
         if (url.pathname === '/v1/passkeys/auth/options') return passkeyResult(await keys.authenticationOptions(pseudonym, allowedOrigin, env.ARCHIVE_ID), allowedOrigin);
         const verified = await keys.authenticate(body, pseudonym, allowedOrigin, env.ARCHIVE_ID);
         if (!verified.ok) return passkeyResult(verified, allowedOrigin);
-        const decision = await guard.attempt(true);
-        if (decision.code !== 'allowed') return stateResponse(decision, allowedOrigin);
+        const decision = await guard.status();
+        if (decision.code !== 'ready') return stateResponse(decision, allowedOrigin);
         if (!await keys.active(verified.credentialId)) throw new HttpError(401, 'invalid_passkey');
         return json({ ok: true, archiveId: env.ARCHIVE_ID, key: env.ARCHIVE_KEY_B64, failures: decision.failures }, 200, allowedOrigin);
       }
-      if (url.pathname !== '/v1/unlock') throw new HttpError(404, 'not_found');
-      if (request.method !== 'POST') throw new HttpError(405, 'method_not_allowed');
-      const body = await boundedJson(request);
-      // Stale client builds and malformed requests never consume a password attempt.
-      if (body.archiveId !== env.ARCHIVE_ID) throw new HttpError(409, 'archive_mismatch');
-      if (typeof body.password !== 'string' || encoder.encode(body.password).byteLength > 512) {
-        throw new HttpError(400, 'invalid_request');
-      }
-      const object = await objectForIp(env, normalizeIp(request.headers.get('CF-Connecting-IP')));
-      const before = await object.status();
-      if (before.code !== 'ready') return stateResponse(before, allowedOrigin);
-      const verified = await matchesDigest(body.password, env.AUTH_PASSWORD_SHA256);
-      // attempt() re-checks persisted lock state after asynchronous verification.
-      const decision = await object.attempt(verified);
-      if (decision.code !== 'allowed') return stateResponse(decision, allowedOrigin);
-      return json({ ok: true, archiveId: env.ARCHIVE_ID, key: env.ARCHIVE_KEY_B64,
-        failures: decision.failures }, 200, allowedOrigin);
+      if (url.pathname === '/v1/unlock') throw new HttpError(410, 'passkey_required');
+      throw new HttpError(404, 'not_found');
     } catch (error) {
       if (error instanceof HttpError) return json({ ok: false, code: error.code }, error.status, allowedOrigin);
       // Fixed log fields only: errors may otherwise contain request/secret data from dependencies.

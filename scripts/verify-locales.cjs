@@ -1,9 +1,10 @@
 'use strict';
-// Exercise the published encrypted flow; never print the access password.
+// Exercise the encrypted site with a throwaway local Passkey fixture.
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
-const root=path.resolve(__dirname,'..'),base=new URL(process.env.PORTFOLIO_BASE_URL||'http://127.0.0.1:8766/lunarvow-united/');
-const password=fs.readFileSync(path.resolve(root,'../lunarvow-private/access-password.txt'),'utf8').trim();
+const {installAuthRoute,redactProtectionError,startPasskeyPreview}=require('./protection-test-auth.cjs');
+const root=path.resolve(__dirname,'..');
+let preview,base;
 const languages=['zh-HK','en','zh-CN','ja','ko','th','ru'],added=languages.slice(3);
 const pages=['index','about','experience','education','skills','projects','photography','equipment','stem','contact','sitemap'];
 const output=path.join(root,'.private/localization/qa'),errors=[];let browser,passed=0;
@@ -19,11 +20,14 @@ async function go(page,name){
   else {if(await page.locator('.menu-toggle').isVisible()&&!await page.locator('.main-nav').isVisible())await page.locator('.menu-toggle').click();link=page.locator('.main-nav > a[href*="'+name+'.html"]');}
   await link.click();await ready(page,name);
 }
+async function createContext(options){
+  const context=await browser.newContext(options);
+  await installAuthRoute(context,{config:preview.config,passkeyOnly:true});
+  return context;
+}
 async function unlock(page,name='index',lang='ja'){
   await page.goto(url(name,lang),{waitUntil:'domcontentloaded'});
-  await page.locator('input[type="password"]:enabled').waitFor({timeout:20000});
-  await page.locator('input[type="password"]').fill(password);
-  await page.locator('form button[type="submit"]').click();await ready(page,name);
+  await page.locator('#passkey-button:enabled').click({timeout:20000});await ready(page,name);
 }
 async function audit(page,name,lang){
   const result=await page.evaluate(({name,lang})=>{
@@ -49,15 +53,16 @@ async function audit(page,name,lang){
     const {prepareLocales}=require('./prepare-locales.cjs');assert.deepEqual(prepareLocales(),{languages:7,translatedKeys:460});
     for(const lang of added){const data=JSON.parse(fs.readFileSync(path.join(root,'public/assets/locales',lang+'.json'),'utf8'));assert.equal(Object.keys(data).length,460);assert(Object.values(data).every(v=>typeof v==='string'&&v.trim()));}
   });
+  preview=await startPasskeyPreview();base=preview.base;
   browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||'chrome',headless:true});
-  const context=await browser.newContext({viewport:{width:1440,height:960}}),page=await context.newPage();
+  const context=await createContext({viewport:{width:1440,height:960}}),page=await context.newPage();
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!m.location().url.endsWith('/favicon.ico'))errors.push(m.text());});
   try{
     await test('Encrypted gate supports all seven choices and unlocks directly into Japanese',async()=>{
-      await page.goto(url('index','ja'),{waitUntil:'domcontentloaded'});await page.locator('input[type="password"]:enabled').waitFor();
+      await page.goto(url('index','ja'),{waitUntil:'domcontentloaded'});await page.locator('#passkey-button:enabled').waitFor();
       assert.equal(await page.locator('[data-gate-language]').count(),7);
-      for(const lang of added){await page.locator('[data-gate-language="'+lang+'"]').click();assert.equal(await page.locator('html').getAttribute('lang'),lang);assert((await page.locator('label[for="site-password"]').innerText()).trim());await page.locator('#show-password').click();assert.equal(await page.locator('#site-password').getAttribute('type'),'text');await page.locator('#show-password').click();}
-      await page.locator('[data-gate-language="ja"]').click();await page.locator('input[type="password"]').fill(password);await page.locator('form button[type="submit"]').click();await ready(page,'index');await audit(page,'index','ja');
+      for(const lang of added){await page.locator('[data-gate-language="'+lang+'"]').click();assert.equal(await page.locator('html').getAttribute('lang'),lang);assert((await page.locator('#passkey-button').innerText()).trim());assert.equal(await page.locator('input[type="password"]').count(),0);}
+      await page.locator('[data-gate-language="ja"]').click();await page.locator('#passkey-button').click();await ready(page,'index');await audit(page,'index','ja');
     });
     await test('All eleven pages render every dictionary field in all seven languages without replacing the document',async()=>{
       const token=await page.evaluate(()=>window.__localeDocument=Math.random());
@@ -88,12 +93,12 @@ async function audit(page,name,lang){
     await test('Language survives refresh, soft navigation, history and a fresh protected session',async()=>{
       await go(page,'about');await change(page,'ko');await page.reload();await ready(page,'about');await audit(page,'about','ko');
       await go(page,'experience');await audit(page,'experience','ko');await page.goBack();await ready(page,'about');await audit(page,'about','ko');
-      const c=await browser.newContext({viewport:{width:360,height:844},reducedMotion:'reduce'}),tab=await c.newPage();try{await unlock(tab,'education','th');await audit(tab,'education','th');await tab.screenshot({path:path.join(output,'mobile-thai-education.png')});}finally{await c.close();}
+      const c=await createContext({viewport:{width:360,height:844},reducedMotion:'reduce'}),tab=await c.newPage();try{await unlock(tab,'education','th');await audit(tab,'education','th');await tab.screenshot({path:path.join(output,'mobile-thai-education.png')});}finally{await c.close();}
     });
-    await test('Locking a translated page returns to the same translated password gate',async()=>{
-      await change(page,'ru');await page.locator('.site-lock').click();await page.locator('input[type="password"]:enabled').waitFor({timeout:20000});assert.equal(await page.locator('html').getAttribute('lang'),'ru');assert.equal(await page.locator('[data-gate-copy="title"]').innerText(),'Сайт заблокирован');
+    await test('Locking a translated page returns to the same translated Passkey gate',async()=>{
+      await change(page,'ru');await page.locator('.site-lock').click();await page.locator('#passkey-button:enabled').waitFor({timeout:20000});assert.equal(await page.locator('html').getAttribute('lang'),'ru');assert.equal(await page.locator('[data-gate-copy="title"]').innerText(),'Сайт заблокирован');
       const response=await page.request.get(new URL('assets/locales.js',base).href);assert([401,403,404].includes(response.status()),'private translations are closed after locking');
     });
     assert.deepEqual([...new Set(errors)],[],'no browser errors');console.log(JSON.stringify({passed,screenshots:output,base:base.href}));
   }finally{await context.close();await browser.close();}
-})().catch(async e=>{console.error(String(e.stack||e).split(password).join('[REDACTED]'));if(browser)await browser.close().catch(()=>{});process.exitCode=1;});
+})().catch(async e=>{console.error(redactProtectionError(e,{config:preview?.config}));if(browser)await browser.close().catch(()=>{});process.exitCode=1;}).finally(async()=>await preview?.close());

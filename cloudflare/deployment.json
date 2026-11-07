@@ -11,5 +11,5 @@
   "migration": { "new_tag": "ip-guard-v1", "new_sqlite_classes": ["IpAttemptGuard"] },
   "passkey_migration": { "old_tag": "ip-guard-v1", "new_tag": "passkeys-v1", "new_sqlite_classes": ["PasskeyRegistry"] },
   "observability": { "enabled": true, "redact_query_string": true, "logs": { "enabled": true, "invocation_logs": true }, "traces": { "enabled": true, "head_sampling_rate": 0.01 } },
-  "secret_names": ["AUTH_PASSWORD_SHA256", "ARCHIVE_KEY_B64", "IP_HMAC_KEY_B64", "ADMIN_TOKEN_SHA256"]
+  "secret_names": ["ARCHIVE_KEY_B64", "IP_HMAC_KEY_B64", "ADMIN_TOKEN_SHA256"]
 }
