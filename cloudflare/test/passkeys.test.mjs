@@ -24,9 +24,9 @@ const bindings = {
   ARCHIVE_KEY_B64: randomBytes(32).toString('base64'), IP_HMAC_KEY_B64: randomBytes(32).toString('base64'),
   ADMIN_TOKEN_SHA256: hash(adminToken).toString('hex'),
 };
-function instance(persist) {
+function instance(persist, extraBindings = {}) {
   return new Miniflare({ name: 'passkey-test', modules: true, script: bundled,
-    compatibilityDate: '2026-07-30', log: new Log(LogLevel.NONE), bindings,
+    compatibilityDate: '2026-07-30', log: new Log(LogLevel.NONE), bindings: { ...bindings, ...extraBindings },
     durableObjects: { IP_GUARD: { className: 'TestGuard', useSQLite: true },
       PASSKEYS: { className: 'TestRegistry', useSQLite: true } }, durableObjectsPersist: persist });
 }
@@ -92,16 +92,16 @@ function assertion(device, options, changes = {}) {
     clientDataJSON: b64(data), authenticatorData: b64(authData), signature: b64(signature),
     userHandle: changes.userHandle ?? device.userId }, clientExtensionResults: {} };
 }
-async function enroll(device = authenticator(), { target = mf, flags, counter } = {}) {
+async function enroll(device = authenticator(), { target = mf, flags, counter, archiveId = bindings.ARCHIVE_ID } = {}) {
   const ip = freshIp(), token = await invite(target);
-  const start = await request('register/options', { token }, ip, target);
+  const start = await request('register/options', { archiveId, token }, ip, target);
   assert.equal(start.response.status, 200, JSON.stringify(start.value));
   assert.equal(start.value.options.authenticatorSelection.residentKey, 'required');
   assert.equal(start.value.options.authenticatorSelection.userVerification, 'required');
   assert.ok(!('authenticatorAttachment' in start.value.options.authenticatorSelection));
   assert.deepEqual(start.value.options.pubKeyCredParams.map(row => row.alg), [-7, -257]);
   const response = registration(device, start.value.options, { flags, counter });
-  const result = await request('register/verify', { flowId: start.value.flowId, response, name: 'Fixture key' }, ip, target);
+  const result = await request('register/verify', { archiveId, flowId: start.value.flowId, response, name: 'Fixture key' }, ip, target);
   assert.equal(result.response.status, 200, JSON.stringify(result.value));
   assert.deepEqual(result.value, { ok: true, registered: true, credentialId: device.id });
   assert.ok(!('key' in result.value));
@@ -126,6 +126,54 @@ test('ES256 and RS256 resident passkeys sign valid challenges in actual workerd'
     const device = await enroll(authenticator(algorithm));
     unlocked(await verify(device, await authStart()));
     unlocked(await verify(device, await authStart())); // Synced/platform counter zero remains valid.
+  }
+});
+
+test('the same passkey authorizes both archives independently and the retired password route releases neither key', async () => {
+  const lunar = { LUNAR_VAULT_ARCHIVE_ID: '2853cd3d-e7f1-45f9-b952-e8d28174bb2b', LUNAR_VAULT_KEY_B64: randomBytes(32).toString('base64') };
+  const target = instance(undefined, lunar);
+  const archives = [
+    { archiveId: bindings.ARCHIVE_ID, key: bindings.ARCHIVE_KEY_B64 },
+    { archiveId: lunar.LUNAR_VAULT_ARCHIVE_ID, key: lunar.LUNAR_VAULT_KEY_B64 },
+  ];
+  try {
+    await target.ready;
+    const device = await enroll(authenticator(), { target, archiveId: lunar.LUNAR_VAULT_ARCHIVE_ID });
+    const start = async (archiveId, ip) => {
+      const result = await request('auth/options', { archiveId }, ip, target);
+      assert.equal(result.response.status, 200);
+      assert.ok(!('key' in result.value));
+      return result.value;
+    };
+    for (const { archiveId, key } of archives) {
+      const otherArchiveId = archives.find(archive => archive.archiveId !== archiveId).archiveId;
+      const ip = freshIp();
+      const wrongFlow = await start(archiveId, ip);
+      noKey(await request('auth/verify', { archiveId: otherArchiveId, flowId: wrongFlow.flowId,
+        response: assertion(device, wrongFlow.options) }, ip, target), 401, 'invalid_passkey');
+      const flow = await start(archiveId, ip);
+      const result = await request('auth/verify', { archiveId, flowId: flow.flowId, response: assertion(device, flow.options) }, ip, target);
+      assert.equal(result.response.status, 200);
+      assert.deepEqual(result.value, { ok: true, archiveId, key, failures: 0 });
+      assert.match(result.response.headers.get('cache-control'), /no-store/);
+      noKey(await call('/v1/unlock', { body: { archiveId, password }, ip, target }), 410, 'passkey_required');
+    }
+    noKey(await request('auth/options', { archiveId: 'different-archive' }, freshIp(), target), 409, 'archive_mismatch');
+  } finally { await target.dispose(); }
+});
+
+test('an incomplete or non-isolated lunar archive configuration fails closed', async () => {
+  const archiveId = '2853cd3d-e7f1-45f9-b952-e8d28174bb2b';
+  for (const extraBindings of [
+    { LUNAR_VAULT_ARCHIVE_ID: archiveId },
+    { LUNAR_VAULT_ARCHIVE_ID: archiveId, LUNAR_VAULT_KEY_B64: bindings.ARCHIVE_KEY_B64 },
+    { LUNAR_VAULT_ARCHIVE_ID: bindings.ARCHIVE_ID, LUNAR_VAULT_KEY_B64: randomBytes(32).toString('base64') },
+  ]) {
+    const target = instance(undefined, extraBindings);
+    try {
+      await target.ready;
+      noKey(await request('auth/options', { archiveId }, freshIp(), target), 503, 'service_unavailable');
+    } finally { await target.dispose(); }
   }
 });
 

@@ -58,15 +58,25 @@ function base64Key(value) {
   return bytes;
 }
 
+function validArchiveId(value) {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{16,128}$/.test(value);
+}
+
 function configuration(env) {
   if (!env.IP_GUARD || typeof env.IP_GUARD.getByName !== 'function' ||
-      typeof env.ARCHIVE_ID !== 'string' || !/^[A-Za-z0-9_-]{16,128}$/.test(env.ARCHIVE_ID)) {
+      !validArchiveId(env.ARCHIVE_ID)) {
     throw new HttpError(503, 'service_unavailable');
   }
   // Require the remaining secrets so the service cannot silently disable recovery or protection.
   hexBytes(env.ADMIN_TOKEN_SHA256);
-  base64Key(env.ARCHIVE_KEY_B64);
+  const portfolioKey = base64Key(env.ARCHIVE_KEY_B64);
   base64Key(env.IP_HMAC_KEY_B64);
+  if (env.LUNAR_VAULT_ARCHIVE_ID !== undefined || env.LUNAR_VAULT_KEY_B64 !== undefined) {
+    if (!validArchiveId(env.LUNAR_VAULT_ARCHIVE_ID) || env.LUNAR_VAULT_ARCHIVE_ID === env.ARCHIVE_ID) throw new HttpError(503, 'service_unavailable');
+    if (crypto.subtle.timingSafeEqual(base64Key(env.LUNAR_VAULT_KEY_B64), portfolioKey)) {
+      throw new HttpError(503, 'service_unavailable');
+    }
+  }
   if (env.SITE_ORIGIN !== 'https://bernie8026.github.io') {
     throw new HttpError(503, 'service_unavailable');
   }
@@ -279,7 +289,9 @@ export default {
         if (request.method !== 'POST') throw new HttpError(405, 'method_not_allowed');
         if (!['/v1/passkeys/auth/options', '/v1/passkeys/auth/verify', '/v1/passkeys/register/options', '/v1/passkeys/register/verify'].includes(url.pathname)) throw new HttpError(404, 'not_found');
         const body = await boundedJson(request, 16384);
-        if (body.archiveId !== env.ARCHIVE_ID) throw new HttpError(409, 'archive_mismatch');
+        const archiveId = body.archiveId;
+        const isLunarVault = validArchiveId(archiveId) && archiveId === env.LUNAR_VAULT_ARCHIVE_ID;
+        if (archiveId !== env.ARCHIVE_ID && !isLunarVault) throw new HttpError(409, 'archive_mismatch');
         const pseudonym = await ipPseudonym(env, normalizeIp(request.headers.get('CF-Connecting-IP')));
         const guard = env.IP_GUARD.getByName(pseudonym), state = await guard.status();
         if (state.code !== 'ready') return stateResponse(state, allowedOrigin);
@@ -288,16 +300,16 @@ export default {
         const keys = registry(env);
         if (url.pathname === '/v1/passkeys/register/options') {
           if (typeof body.token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(body.token)) throw new HttpError(403, 'invalid_invitation');
-          return passkeyResult(await keys.registrationOptions(await digestHex(body.token), pseudonym, allowedOrigin, env.ARCHIVE_ID), allowedOrigin);
+          return passkeyResult(await keys.registrationOptions(await digestHex(body.token), pseudonym, allowedOrigin, archiveId), allowedOrigin);
         }
-        if (url.pathname === '/v1/passkeys/register/verify') return passkeyResult(await keys.register(body, pseudonym, allowedOrigin, env.ARCHIVE_ID), allowedOrigin);
-        if (url.pathname === '/v1/passkeys/auth/options') return passkeyResult(await keys.authenticationOptions(pseudonym, allowedOrigin, env.ARCHIVE_ID), allowedOrigin);
-        const verified = await keys.authenticate(body, pseudonym, allowedOrigin, env.ARCHIVE_ID);
+        if (url.pathname === '/v1/passkeys/register/verify') return passkeyResult(await keys.register(body, pseudonym, allowedOrigin, archiveId), allowedOrigin);
+        if (url.pathname === '/v1/passkeys/auth/options') return passkeyResult(await keys.authenticationOptions(pseudonym, allowedOrigin, archiveId), allowedOrigin);
+        const verified = await keys.authenticate(body, pseudonym, allowedOrigin, archiveId);
         if (!verified.ok) return passkeyResult(verified, allowedOrigin);
         const decision = await guard.status();
         if (decision.code !== 'ready') return stateResponse(decision, allowedOrigin);
         if (!await keys.active(verified.credentialId)) throw new HttpError(401, 'invalid_passkey');
-        return json({ ok: true, archiveId: env.ARCHIVE_ID, key: env.ARCHIVE_KEY_B64, failures: decision.failures }, 200, allowedOrigin);
+        return json({ ok: true, archiveId, key: isLunarVault ? env.LUNAR_VAULT_KEY_B64 : env.ARCHIVE_KEY_B64, failures: decision.failures }, 200, allowedOrigin);
       }
       if (url.pathname === '/v1/unlock') throw new HttpError(410, 'passkey_required');
       throw new HttpError(404, 'not_found');

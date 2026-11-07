@@ -17,6 +17,15 @@ Deployment metadata is recorded in `deployment.json`. It is descriptive API meta
 Secrets belong in Cloudflare Worker secret bindings. The private local backup is `../lunarvow-private/cloudflare-access.json`, outside this repository, with file mode 0600. It holds the archive key, its generation identifier, IP HMAC key, and an independent owner recovery credential. The retired portfolio password and its verifier are not needed for new unlocks.
 Retain any credentials required for **other** archives separately.
 
+## Original Lunar Vow archive
+
+The [original Lunar Vow passkey branch](https://github.com/bernie8026/lunarvow/tree/passkey-only) shares the registry, origin and owner credentials, but has a separate archive generation and wrapping key. The service remains compatible with the portfolio-only configuration when both Lunar bindings are absent. For a coordinated rollout, add both:
+
+- `LUNAR_VAULT_ARCHIVE_ID`: the original archive's public generation ID.
+- `LUNAR_VAULT_KEY_B64`: the original archive's independent wrapping key, supplied as a Worker secret. Use the private Lunar archive configuration; keep the existing portfolio key unchanged.
+
+Authentication challenges are bound to the requested generation. Successful verification returns only its corresponding key. The retired password endpoint issues neither key. Keep the existing Durable Object namespaces and verify a physical passkey and a recovery method before deploying this Worker alongside both Passkey-only Pages versions.
+
 ## Rollout
 
 Before replacing the live password gate, verify that a registered passkey
