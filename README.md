@@ -1,7 +1,7 @@
-# Passkey-protected portfolio
+# Encrypted portfolio with password and passkey access
 
 The existing GitHub Pages address and page routes are retained. The published
-`docs/` directory contains a passkey gate, its runtime, and one encrypted site
+`docs/` directory contains a password and passkey gate, its runtime, and one encrypted site
 archive. Original pages, scripts, styles and images are inside that archive.
 
 ## Local source and access configuration
@@ -36,6 +36,8 @@ The build validates the private access configuration before changing public
 output. It prepares plaintext only in the ignored `.private/plain-site/`
 directory, then replaces `docs/` with the verified encrypted deployment.
 GitHub Pages remains **main /docs**.
+
+The password form uses the privately saved website password and does not require device enrollment. Each site has its own password. Password failures are checked by the shared server-side IP guard; see the access service guide for cooldowns and owner recovery.
 
 Selecting **Use a passkey** starts the device verification ceremony and retains
 the blue loading animation. Real download progress, device verification,
@@ -108,16 +110,14 @@ offscreen content and page disposal stop and reset these effects.
 
 The encrypted archive uses AES-256-GCM with a fresh IV on every build and a
 random 256-bit archive key independent of login. The authentication service
-releases the key after a valid assertion from a registered passkey.
+releases the key after validating the corresponding website password or a valid assertion from a registered passkey. Password verification and persistent IP limits run on the server. The password is not an offline archive key.
 
 ## Browser behaviour and limits
 
 After unlock, the site is served at its existing URLs from Service Worker
 memory. The site does not persist the archive key or decrypted files in browser
 storage. An authorised viewer can still copy files or retain the key received at
-unlock. Removing password login does not revoke previously released keys or
-protect old public copies. The footer lock and worker eviction can require a new
-passkey login.
+unlock. Changing login methods does not revoke previously released keys or protect old public copies. The footer lock and worker eviction can require a new password or passkey login.
 
 ## Verification and recovery
 
@@ -133,9 +133,7 @@ The browser suite creates a local encrypted fixture and virtual authenticator,
 then exercises the real WebAuthn verifier and SQLite without connecting to
 production. After preparing the local content with `node scripts/prepare-content.cjs`,
 run `node scripts/verify-locales.cjs` and `node scripts/verify-unlock-loading.cjs`
-for the seven-language UI and unlock progress checks. Older visual and security
-scripts using a password form target the
-historical password build and are not passkey migration checks.
+for the seven-language UI and unlock progress checks. The current authentication suite tests both password and passkey access using synthetic secrets; it also verifies password access without WebAuthn support.
 
 Recover a current encrypted publication into a **new local directory** with
 the matching private archive configuration:
@@ -159,7 +157,7 @@ student concept with Tello EDU as a reference, not an owned prototype. Original
 Projects content and anchors remain available. Each page has seven-language copy,
 its own visual layout and motion, with reduced-motion and pause support.
 The rail compacts at short desktop heights so eight entries fit beside languages.
-Only encrypted content and passkey gates are published.
+Only encrypted content and public login gates are published.
 
 Quick preview after unlocking: [06 Photography](https://bernie8026.github.io/lunarvow-united/photography.html?lang=zh-HK),
 [07 Equipment](https://bernie8026.github.io/lunarvow-united/equipment.html?lang=zh-HK) and

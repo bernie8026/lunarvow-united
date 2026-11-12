@@ -66,21 +66,48 @@ function denied(result, status, code) {
   assert.match(result.response.headers.get('cache-control'), /no-store/);
 }
 
-test('legacy password endpoint never releases a key, even if the old secret is still configured', async () => {
-  const oldBinding = instance({ AUTH_PASSWORD_SHA256: hash(password) });
+test('password access is opt-in, verifies server-side and releases only the selected archive key', async () => {
+  const lunarPassword = randomBytes(32).toString('base64url');
+  const lunar = { LUNAR_VAULT_ARCHIVE_ID:'5a384e78-5555-4222-aaaa-cb2bf52644dc',
+    LUNAR_VAULT_KEY_B64:randomBytes(32).toString('base64'), LUNAR_VAULT_PASSWORD_SHA256:hash(lunarPassword) };
+  const enabled = instance({ AUTH_PASSWORD_SHA256: hash(password), ...lunar });
   try {
-    await oldBinding.ready;
-    for (const target of [mf, oldBinding]) {
-      for (const candidate of [password, 'incorrect']) {
-        const retired = await unlock('192.0.2.2', candidate, { target });
-        denied(retired, 410, 'passkey_required');
-        assert.equal(retired.response.headers.get('access-control-allow-origin'), origin);
-      }
-      const status = await call('/v1/status', { ip: '192.0.2.2', target });
-      assert.deepEqual(status.value, { ok: true, archiveId: bindings.ARCHIVE_ID, code: 'ready', failures: 0 });
-      assert.equal(status.response.status, 200);
+    await enabled.ready;
+    denied(await unlock('192.0.2.2', password), 410, 'passkey_required');
+    for (const [archiveId, supplied, key] of [
+      [bindings.ARCHIVE_ID,password,bindings.ARCHIVE_KEY_B64],
+      [lunar.LUNAR_VAULT_ARCHIVE_ID,lunarPassword,lunar.LUNAR_VAULT_KEY_B64]
+    ]) {
+      const result = await call('/v1/unlock',{target:enabled,ip:'192.0.2.3',body:{archiveId,password:supplied}});
+      assert.equal(result.response.status,200);
+      assert.deepEqual(result.value,{ok:true,archiveId,key,failures:0});
+      assert.match(result.response.headers.get('cache-control'),/no-store/);
     }
-  } finally { await oldBinding.dispose(); }
+    denied(await call('/v1/unlock',{target:enabled,ip:'192.0.2.4',body:{archiveId:lunar.LUNAR_VAULT_ARCHIVE_ID,password}}),401,'invalid_password');
+    denied(await unlock('192.0.2.5','incorrect',{target:enabled}),401,'invalid_password');
+    const before = await call('/v1/status',{target:enabled,ip:'192.0.2.6'});
+    for (const value of [null,'','x'.repeat(513)]) denied(await unlock('192.0.2.6',value,{target:enabled}),400,'invalid_request');
+    assert.equal((await call('/v1/status',{target:enabled,ip:'192.0.2.6'})).value.failures,before.value.failures);
+  } finally { await enabled.dispose(); }
+});
+
+test('password attempts are atomic: third failure locks five minutes and lifetime tenth requires owner recovery', async () => {
+  const enabled=instance({AUTH_PASSWORD_SHA256:hash(password)});
+  try {
+    await enabled.ready;
+    const ip='192.0.2.7';
+    const results=await Promise.all(Array.from({length:8},()=>unlock(ip,'incorrect',{target:enabled})));
+    assert.equal(results.filter(r=>r.value.code==='invalid_password').length,2);
+    assert.equal(results.filter(r=>r.value.code==='cooldown').length,6);
+    const cooled=await unlock(ip,password,{target:enabled});denied(cooled,429,'cooldown');
+    assert.equal(cooled.value.failures,3);assert(cooled.value.retryAfterSeconds>=299);
+    await seedLegacyLock(ip,9,false,enabled);
+    denied(await unlock(ip,'incorrect',{target:enabled}),403,'permanent_lock');
+    denied(await unlock(ip,password,{target:enabled}),403,'permanent_lock');
+    const reset=await call('/v1/admin/unblock',{target:enabled,ip,body:{ip:'self'},headers:{Authorization:'Bearer '+adminToken}});
+    assert.equal(reset.response.status,200);
+    assert.equal((await unlock(ip,password,{target:enabled})).response.status,200);
+  } finally {await enabled.dispose();}
 });
 
 test('legacy cooldown and permanent records retain their status and expire or unblock as intended', async () => {
@@ -126,7 +153,7 @@ test('stale archive, malformed and oversized passkey requests fail without a key
   assert.equal((await call('/v1/status', { ip })).value.failures, 0);
 });
 
-test('only exact configured browser origins get CORS access and the retired route has no preflight', async () => {
+test('only exact configured browser origins get CORS access and password preflight is allowed', async () => {
   const path = '/v1/passkeys/auth/options';
   denied(await call(path, { headers: { Origin: 'https://evil.test' }, body: {} }), 403, 'origin_not_allowed');
   denied(await call(path, { headers: { Origin: 'https://bernie8026.github.io.evil.test' }, body: {} }), 403, 'origin_not_allowed');
@@ -134,7 +161,7 @@ test('only exact configured browser origins get CORS access and the retired rout
   assert.equal(preflight.response.status, 204);
   assert.equal(preflight.response.headers.get('access-control-allow-origin'), origin);
   assert.equal(preflight.response.headers.get('access-control-allow-credentials'), null);
-  denied(await call('/v1/unlock', { method: 'OPTIONS' }), 403, 'origin_not_allowed');
+  assert.equal((await call('/v1/unlock', { method: 'OPTIONS' })).response.status,204);
   const noOrigin = await mf.dispatchFetch('https://auth.test/v1/status');
   assert.equal(noOrigin.status, 403);
 });

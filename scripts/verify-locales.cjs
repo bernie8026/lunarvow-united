@@ -61,7 +61,7 @@ async function audit(page,name,lang){
     await test('Encrypted gate supports all seven choices and unlocks directly into Japanese',async()=>{
       await page.goto(url('index','ja'),{waitUntil:'domcontentloaded'});await page.locator('#passkey-button:enabled').waitFor();
       assert.equal(await page.locator('[data-gate-language]').count(),7);
-      for(const lang of added){await page.locator('[data-gate-language="'+lang+'"]').click();assert.equal(await page.locator('html').getAttribute('lang'),lang);assert((await page.locator('#passkey-button').innerText()).trim());assert.equal(await page.locator('input[type="password"]').count(),0);}
+      for(const lang of added){await page.locator('[data-gate-language="'+lang+'"]').click();assert.equal(await page.locator('html').getAttribute('lang'),lang);assert((await page.locator('#passkey-button').innerText()).trim());assert.equal(await page.locator('input[type="password"]').count(),1);}
       await page.locator('[data-gate-language="ja"]').click();await page.locator('#passkey-button').click();await ready(page,'index');await audit(page,'index','ja');
     });
     await test('All eleven pages render every dictionary field in all seven languages without replacing the document',async()=>{

@@ -1,10 +1,8 @@
 # Portfolio access service
 
-The existing GitHub Pages URL serves a passkey gate and an AES-256-GCM archive.
-Only the Worker releases the random archive key, after a registered passkey
-proves user verification and the Worker checks persistent IP state. The former
-`/v1/unlock` route is retired; a direct request cannot release a key. There is
-no password verifier binding requirement.
+The existing GitHub Pages URLs serve password and passkey gates with AES-256-GCM archives. The Worker releases a random archive key only after validating either the corresponding archive password or a registered passkey, and checking persistent IP state. Passwords are verified on the server; the browser never derives an archive key from a password.
+
+The optional `AUTH_PASSWORD_SHA256` secret enables portfolio password access. The optional `LUNAR_VAULT_PASSWORD_SHA256` secret enables the original Lunar Vow password. Each is a SHA-256 hexadecimal digest of that site's independently stored, high-entropy password. Without its verifier binding, `/v1/unlock` returns `410 passkey_required` for that archive. Never put passwords or digests in public files.
 
 Each normalized client IP maps to a separate SQLite Durable Object through a
 server-secret HMAC. Existing cooldowns and permanent blocks are preserved and
@@ -14,29 +12,23 @@ request bodies, credentials, keys, or raw IPs.
 
 Deployment metadata is recorded in `deployment.json`. It is descriptive API metadata, not a Wrangler configuration. Build the maintained WebAuthn dependency with `node scripts/build-access-worker.cjs` and upload only its `.private/passkey-worker.mjs` bundle using the connected Cloudflare API. Create each SQLite class with its recorded migration only on first upload; subsequent uploads preserve both namespaces and all secret bindings. Enable the production workers.dev subdomain and disable preview URLs. Never upload the test harness.
 
-Secrets belong in Cloudflare Worker secret bindings. The private local backup is `../lunarvow-private/cloudflare-access.json`, outside this repository, with file mode 0600. It holds the archive key, its generation identifier, IP HMAC key, and an independent owner recovery credential. The retired portfolio password and its verifier are not needed for new unlocks.
+Secrets belong in Cloudflare Worker secret bindings. The private local backup is `../lunarvow-private/cloudflare-access.json`, outside this repository, with file mode 0600. It holds the archive key, its generation identifier, IP HMAC key, and an independent owner recovery credential. Keep the saved website passwords privately when enabling password access; the independent owner credential is not a website password.
 Retain any credentials required for **other** archives separately.
 
 ## Original Lunar Vow archive
 
-The [original Lunar Vow passkey branch](https://github.com/bernie8026/lunarvow/tree/passkey-only) shares the registry, origin and owner credentials, but has a separate archive generation and wrapping key. The service remains compatible with the portfolio-only configuration when both Lunar bindings are absent. For a coordinated rollout, add both:
+The [original Lunar Vow archive](https://github.com/bernie8026/lunarvow) shares the registry, origin and owner credentials, but has a separate archive generation and wrapping key. The service remains compatible with the portfolio-only configuration when both Lunar bindings are absent. For a coordinated rollout, add both:
 
 - `LUNAR_VAULT_ARCHIVE_ID`: the original archive's public generation ID.
 - `LUNAR_VAULT_KEY_B64`: the original archive's independent wrapping key, supplied as a Worker secret. Use the private Lunar archive configuration; keep the existing portfolio key unchanged.
 
-Authentication challenges are bound to the requested generation. Successful verification returns only its corresponding key. The retired password endpoint issues neither key. Keep the existing Durable Object namespaces and verify a physical passkey and a recovery method before deploying this Worker alongside both Passkey-only Pages versions.
+Authentication challenges are bound to the requested generation. Successful verification returns only its corresponding key. The password endpoint selects the corresponding verifier and key by archive generation; one archive password cannot release the other key. Preserve both Durable Object namespaces and all independent key bindings.
 
 ## Rollout
 
-Before replacing the live password gate, verify that a registered passkey
-actually unlocks the portfolio on the owner's device, and have a second
-registered passkey or verified owner invitation recovery available. Publish
-the passkey gate, then upload the new Worker bundle promptly so the retired
-password endpoint cannot issue keys. Preserve existing secret bindings and
-Durable Object namespaces during rollout; the obsolete password verifier is
-unused by the new Worker. Test owner login and a second device, and verify
-that the retired route denies access. If restoring the previous Worker is
-necessary during rollout, it would restore the old password route.
+Build and test the Worker, then upload a new version preserving the current bindings and both Durable Object namespaces. Add the two password verifier secrets from the privately saved passwords, and deploy the tested version before publishing gates with password forms. No namespace migration or archive re-encryption is required. Verify password access for both sites and retain the existing passkey registry and recovery credential.
+
+Password failures persist by IP: the third, sixth and ninth failures start a five-minute cooldown; the tenth lifetime failure blocks new unlocks until the owner clears the IP. Successful password login retains lifetime failures; only the owner reset clears the counter. Passkey login observes existing IP locks. Invalid passkey ceremonies do not increment password failure counts.
 
 ## Owner recovery
 
@@ -49,7 +41,7 @@ If the private owner credential is lost, use the Cloudflare account to replace i
 Run `node --test cloudflare/test/*.test.mjs` after installing the pinned
 dependencies. The suite uses local Miniflare/workerd and actual SQLite storage.
 `node scripts/verify-passkeys.cjs` exercises a local encrypted fixture and real
-verifier with a Chrome virtual authenticator, without the password binding.
+verifier with a Chrome virtual authenticator, plus password access with synthetic test secrets. It verifies a browser without WebAuthn can still use the password form.
 The live smoke script is for a separately authorised rollout.
 
 IP limits affect users sharing the same public IP. A visitor with a different public IP has a separate counter. These controls govern new unlocks; they cannot revoke content or keys already received by an authorized browser, or retract old archives and plaintext previously published in repository history.

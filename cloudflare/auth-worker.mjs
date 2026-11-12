@@ -5,6 +5,7 @@ export { PasskeyRegistry };
 const encoder = new TextEncoder();
 const MAX_BODY_BYTES = 2048;
 const PERMANENT_THRESHOLD = 10;
+const COOLDOWN_MS = 5 * 60 * 1000;
 
 class HttpError extends Error {
   constructor(status, code) {
@@ -212,6 +213,23 @@ export class IpAttemptGuard extends DurableObject {
     return this.#blocked(row, Date.now()) || { code: 'ready', failures: row.failures };
   }
 
+  attempt(verified) {
+    if (typeof verified !== 'boolean') throw new Error('Invalid internal verification result');
+    // No await between read, decision and persisted update. Concurrent RPCs cannot interleave here.
+    return this.ctx.storage.transactionSync(() => {
+      const now = Date.now();
+      const row = this.#read();
+      const blocked = this.#blocked(row, now);
+      if (blocked) return blocked;
+      if (verified) return { code: 'allowed', failures: row.failures };
+      const failures = row.failures + 1;
+      const lockedUntil = failures < PERMANENT_THRESHOLD && failures % 3 === 0 ? now + COOLDOWN_MS : 0;
+      this.ctx.storage.sql.exec('UPDATE attempt_state SET failures = ?, locked_until = ? WHERE id = 1',
+        failures, lockedUntil);
+      return this.#blocked({ failures, locked_until: lockedUntil }, now) || { code: 'invalid_password', failures };
+    });
+  }
+
   ceremonyBudget() {
     return this.ctx.storage.transactionSync(() => {
       const now = Date.now();
@@ -250,7 +268,7 @@ export default {
         throw new HttpError(403, 'origin_not_allowed');
       }
       if (request.method === 'OPTIONS') {
-        if (!allowedOrigin || !['/v1/status', '/v1/admin/unblock', '/v1/passkeys/auth/options', '/v1/passkeys/auth/verify', '/v1/passkeys/register/options', '/v1/passkeys/register/verify', '/v1/admin/passkeys/invitations', '/v1/admin/passkeys', '/v1/admin/passkeys/revoke'].includes(url.pathname)) {
+        if (!allowedOrigin || !['/v1/unlock', '/v1/status', '/v1/admin/unblock', '/v1/passkeys/auth/options', '/v1/passkeys/auth/verify', '/v1/passkeys/register/options', '/v1/passkeys/register/verify', '/v1/admin/passkeys/invitations', '/v1/admin/passkeys', '/v1/admin/passkeys/revoke'].includes(url.pathname)) {
           throw new HttpError(403, 'origin_not_allowed');
         }
         return json(null, 204, allowedOrigin, {
@@ -311,7 +329,24 @@ export default {
         if (!await keys.active(verified.credentialId)) throw new HttpError(401, 'invalid_passkey');
         return json({ ok: true, archiveId, key: isLunarVault ? env.LUNAR_VAULT_KEY_B64 : env.ARCHIVE_KEY_B64, failures: decision.failures }, 200, allowedOrigin);
       }
-      if (url.pathname === '/v1/unlock') throw new HttpError(410, 'passkey_required');
+      if (url.pathname === '/v1/unlock') {
+        if (request.method !== 'POST') throw new HttpError(405, 'method_not_allowed');
+        const { archiveId, password } = await boundedJson(request, 4096);
+        const isLunarVault = validArchiveId(archiveId) && archiveId === env.LUNAR_VAULT_ARCHIVE_ID;
+        if (archiveId !== env.ARCHIVE_ID && !isLunarVault) throw new HttpError(409, 'archive_mismatch');
+        const verifier = isLunarVault ? env.LUNAR_VAULT_PASSWORD_SHA256 : env.AUTH_PASSWORD_SHA256;
+        if (verifier === undefined) throw new HttpError(410, 'passkey_required');
+        if (typeof password !== 'string' || !password.length || encoder.encode(password).byteLength > 512) {
+          throw new HttpError(400, 'invalid_request');
+        }
+        const guard = await objectForIp(env, normalizeIp(request.headers.get('CF-Connecting-IP')));
+        const before = await guard.status();
+        if (before.code !== 'ready') return stateResponse(before, allowedOrigin);
+        const decision = await guard.attempt(await matchesDigest(password, verifier));
+        if (decision.code !== 'allowed') return stateResponse(decision, allowedOrigin);
+        return json({ ok: true, archiveId, key: isLunarVault ? env.LUNAR_VAULT_KEY_B64 : env.ARCHIVE_KEY_B64,
+          failures: decision.failures }, 200, allowedOrigin);
+      }
       throw new HttpError(404, 'not_found');
     } catch (error) {
       if (error instanceof HttpError) return json({ ok: false, code: error.code }, error.status, allowedOrigin);

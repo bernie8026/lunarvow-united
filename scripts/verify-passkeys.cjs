@@ -35,7 +35,7 @@ const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=
 async function test(label,operation){await operation();passed.push(label);console.log('PASS '+label);}
 async function gate(tab=page){
  await tab.locator('body[data-protected-gate]').waitFor();
- assert.equal(await tab.locator('input[type=password]').count(),0);
+ assert.equal(await tab.locator('input[type=password]').count(),1);
 }
 async function ready(tab=page){
  await tab.getByRole('heading',{name:'Private fixture content',exact:true}).waitFor();
@@ -137,7 +137,7 @@ async function start(){
  worker=worker.split(productionSite).join(siteOrigin);
  mf=new Miniflare({name:'lunarvow-passkey-browser',modules:true,script:worker,compatibilityDate:'2026-07-30',
   durableObjects:{IP_GUARD:{className:'IpAttemptGuard',useSQLite:true},PASSKEYS:{className:'PasskeyRegistry',useSQLite:true}},
-  bindings:{SITE_ORIGIN:siteOrigin,ARCHIVE_ID:access.archiveId,ARCHIVE_KEY_B64:access.archiveKeyB64,IP_HMAC_KEY_B64:ipKey,ADMIN_TOKEN_SHA256:sha(adminToken)},log:new Log(LogLevel.NONE)});
+  bindings:{SITE_ORIGIN:siteOrigin,ARCHIVE_ID:access.archiveId,ARCHIVE_KEY_B64:access.archiveKeyB64,IP_HMAC_KEY_B64:ipKey,ADMIN_TOKEN_SHA256:sha(adminToken),AUTH_PASSWORD_SHA256:sha(retiredPassword)},log:new Log(LogLevel.NONE)});
  await mf.ready;
  browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||'chrome',headless:true,args:[
   '--no-proxy-server','--ignore-certificate-errors',
@@ -151,11 +151,11 @@ async function start(){
 }
 async function main(){
  await start();
- await test('Passkey is the only login control and waits for a click',async()=>{
+ await test('Both login methods wait for the visitor and teacher password needs no registered Passkey',async()=>{
   assert(await page.locator('#passkey-button').isVisible());
   assert(!events.some(event=>event.path.includes('/passkeys/auth/')),'no authentication prompt or challenge is requested before a click');
-  const retired=await call('/v1/unlock',{body:{archiveId:access.archiveId,password:retiredPassword}});
-  assert.equal(retired.status,410);assert.equal(retired.value.code,'passkey_required');assert(!('key' in retired.value));
+  await page.locator('#site-password').fill(retiredPassword);
+  await page.locator('#unlock-button').click();await ready();await storageAudit();await lock();
  });
  await test('An empty registry cannot unlock the site',async()=>{
   await page.locator('#passkey-button').click();
@@ -213,7 +213,7 @@ async function main(){
   await page.locator('#passkey-button').click();
   await page.locator('#gate-loading').waitFor({state:'hidden'});
   await page.locator('#passkey-button:enabled').waitFor();assert.equal(await unlocked(),0);
-  assert.equal((await ipStatus()).failures,before);assert.equal(await page.locator('input[type=password]').count(),0);
+  assert.equal((await ipStatus()).failures,before);assert.equal(await page.locator('input[type=password]').count(),1);
  });
  await test('An assertion without user verification is denied without releasing the site',async()=>{
   const before=(await ipStatus()).failures;
@@ -229,16 +229,17 @@ async function main(){
   const revoked=await call('/v1/admin/passkeys/revoke',{admin:true,body:{credentialId:registered[0].id}});assert.equal(revoked.status,200);
   await page.locator('#passkey-button').click();await waitError();assert.equal((await ipStatus()).failures,0);
  });
- await test('Unsupported browsers remain locked and do not offer a password fallback',async()=>{
+ await test('Unsupported Passkey browsers retain a usable password input',async()=>{
   const unsupported=await createContext();
   try{
    await unsupported.addInitScript(()=>{Object.defineProperty(window,'PublicKeyCredential',{configurable:true,value:undefined});});
    const tab=await unsupported.newPage();await tab.goto(base+'index.html?lang=en');await gate(tab);
    const button=tab.locator('#passkey-button');assert(!await button.isVisible()||await button.isDisabled());
    assert.equal(await unlocked(tab),0);await storageAudit(tab);
+   await tab.locator('#site-password').fill(retiredPassword);await tab.locator('#unlock-button').click();await ready(tab);
   }finally{await unsupported.close();}
  });
- await test('Owner can issue a recovery invitation after revocation without a password binding',async()=>{
+ await test('Owner can issue a recovery invitation after revocation',async()=>{
   const token=await invitation();
   await page.goto(base+'unlock.html#passkey-setup='+encodeURIComponent(token));await gate();
   await page.locator('#passkey-register-button:enabled').waitFor();
