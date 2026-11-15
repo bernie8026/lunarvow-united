@@ -16,7 +16,9 @@ const response = (status, body) => new Response(JSON.stringify(body), {
 
 // Run the complete published gate with synthetic DOM/network boundaries. No
 // production credentials, authentication requests or browser storage are used.
-async function gate({ language = 'en', statusReply, archiveReply, authenticate, credentialError, passkeys = true } = {}) {
+async function gate({ language = 'en', statusReply, archiveReply, authenticate, credentialError, passkeys = true, sessionMarker } = {}) {
+  const sessionValues = new Map(), intervals = new Set();
+  if (sessionMarker !== undefined) sessionValues.set('portfolio-protected-ended', typeof sessionMarker === 'string' ? sessionMarker : JSON.stringify(sessionMarker));
   function element(extra = {}) {
     return {
       disabled: true, value: '', type: '', textContent: '', dataset: {}, attributes: {}, handlers: {},
@@ -63,6 +65,7 @@ async function gate({ language = 'en', statusReply, archiveReply, authenticate, 
     window: { DecompressionStream, ...(passkeys ? { PublicKeyCredential: class {} } : {}) },
     location, history: { replaceState() {} }, isSecureContext: true,
     localStorage: { getItem: () => null, setItem() {} }, crypto: webcrypto,
+    sessionStorage: { getItem: key => sessionValues.get(key) || null, removeItem: key => sessionValues.delete(key) },
     fetch: async url => {
       const target = new URL(url);
       if (target.hostname === 'fixture.test') return archiveReply ? archiveReply() : response(200, envelope);
@@ -71,13 +74,16 @@ async function gate({ language = 'en', statusReply, archiveReply, authenticate, 
     },
     requestAnimationFrame: fn => setImmediate(fn), MessageChannel, URL, URLSearchParams,
     AbortController, Uint8Array, ArrayBuffer, TextDecoder, TextEncoder, Response, Blob,
-    DOMException, atob, btoa, setTimeout, clearTimeout, setInterval, clearInterval,
+    DOMException, atob, btoa, setTimeout, clearTimeout,
+    setInterval: (fn, delay) => { const id = setInterval(fn, delay); intervals.add(id); return id; },
+    clearInterval: id => { intervals.delete(id); clearInterval(id); },
   };
   vm.runInNewContext(source, context, { filename: 'protected-unlock.js' });
   const flush = async () => { for (let i = 0; i < 12; i++) await new Promise(setImmediate); };
   await flush();
   return {
-    elements, copies, languageButtons, context, flush,
+    elements, copies, languageButtons, context, flush, sessionValues,
+    dispose: () => { for (const id of intervals) clearInterval(id); intervals.clear(); },
     status: () => elements['gate-status'].textContent,
     passkey: () => elements['passkey-button'].handlers.click(),
     async password() {
@@ -175,4 +181,46 @@ test('every language describes both access methods and password works without We
   assert.equal(unsupported.elements['passkey-button'].disabled, true);
   assert.equal(unsupported.elements['site-password'].disabled, false);
   assert.equal(unsupported.elements['unlock-button'].disabled, false);
+});
+
+test('a fresh same-page session marker gives a translated notice and is consumed immediately', async () => {
+  const words = { 'zh-HK': '登入已結束', en: 'Your session ended', 'zh-CN': '登录已结束', ja: 'セッションが終了', ko: '세션이 종료', th: 'เซสชันสิ้นสุด', ru: 'Сеанс завершён' };
+  for (const [language, word] of Object.entries(words)) {
+    const page = await gate({ language, sessionMarker: { reason: 'ended', time: Date.now(), path: '/lunarvow-united/' } });
+    assert(page.status().includes(word), language);
+    assert.equal(page.sessionValues.size, 0);
+    assert.equal(page.elements['gate-status'].dataset.kind, '');
+    assert.equal(page.elements['unlock-button'].disabled, false);
+  }
+});
+
+test('invalid, stale, future or wrong-page session markers cannot replace the ready status', async () => {
+  const marker = { reason: 'ended', time: Date.now(), path: '/lunarvow-united/' };
+  for (const sessionMarker of [
+    '{broken', null, { ...marker, reason: '<script>test</script>' },
+    { ...marker, time: Date.now() - 300001 }, { ...marker, time: Date.now() + 60000 },
+    { ...marker, time: '0' }, { ...marker, path: '/lunarvow-united/projects.html' },
+    { ...marker, path: 'https://fixture.test/lunarvow-united/' },
+  ]) {
+    const page = await gate({ sessionMarker });
+    assert.equal(page.status(), ready);
+    assert.equal(page.sessionValues.size, 0);
+  }
+});
+
+test('network, authentication and IP lockout feedback take priority over the session-ended notice', async t => {
+  const sessionMarker = { reason: 'ended', time: Date.now(), path: '/lunarvow-united/' };
+  const offline = await gate({ sessionMarker, statusReply: async () => response(503, { ok: false, code: 'service_unavailable' }) });
+  assert.equal(offline.status(), failed);
+  const password = await gate({ sessionMarker });
+  await password.password();
+  assert.equal(password.status(), 'The password is incorrect.');
+  for (const code of ['cooldown', 'permanent_lock']) {
+    const page = await gate({ sessionMarker, statusReply: async () => response(code === 'cooldown' ? 429 : 403, { ok: false, code, retryAfterSeconds: 300 }) });
+    t.after(page.dispose);
+    assert(!page.status().includes('Your session ended'));
+    assert.equal(page.elements['gate-status'].dataset.kind, 'error');
+    assert.equal(page.elements['unlock-button'].disabled, true);
+    assert.equal(page.elements['passkey-button'].disabled, true);
+  }
 });

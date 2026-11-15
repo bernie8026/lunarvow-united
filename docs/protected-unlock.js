@@ -102,6 +102,24 @@
     ru:'Вход по паролю недоступен. Используйте ключ доступа или свяжитесь с владельцем сайта.'
   };
   for(const locale of Object.keys(passwordUnavailable))dictionary[locale].passkeyOnly=passwordUnavailable[locale];
+  const endedCopy = {
+    'zh-HK':'登入已結束。請重新解鎖，繼續前往呢一頁。',
+    en:'Your session ended. Unlock again to continue to this page.',
+    'zh-CN':'登录已结束。请重新解锁，继续前往此页面。',
+    ja:'セッションが終了しました。このページを続けて見るには、もう一度ロックを解除してください。',
+    ko:'세션이 종료되었습니다. 이 페이지를 계속 보려면 다시 잠금을 해제해 주세요.',
+    th:'เซสชันสิ้นสุดแล้ว โปรดปลดล็อกอีกครั้งเพื่อดูหน้านี้ต่อ',
+    ru:'Сеанс завершён. Разблокируйте сайт снова, чтобы перейти на эту страницу.'
+  };
+  for(const locale of Object.keys(endedCopy))dictionary[locale].ended=endedCopy[locale];
+  let sessionEnded = false;
+  try {
+    const marker = JSON.parse(sessionStorage.getItem('portfolio-protected-ended') || 'null');
+    sessionStorage.removeItem('portfolio-protected-ended');
+    const age = Date.now() - marker?.time;
+    sessionEnded = marker?.reason === 'ended' && marker.path === location.pathname &&
+      Number.isFinite(marker.time) && age >= 0 && age <= 300000;
+  } catch { try { sessionStorage.removeItem('portfolio-protected-ended'); } catch {} }
   let language = new URL(location.href).searchParams.get("lang");
   if (!Object.hasOwn(dictionary,language)) { try { language=localStorage.getItem('bernie-portfolio-language'); } catch {} }
   if (!Object.hasOwn(dictionary,language)) language = "zh-HK";
@@ -405,7 +423,7 @@
     if(session.unlocked&&!setupToken){setStatus("opening");location.replace(location.pathname.endsWith('/unlock.html')?new URL('index.html'+location.search,base).href:location.href);return;}
     // Keep the form disabled until the initial status is known so a late
     // status response cannot overwrite an in-progress unlock or its feedback.
-    try{await accessRequest('/v1/status');setStatus('ready');}
+    try{await accessRequest('/v1/status');setStatus(sessionEnded?'ended':'ready');}
     catch(error){
       if(['cooldown','permanent_lock'].includes(error.accessCode))showBlock(error.accessReply);
       else setStatus('failed',true);

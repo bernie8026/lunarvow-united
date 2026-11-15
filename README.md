@@ -119,6 +119,16 @@ memory. The site does not persist the archive key or decrypted files in browser
 storage. An authorised viewer can still copy files or retain the key received at
 unlock. Changing login methods does not revoke previously released keys or protect old public copies. The footer lock and worker eviction can require a new password or passkey login.
 
+While an unlocked page is visible, the session guard checks the worker every
+15 seconds to mitigate ordinary idle eviction during reading. It stops these
+checks when the page is hidden or leaves, and verifies again when it returns.
+This does not guarantee that the browser will keep the worker alive. If its
+memory is lost, the site stays locked and requires a fresh login; it never
+restores a key or replays an unlock. A failed internal navigation keeps the
+requested page at its gate and shows a translated session-ended notice.
+Only a short-lived reason, time and path marker is placed in session storage
+for that notice; no password, key, decrypted content or full URL is stored.
+
 ## Verification and recovery
 
 The **Protection checks** workflow runs the local route/recovery regression

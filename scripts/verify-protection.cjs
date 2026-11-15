@@ -226,7 +226,8 @@ async function main(){
       await unlock(page,'skills');
       const cdp=await context.newCDPSession(page);await cdp.send('ServiceWorker.enable');await cdp.send('ServiceWorker.stopAllWorkers');
       await page.locator('.main-nav > a[href*="about.html"]').click();await closed(page);
-      await submit(page,password);await ready(page,'skills');
+      assert(new URL(page.url()).pathname.endsWith('/about.html'),'session loss preserves the requested destination');
+      await submit(page,password);await ready(page,'about');
       await storageAudit(page);await cdp.detach();
     });
     assert.deepEqual([...new Set(errors)],[],'protected portfolio has no uncaught browser errors');
