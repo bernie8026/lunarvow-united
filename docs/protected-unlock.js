@@ -439,7 +439,7 @@
   const scriptUrl = document.currentScript?.src;
   if (!stage || !scriptUrl || stage.hasAttribute("data-video-bootstrap")) return;
   stage.setAttribute("data-video-bootstrap", "");
-  const url = new URL("assets/gate-video.js?v=anfield-2", scriptUrl);
+  const url = new URL("assets/gate-background.js?v=anfield-mp4-1", scriptUrl);
   const serviceWorker = navigator.serviceWorker;
   const attempted = new Set();
   let pending = false, loaded = false;

@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '../docs');
 const port = Number(process.env.PORT || 8766);
 const base = process.env.PORTFOLIO_BASE_PATH || '/lunarvow-united/';
 if (!/^\/(?:[A-Za-z0-9_-]+\/)*$/.test(base)) throw new Error('Invalid preview base path');
-const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.txt':'text/plain; charset=utf-8'};
+const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.txt':'text/plain; charset=utf-8','.mp4':'video/mp4','.jpg':'image/jpeg'};
 http.createServer((request, response) => {
   if (!['GET','HEAD'].includes(request.method)) { response.writeHead(405).end(); return; }
   let filename;

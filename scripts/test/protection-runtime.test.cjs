@@ -54,7 +54,7 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       assert.equal(opened.headers.get('Cache-Control'), 'no-store');
       assert.equal(html.split(uiScript).length - 1, 1, 'one versioned UI script per decrypted response');
       assert.equal(html.split(sessionScript).length - 1, 1);
-      assert(!html.includes('gate-video.js'), 'the gate video controller is never injected into private pages');
+      assert(!html.includes('gate-video.js') && !html.includes('gate-background.js'), 'the gate video controller is never injected into private pages');
       assert(html.indexOf(sessionScript) < html.indexOf(uiScript), 'session guard executes before UI enhancements');
       assert(html.indexOf(uiScript) < html.indexOf('</head>'));
       const head = await worker.handle({ method: 'HEAD' }, path);
@@ -72,6 +72,9 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
     const publicBodies = {
       'assets/protected-ui.js': '/* Synthetic public UI code */',
       'assets/gate-video.js': '/* Synthetic public video controller */',
+      'assets/gate-background.js': '/* Synthetic public background controller */',
+      'assets/anfield-anthem.mp4': 'synthetic-public-video',
+      'assets/anfield-anthem.jpg': 'synthetic-public-poster',
       'protected-site.json': '{"ciphertext":"synthetic-public-ciphertext"}',
     };
     worker.fetch = async (request, options) => {
@@ -86,7 +89,7 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       const response = await worker.handle(request(name), name);
       assert.equal(await response.text(), publicBodies[name], 'public bootstrap works while locked');
     }
-    for (const name of ['assets/private-example.js', 'assets/gate-video-private.js', 'assets/gate-video.js.map']) {
+    for (const name of ['assets/private-example.js', 'assets/gate-video-private.js', 'assets/gate-video.js.map', 'assets/private.mp4', 'assets/anfield-anthem-private.mp4', 'assets/anfield-anthem.mp4.map']) {
       const privateAsset = await worker.handle(request(name), name);
       assert.equal(privateAsset.status, 401, 'public helpers do not expose neighbouring private assets');
       assert.equal(privateAsset.headers.get('X-Portfolio-Locked'), '1');
@@ -177,6 +180,10 @@ test('protected builds require and copy nested public runtimes without exposing 
   assert.throws(() => prepareProtectedSite(options), /Protection runtime is incomplete/, 'a missing gate video controller must fail the build');
   const videoCode = '/* Public video controller fixture: no authentication */';
   fs.writeFileSync(path.join(protectionRoot, 'assets/gate-video.js'), videoCode);
+  assert.throws(() => prepareProtectedSite(options), /Protection runtime is incomplete/, 'the background and public media must be present');
+  fs.writeFileSync(path.join(protectionRoot, 'assets/gate-background.js'), videoCode);
+  fs.writeFileSync(path.join(protectionRoot, 'assets/anfield-anthem.mp4'), 'synthetic-video');
+  fs.writeFileSync(path.join(protectionRoot, 'assets/anfield-anthem.jpg'), 'synthetic-poster');
   prepareProtectedSite(options);
   assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/protected-ui.js'), 'utf8'), uiCode);
   assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/gate-video.js'), 'utf8'), videoCode);

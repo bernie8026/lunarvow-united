@@ -4,7 +4,7 @@
 // locked again; neither a key nor a decrypted response enters persistent storage.
 const base = new URL(self.registration.scope);
 const bootstrap = new Set([
-  "protected-worker.js", "protected-unlock.js", "protected-session.js", "assets/protected-ui.js", "assets/gate-video.js",
+  "protected-worker.js", "protected-unlock.js", "protected-session.js", "assets/protected-ui.js", "assets/gate-video.js", "assets/gate-background.js", "assets/anfield-anthem.mp4", "assets/anfield-anthem.jpg",
   "protected-site.json", ".nojekyll", "robots.txt"
 ]);
 const shells = new Set([

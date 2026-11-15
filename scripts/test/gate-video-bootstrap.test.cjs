@@ -88,7 +88,7 @@ test('old-worker rejection recovers once a new controller claims the gate', () =
   const oldWorker = { scriptURL: workerUrl }, newWorker = { scriptURL: workerUrl };
   const page = gate({ controller: oldWorker });
   assert.deepEqual(page.order, ['listen', 'request']);
-  assert.equal(page.requests[0].script.src, origin + '/lunarvow-united/assets/gate-video.js?v=anfield-2');
+  assert.equal(page.requests[0].script.src, origin + '/lunarvow-united/assets/gate-background.js?v=anfield-mp4-1');
   assert.equal(page.requests[0].script.async, true);
   page.fail(0);
   assert.equal(page.requests[0].script.connected, false);

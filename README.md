@@ -139,6 +139,30 @@ The encrypted archive uses AES-256-GCM with a fresh IV on every build and a
 random 256-bit archive key independent of login. The authentication service
 releases the key after validating the corresponding website password or a valid assertion from a registered passkey. Password verification and persistent IP limits run on the server. The password is not an offline archive key.
 
+## Login background video
+
+The login gate uses the supplied anthem MP4 as a full-screen, looping H.264/AAC
+background, with a poster and a dark overlay to keep the form readable. The
+compressed public clip and poster live in `protection/assets/anfield-anthem.*`
+and are mirrored in `docs/assets/`; these gate assets are available before login.
+The original upload is not included. `gate-background.js` owns only the public
+media controls and has no access to credentials, keys or browser storage.
+
+Playback starts muted when the browser permits it. Sound requires pressing the
+sound button. Pause, leaving the tab or page, reduced-motion changes and the login
+loading overlay pause the clip and mute it. Returning never restores sound
+automatically. Reduced motion starts with the poster and loads video only after
+an explicit play or sound action. Failed playback keeps the form available and
+offers a retry and an independent YouTube link. The seven language choices
+update both media buttons and playback status.
+
+The isolated media bootstrap loads a new controller path so an older locked
+service worker cannot run the controller before it supports the public media
+routes. Its existing bounded retry loads the script after the new worker claims
+the page. The worker passes through only the exact public media filenames,
+including normal browser byte-range requests, without opening neighbouring
+private assets. Rebuilds require all background assets before replacing output.
+
 ## Browser behaviour and limits
 
 After unlock, the site is served at its existing URLs from Service Worker
