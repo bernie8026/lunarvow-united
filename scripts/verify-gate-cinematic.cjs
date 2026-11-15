@@ -10,7 +10,7 @@ const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '..');
 const prefix = '/lunarvow-united/';
 const authOrigin = 'https://fixture-auth.workers.dev';
-const videoId = 'zVe7bvDkhbc';
+const videoId = 'OV5_LQArLa0';
 const watchUrl = 'https://www.youtube.com/watch?v=' + videoId;
 const locales = ['zh-HK', 'en', 'zh-CN', 'ja', 'ko', 'th', 'ru'];
 const viewports = [[360, 800], [390, 844], [768, 1024], [1366, 900], [1366, 540], [320, 740]];
@@ -77,7 +77,7 @@ async function assertLayout(page, width, height, locale) {
 (async () => {
   const template = fs.readFileSync(path.join(root, 'protection/index.html'), 'utf8');
   const bootstrapVersion = template.match(/<script[^>]+protected-unlock\.js\?v=password-(\d+)/);
-  assert(bootstrapVersion && Number(bootstrapVersion[1]) >= 4, 'gate uses the refreshed unlock bootstrap');
+  assert(bootstrapVersion && Number(bootstrapVersion[1]) >= 5, 'gate uses the refreshed unlock bootstrap');
   assert.doesNotMatch(template, /<script[^>]+assets\/gate-video\.js/, 'the bootstrap loads media after controller migration instead of a direct deferred tag');
   const gate = template.replaceAll('__BASE_PATH__', prefix).replaceAll('__AUTH_ORIGIN__', authOrigin);
   const files = new Map([

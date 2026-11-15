@@ -26,7 +26,7 @@ function gate({ controller = { scriptURL: workerUrl }, available = true, missing
       assert.equal(name, 'data-video-bootstrap'); attributes.set(name, value);
     }
   };
-  const fallback = { href: 'https://www.youtube.com/watch?v=zVe7bvDkhbc', hidden: false };
+  const fallback = { href: 'https://www.youtube.com/watch?v=OV5_LQArLa0', hidden: false };
   const serviceWorker = {
     controller,
     addEventListener(name, listener) {
@@ -39,7 +39,7 @@ function gate({ controller = { scriptURL: workerUrl }, available = true, missing
   const context = {
     URL,
     document: {
-      currentScript: { src: origin + '/lunarvow-united/protected-unlock.js?v=password-4' },
+      currentScript: { src: origin + '/lunarvow-united/protected-unlock.js?v=password-5' },
       getElementById(id) {
         assert.equal(id, 'gate-video-stage', 'loader must not inspect form or fallback content');
         return missingStage ? null : stage;
@@ -88,7 +88,7 @@ test('old-worker rejection recovers once a new controller claims the gate', () =
   const oldWorker = { scriptURL: workerUrl }, newWorker = { scriptURL: workerUrl };
   const page = gate({ controller: oldWorker });
   assert.deepEqual(page.order, ['listen', 'request']);
-  assert.equal(page.requests[0].script.src, origin + '/lunarvow-united/assets/gate-video.js?v=anfield-1');
+  assert.equal(page.requests[0].script.src, origin + '/lunarvow-united/assets/gate-video.js?v=anfield-2');
   assert.equal(page.requests[0].script.async, true);
   page.fail(0);
   assert.equal(page.requests[0].script.connected, false);
@@ -137,7 +137,7 @@ test('permanent media failure stays bounded and preserves the independent fallba
   page.control(replacement); page.fail(1);
   page.control(replacement); page.control(controller);
   assert.equal(page.requests.length, 2, 'one attempt for each distinct controller, including revisits');
-  assert.deepEqual(page.fallback, { href: 'https://www.youtube.com/watch?v=zVe7bvDkhbc', hidden: false });
+  assert.deepEqual(page.fallback, { href: 'https://www.youtube.com/watch?v=OV5_LQArLa0', hidden: false });
 });
 
 test('uncontrolled first loads retry after claim, while browsers without service workers make one normal attempt', () => {
