@@ -144,8 +144,8 @@
   }
 
   async function verify(hidden = false) {
-    if (redirecting || !pageActive || document.hidden) return false;
     if (hidden) cover();
+    if (redirecting || !pageActive || document.hidden) return false;
     if (!checking) {
       const revision = lifecycleRevision;
       const current = () => revision === lifecycleRevision && pageActive && !document.hidden && !redirecting;

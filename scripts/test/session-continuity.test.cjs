@@ -12,7 +12,7 @@ const origin = 'https://fixture.test';
 const base = '/lunarvow-united/';
 const endedKey = 'portfolio-protected-ended';
 
-async function session({ idleAfter = 30000 } = {}) {
+async function session({ idleAfter = 30000, initiallyHidden = false } = {}) {
   let now = 1000000, timerId = 0;
   const timers = new Map(), storage = new Map(), messages = [], navigation = [], replayed = [];
   const handlers = { window: new Map(), document: new Map(), worker: new Map() };
@@ -52,7 +52,7 @@ async function session({ idleAfter = 30000 } = {}) {
   html.lang = 'en';
   html.classList = { add: name => classes.add(name), remove: name => classes.delete(name) };
   const document = {
-    hidden: false,
+    hidden: initiallyHidden,
     currentScript: { src: origin + base + 'protected-session.js?v=foreground-1' },
     documentElement: html,
     body: { classList: { contains: () => true } },
@@ -125,6 +125,17 @@ async function session({ idleAfter = 30000 } = {}) {
 
 test('published and source session guards match', () => {
   assert.equal(fs.readFileSync(path.join(root, 'docs/protected-session.js'), 'utf8'), source);
+});
+
+test('a page opened in the background stays covered until its first visible verification', async () => {
+  const page = await session({ initiallyHidden: true });
+  assert(page.classes.has('portfolio-session-checking'));
+  assert.equal(page.messages.length, 0);
+  assert.equal(page.timers.size, 0);
+  await page.visibility(false);
+  assert.equal(page.messages.length, 1);
+  assert.equal(page.classes.has('portfolio-session-checking'), false);
+  assert.equal(page.heartbeatCount(), 1);
 });
 
 test('foreground reading checks STATE every 15 seconds and preserves ordinary navigation beyond idle timeout', async () => {
