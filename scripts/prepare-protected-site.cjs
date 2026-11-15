@@ -162,20 +162,23 @@ function restoreArchive(options){
   if(fs.statSync(input).size>maximumBytes*2)throw new Error('Encrypted bundle is unexpectedly large');
   const envelope=JSON.parse(fs.readFileSync(input,'utf8'));
   // Legacy restoration is a private command only. The browser never accepts v1.
-  const archive=envelope.version===1?decryptLegacyArchive(envelope,options.password):decryptArchive(envelope,options.accessConfig||readAccessConfig());fs.mkdirSync(output,{recursive:true,mode:0o700});
-  try{for(const file of archive.files)writeFile(output,file.path,base64(file.data,'archive data'));}
-  catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
-  return {restored_files:archive.files.length,output};
+  // Only legacy v1 archives use a password file. Current v2 recovery requires
+  // the matching archive key, including for owners who only use passkeys.
+  let legacyPassword;
+  try{
+    if(envelope.version===1&&options.password===undefined)legacyPassword=readPasswordFile(options.passwordFile);
+    const archive=envelope.version===1?decryptLegacyArchive(envelope,options.password??legacyPassword):decryptArchive(envelope,options.accessConfig||readAccessConfig());fs.mkdirSync(output,{recursive:true,mode:0o700});
+    try{for(const file of archive.files)writeFile(output,file.path,base64(file.data,'archive data'));}
+    catch(error){fs.rmSync(output,{recursive:true,force:true});throw error;}
+    return {restored_files:archive.files.length,output};
+  }finally{legacyPassword?.fill(0);}
 }
 module.exports={assertNoSymlinks,readPasswordFile,passwordPath,readAccessConfig,walkFiles,validPath,encryptArchive,decryptArchive,decryptLegacyArchive,prepareProtectedSite,restoreArchive};
 if(require.main===module){
-  let password;
   try{
     const args=process.argv.slice(2),values={};
     while(args.length){const option=args.shift();if(!['--decrypt','--output','--password-file'].includes(option)||!args.length)throw new Error('Use --decrypt <bundle> --output <new directory> [--password-file <private file>]');values[option]=args.shift();}
     if((values['--decrypt']&&!values['--output'])||(!values['--decrypt']&&values['--output']))throw new Error('Restore requires --decrypt <bundle> --output <new directory>');
-    password=readPasswordFile(values['--password-file']);
-    console.log(JSON.stringify(values['--decrypt']?restoreArchive({bundle:values['--decrypt'],output:values['--output'],password}):prepareProtectedSite({password})));
+    console.log(JSON.stringify(values['--decrypt']?restoreArchive({bundle:values['--decrypt'],output:values['--output'],passwordFile:values['--password-file']}):prepareProtectedSite()));
   }catch(error){console.error('Protection operation failed: '+error.message);process.exitCode=1;}
-  finally{password?.fill(0);}
 }

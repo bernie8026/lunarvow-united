@@ -23,7 +23,11 @@ function pathFor(url) {
   if (url.origin !== base.origin || !url.pathname.startsWith(base.pathname)) return null;
   let path;
   try { path = decodeURIComponent(url.pathname.slice(base.pathname.length)); } catch { return null; }
-  return path === "" ? "index.html" : validPath(path) ? path : null;
+  // Keep directory links working after unlock, including the copied Lunar Vow
+  // entry point. Validate after adding the index so empty/traversal segments
+  // elsewhere in the path are still rejected.
+  if (path === "" || path.endsWith("/")) path += "index.html";
+  return validPath(path) ? path : null;
 }
 
 async function trustedSource(event) {
