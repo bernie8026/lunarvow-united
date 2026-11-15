@@ -82,6 +82,16 @@
     ru:'Ключ доступа ещё не зарегистрирован. Используйте пароль или зарегистрируйте ключ по приглашению владельца.'
   };
   for(const locale of Object.keys(noPasskeys))dictionary[locale].noPasskeys=noPasskeys[locale];
+  const accessMethods = {
+    'zh-HK': {intro:'用存取密碼或通行密鑰，開啟個人作品集。',ready:'選擇通行密鑰，或輸入存取密碼解鎖。',footer:'供持有存取密碼或已登記通行密鑰嘅訪客使用'},
+    en: {intro:'Use an access password or a passkey to open the portfolio.',ready:'Use a passkey or enter your access password to unlock.',footer:'Access with an authorised password or registered passkey'},
+    'zh-CN': {intro:'使用访问密码或通行密钥打开个人作品集。',ready:'使用通行密钥或输入访问密码解锁。',footer:'供持有访问密码或已登记通行密钥的访客使用'},
+    ja: {intro:'アクセス用パスワードまたはパスキーでポートフォリオを開けます。',ready:'パスキーを使うか、アクセス用パスワードを入力してください。',footer:'アクセス用パスワードまたは登録済みパスキーをお持ちの方のみ閲覧できます'},
+    ko: {intro:'접속 비밀번호 또는 패스키로 포트폴리오를 열 수 있습니다.',ready:'패스키를 사용하거나 접속 비밀번호를 입력해 잠금을 해제하세요.',footer:'접속 비밀번호 또는 등록된 패스키가 있는 방문자만 볼 수 있습니다'},
+    th: {intro:'ใช้รหัสผ่านหรือพาสคีย์เพื่อเปิดแฟ้มผลงาน',ready:'ใช้พาสคีย์หรือกรอกรหัสผ่านเพื่อปลดล็อก',footer:'สำหรับผู้เข้าชมที่มีรหัสผ่านหรือพาสคีย์ที่ลงทะเบียนไว้เท่านั้น'},
+    ru: {intro:'Используйте пароль доступа или ключ доступа, чтобы открыть портфолио.',ready:'Войдите с ключом доступа или введите пароль доступа.',footer:'Доступ для посетителей с паролем или зарегистрированным ключом доступа'}
+  };
+  for(const locale of Object.keys(accessMethods))Object.assign(dictionary[locale],accessMethods[locale]);
   const passwordUnavailable = {
     'zh-HK':'密碼登入暫未開放。請用通行密鑰，或聯絡網站擁有人。',
     en:'Password access is unavailable. Use a passkey or contact the website owner.',
@@ -93,8 +103,8 @@
   };
   for(const locale of Object.keys(passwordUnavailable))dictionary[locale].passkeyOnly=passwordUnavailable[locale];
   let language = new URL(location.href).searchParams.get("lang");
-  if (!dictionary[language]) { try { language=localStorage.getItem('bernie-portfolio-language'); } catch {} }
-  if (!dictionary[language]) language = "zh-HK";
+  if (!Object.hasOwn(dictionary,language)) { try { language=localStorage.getItem('bernie-portfolio-language'); } catch {} }
+  if (!Object.hasOwn(dictionary,language)) language = "zh-HK";
   let state = "preparing", kind = "", busy = false, worker, previousFocus;
   let archivePromise=null, download={loaded:0,total:0};
   let blockedUntil=0,permanentlyBlocked=false,blockTimer;
@@ -137,7 +147,9 @@
     document.documentElement.lang = language;
     document.title = text.heading + " · Bernie Leung";
     document.querySelectorAll("[data-gate-copy]").forEach(node => {node.textContent = text[node.dataset.gateCopy] || "";});
-    show.textContent = input.type === "password" ? text.show : text.hide;
+    const passwordShown = input.type === "text";
+    show.textContent = passwordShown ? text.hide : text.show;
+    show.setAttribute("aria-pressed", String(passwordShown));
     const note=document.getElementById('passkey-note');
     if(note)note.textContent=passkeySupported?text.passkeyHint:text.passkeyUnavailable;
     const seconds=Math.max(0,Math.ceil((blockedUntil-Date.now())/1000));
@@ -163,7 +175,7 @@
     try { localStorage.setItem('bernie-portfolio-language', language); } catch {}
     const url=new URL(location.href);url.searchParams.set("lang",language);history.replaceState(null,"",url);render();
   }));
-  show.addEventListener("click",() => {input.type=input.type==="password"?"text":"password";show.setAttribute("aria-pressed",String(input.type==="text"));render();});
+  show.addEventListener("click",() => {input.type=input.type==="password"?"text":"password";render();});
   function request(message, transfer=[]) {
     return new Promise((resolve,reject) => {
       const channel=new MessageChannel();
@@ -215,7 +227,11 @@
         if(download.total&&download.loaded!==download.total)throw new Error('Incomplete archive');
         return JSON.parse(content);
       }finally{clearTimeout(timer);}
-    })().catch(error=>{archivePromise=null;throw error;});
+    })().catch(error=>{
+      archivePromise=null;
+      if(error.name==='AbortError')throw new Error('Archive download timed out');
+      throw error;
+    });
     return archivePromise;
   }
   input.addEventListener('focus',()=>{if(kind!=='error')prepareArchive().catch(()=>{});});
@@ -227,12 +243,18 @@
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
     try{
       const response=await fetch(new URL(path,origin),{method:body?'POST':'GET',mode:'cors',credentials:'omit',cache:'no-store',redirect:'error',referrerPolicy:'no-referrer',signal:controller.signal,...(body?{headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})});
-      const reply=await response.json();
+      let reply;
+      try{reply=await response.json();}catch{throw new Error('Authentication service unavailable');}
+      if(response.status>=500||!reply||typeof reply!=='object')throw new Error('Authentication service unavailable');
       if(!response.ok||reply.ok!==true){
         const error=new Error('Access denied');
         error.accessCode=reply.code;error.accessReply=reply;throw error;
       }
       return reply;
+    }catch(error){
+      // A request timeout is a connection failure, not a cancelled device prompt.
+      if(!error.accessCode)throw new Error('Authentication service unavailable');
+      throw error;
     }finally{clearTimeout(timer);}
   }
   async function decrypt(getAccess) {
@@ -322,6 +344,7 @@
     if(error.accessCode==='no_passkeys'){setStatus('noPasskeys',true);return;}
     if(['invalid_invitation','invitation_expired','invitation_used','invite_invalid'].includes(error.accessCode)){setStatus('inviteInvalid',true);return;}
     if(['rate_limited','passkey_rate_limited','passkey_rate_limit','passkey_busy'].includes(error.accessCode)){setStatus('passkeyThrottled',true);return;}
+    if(error.accessCode==='service_unavailable'){setStatus('failed',true);return;}
     setStatus(error.accessCode?'passkeyRejected':'failed',true);
   }
   passkeyButton?.addEventListener('click',async()=>{
@@ -380,9 +403,14 @@
     worker=navigator.serviceWorker.controller;
     const session=await request({type:"STATE"});
     if(session.unlocked&&!setupToken){setStatus("opening");location.replace(location.pathname.endsWith('/unlock.html')?new URL('index.html'+location.search,base).href:location.href);return;}
-    setBusy(false);setStatus("ready");
-    try{await accessRequest('/v1/status');}
-    catch(error){if(['cooldown','permanent_lock'].includes(error.accessCode))showBlock(error.accessReply);}
+    // Keep the form disabled until the initial status is known so a late
+    // status response cannot overwrite an in-progress unlock or its feedback.
+    try{await accessRequest('/v1/status');setStatus('ready');}
+    catch(error){
+      if(['cooldown','permanent_lock'].includes(error.accessCode))showBlock(error.accessReply);
+      else setStatus('failed',true);
+    }
+    syncControls();
   }
   initialise().catch(() => setStatus("failed",true));
 })();

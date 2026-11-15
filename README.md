@@ -121,6 +121,17 @@ unlock. Changing login methods does not revoke previously released keys or prote
 
 ## Verification and recovery
 
+The **Protection checks** workflow runs the local route/recovery regression
+checks and the backend password/passkey tests on pushes and pull requests to
+`main`. It uses Node.js 24 and pnpm 11.25.0 with the committed lockfile. These
+tests generate temporary credentials and need no private source, archive key or
+production service. Run the same checks locally with those tool versions:
+
+```sh
+pnpm --dir cloudflare install --frozen-lockfile
+node --test scripts/test/*.test.cjs cloudflare/test/*.test.mjs
+```
+
 Run the current authentication checks with the pinned backend dependencies,
 Chrome, and Playwright available:
 
@@ -145,6 +156,9 @@ node scripts/prepare-protected-site.cjs --decrypt docs/protected-site.json --out
 Recovery does not publish anything. Keep the recovered files outside this
 repository. A passkey or new login configuration cannot recover an archive if
 its matching archive key and plaintext backup are both lost.
+Current v2 recovery does not require a website password file. Only a legacy v1
+archive needs its original password, supplied with `--password-file` or
+`PORTFOLIO_PASSWORD_FILE`.
 
 ## Dedicated creative topics
 

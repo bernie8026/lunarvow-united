@@ -1,0 +1,33 @@
+name: Protection checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: '11.25.0'
+          run_install: false
+      - name: Install pinned backend dependencies
+        run: pnpm --dir cloudflare install --frozen-lockfile
+      - name: Check protected routes, archive recovery and authentication
+        # Fixtures create temporary keys and passwords; no production access.
+        run: node --test scripts/test/*.test.cjs cloudflare/test/*.test.mjs
