@@ -100,7 +100,11 @@ page without changing its width or reading position; labels keep their accessibl
 link names while clipped. The selected language and theme control remain available
 when collapsed; all language choices appear on expansion. Wide touch devices retain
 the full rail, and mobile keeps its existing menu. Reduced motion removes the
-width transition. The module also derives the persistent
+width transition. On the recognised About hero, the kicker, two headline lines,
+summary, action row and interests share the main content centre. Symmetric padding
+replaces the old rail compensation, per-line ink offsets are suppressed, and
+responsive title sizing/wrapping keeps the name inside the available width. The
+module also derives the persistent
 homepage introduction from current page content, promotes the existing
 selected-work section, and corrects recognised three-language wording in
 Lunar project descriptions. Carousel controls and the three story indexes

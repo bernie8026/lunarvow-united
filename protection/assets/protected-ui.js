@@ -19,6 +19,19 @@ body[data-portfolio-clarity] .portfolio-identity-link{display:inline-flex;align-
 body[data-portfolio-clarity] .portfolio-identity-link:first-child{background:var(--signal,#00d5ff);border-color:transparent;color:var(--signal-ink,#071724)}
 body[data-portfolio-clarity] .portfolio-identity-link:hover{border-color:currentColor}
 body[data-portfolio-clarity] .portfolio-identity-link:focus-visible{outline:3px solid var(--home-signal,#00d5ff);outline-offset:4px}
+/* Align the observed About introduction to the available content area.
+   Its original 68px rail compensation and per-line ink offsets drift after
+   navigation changes; keep one geometric centre for all five content groups. */
+body[data-page=about][data-portfolio-clarity] main.about-apple-page .about-apple-hero{padding-inline:clamp(24px,4vw,64px);text-align:center;box-sizing:border-box;min-width:0}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero :is(.about-apple-kicker,h1,.about-apple-tagline,.about-apple-actions,.about-apple-disciplines){box-sizing:border-box;margin-inline:auto;text-align:center;min-width:0}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero h1{width:min(100%,960px);max-width:100%;font-size:clamp(38px,9.8vw,76px);white-space:normal;overflow-wrap:anywhere;text-wrap:balance}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero h1>span{display:block;width:100%;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:center}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero h1>span:first-child{font-size:.56em}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero .about-apple-gradient{font-size:1em}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero :is(.about-apple-kicker,h1>span){--about-ink-offset:0px!important;left:0!important;right:auto!important}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero .about-apple-tagline{width:min(100%,648px);max-width:100%;overflow-wrap:anywhere}
+body[data-page=about][data-portfolio-clarity] .about-apple-hero :is(.about-apple-actions,.about-apple-disciplines){display:flex;width:100%;max-width:960px;align-items:center;justify-content:center;flex-wrap:wrap}
+body[data-page=about][data-portfolio-clarity] .about-apple-actions>a{min-width:0;max-width:100%;min-height:44px;white-space:normal;overflow-wrap:anywhere;text-align:center}
 @media(min-width:1001px){
   html[data-portfolio-clarity]{--portfolio-rail-width:224px;--masthead-height:0px!important}
   body[data-page][data-portfolio-clarity]{padding-left:var(--portfolio-rail-width)}

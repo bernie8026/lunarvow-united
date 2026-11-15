@@ -59,3 +59,6 @@ jobs:
       - name: Check real reference media and chapter controls
         # Public reference assets and synthetic unlocked markup; no sign-in.
         run: NODE_PATH="$RUNNER_TEMP/portfolio-ui-deps/node_modules" node scripts/verify-reference-media.cjs
+      - name: Check About introduction alignment
+        # Observed hero structure with synthetic copy; no authentication.
+        run: NODE_PATH="$RUNNER_TEMP/portfolio-ui-deps/node_modules" node scripts/verify-about-hero.cjs
