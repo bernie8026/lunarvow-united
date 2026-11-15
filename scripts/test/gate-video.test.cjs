@@ -8,7 +8,7 @@ const vm = require('node:vm');
 
 const root = path.resolve(__dirname, '../..');
 const source = fs.readFileSync(path.join(root, 'protection/assets/gate-video.js'), 'utf8');
-const videoId = 'zVe7bvDkhbc';
+const videoId = 'OV5_LQArLa0';
 const origin = 'https://fixture.test';
 const forbidden = name => { throw new Error('Video controller crossed its boundary: ' + name); };
 
@@ -251,7 +251,7 @@ test('all seven languages update each state without resetting an existing player
     page.language(language);
     assert.equal(page.label.textContent, stop);
     assert.match(page.link.textContent, /YouTube/);
-    assert(frame.title.includes('Liverpool FC'));
+    assert(frame.title.includes('Gerry & The Pacemakers'));
     assert(page.group.getAttribute('aria-label'));
     assert.equal(frame.src, initialUrl, 'locale changes do not reload or navigate the player');
     loadedStatuses.add(page.status.textContent);
