@@ -432,3 +432,50 @@
   }
   initialise().catch(() => setStatus("failed",true));
 })();
+
+// Public gate media bootstrap: isolated from the authentication closure.
+(() => {
+  const stage = document.getElementById("gate-video-stage");
+  const scriptUrl = document.currentScript?.src;
+  if (!stage || !scriptUrl || stage.hasAttribute("data-video-bootstrap")) return;
+  stage.setAttribute("data-video-bootstrap", "");
+  const url = new URL("assets/gate-video.js?v=anfield-1", scriptUrl);
+  const serviceWorker = navigator.serviceWorker;
+  const attempted = new Set();
+  let pending = false, loaded = false;
+
+  function load() {
+    const controller = serviceWorker?.controller || null;
+    if (loaded || pending || attempted.has(controller)) return;
+    attempted.add(controller);
+    pending = true;
+    const script = document.createElement("script");
+    script.src = url.href;
+    script.async = true;
+    let settled = false;
+    function finish(ok) {
+      if (settled) return;
+      settled = true;
+      pending = false;
+      script.onload = script.onerror = null;
+      if (ok) {
+        loaded = true;
+        serviceWorker?.removeEventListener("controllerchange", load);
+      } else {
+        script.remove();
+        // An old locked worker may reject this newly introduced asset. If
+        // control changed while its request was pending, retry that new
+        // controller now; each controller identity gets only one attempt.
+        load();
+      }
+    }
+    script.onload = () => finish(true);
+    script.onerror = () => finish(false);
+    document.head.append(script);
+  }
+
+  // Existing workers already allow protected-unlock.js. Subscribe before the
+  // first media request so an update cannot be missed between attempt/error.
+  serviceWorker?.addEventListener("controllerchange", load);
+  load();
+})();
