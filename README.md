@@ -77,8 +77,10 @@ palette, becomes three columns on tablets and two on phones, and follows all
 seven languages. Shared source files are `public/assets/footer-content.js` and
 `public/assets/footer-directory.css`; links use the existing navigation router.
 
-The homepage opens with a full-bleed, three-story carousel: photography equipment,
-Lunar Vow web design and the Aerovate concept. It reuses existing credited images
+After unlock, the homepage opens with a persistent identity introduction and
+direct links to the existing project and profile pages. The existing selected
+web project comes before the three-story carousel: photography equipment,
+Lunar Vow web design and the Aerovate concept. The carousel reuses credited images
 and translated copy, with an overlaid heading, project link, numbered topics,
 previous/next controls, swipe input and a pause button. Autoplay waits for entry
 and stops during hover, keyboard focus, offscreen/hidden state, reduced motion
@@ -86,6 +88,31 @@ or the global animation pause. Modules live in `public/assets/home-carousel.*`,
 `home-carousel.css` and `features-content.js`.
 The existing eleven-page portfolio and encrypted publication
 workflow remain in place.
+
+### Post-unlock interface improvements
+
+`protection/assets/protected-ui.js` is a small, generic presentation module.
+The worker injects it after the session guard only into decrypted HTML; the
+published mirror is `docs/assets/protected-ui.js`. Its `assets/` URL remains
+compatible with the portfolio router's asset validation. The module reveals
+the existing translated desktop navigation labels, derives the persistent
+homepage introduction from current page content, promotes the existing
+selected-work section, and corrects recognised three-language wording in
+Lunar project descriptions. Carousel controls and the three story indexes
+keep their existing behaviour. Reference-image captions remain attached to
+their original images.
+
+The helper contains generic styles and language-count corrections, not a copy
+of the private profile, project content or images. It makes no authentication
+requests and stores no private content. Unrecognised page structures, including
+the nested archive, are left alone. The encrypted publication is unchanged by
+this presentation update; these bounded transformations should be folded into
+the canonical private source when that complete source is next available.
+
+Runtime and DOM fixture tests cover the loading boundary, repeated mounts,
+language changes and targeted corrections without production credentials.
+Fixture layout checks do not substitute for a logged-in review of the current
+encrypted publication.
 
 All eleven pages and the access gate support Hong Kong Traditional Chinese,
 English, Simplified Chinese, Japanese (`ja`), Korean (`ko`), Thai (`th`) and

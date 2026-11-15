@@ -124,7 +124,7 @@ function prepareProtectedSite(options={}){
   if([sourceRoot,protectionRoot].some(folder=>inside(folder,outputRoot)||inside(outputRoot,folder)))throw new Error('Public output must be separate from source and protection runtime directories');
   if(fs.existsSync(outputRoot)&&!fs.statSync(outputRoot).isDirectory())throw new Error('Public output must be a directory');
   const runtime=walkFiles(protectionRoot),template=runtime.find(file=>file.path==='index.html');
-  if(!template||!['protected-worker.js','protected-session.js','protected-unlock.js'].every(name=>runtime.some(file=>file.path===name)))throw new Error('Protection runtime is incomplete; the gate and all three runtime scripts are required');
+  if(!template||!['protected-worker.js','protected-session.js','protected-unlock.js','assets/protected-ui.js'].every(name=>runtime.some(file=>file.path===name)))throw new Error('Protection runtime is incomplete; the gate and every runtime script must be present');
   const templateText=fs.readFileSync(template.absolute,'utf8');if(!templateText.includes('__BASE_PATH__'))throw new Error('Unlock template is missing its base path placeholder');
   const sources=walkFiles(sourceRoot),originalBytes=sources.reduce((sum,file)=>sum+file.size,0);
   if(originalBytes>maximumBytes)throw new Error('Site exceeds the supported size');

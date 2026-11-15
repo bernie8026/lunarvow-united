@@ -9,7 +9,7 @@ const vm = require('node:vm');
 const crypto = require('node:crypto');
 const zlib = require('node:zlib');
 const { spawnSync } = require('node:child_process');
-const { encryptArchive } = require('../prepare-protected-site.cjs');
+const { encryptArchive, prepareProtectedSite } = require('../prepare-protected-site.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const origin = 'https://bernie8026.github.io';
@@ -32,6 +32,74 @@ function loadWorker(relative) {
 }
 
 for (const relative of ['protection/protected-worker.js', 'docs/protected-worker.js']) {
+  test(`${relative}: UI enhancements are injected only into decrypted HTML after the session guard`, async () => {
+    const worker = loadWorker(relative);
+    const uiScript = `<script src="${basePath}assets/protected-ui.js?v=clarity-1" defer></script>`;
+    const sessionScript = `<script src="${basePath}protected-session.js?v=foreground-1" defer></script>`;
+    const locked = await worker.handle({ method: 'GET', mode: 'navigate' }, 'index.html');
+    assert.equal(locked.headers.get('X-Portfolio-Locked'), '1');
+    assert(!(await locked.text()).includes('protected-ui.js'), 'locked gates must not execute the UI enhancer');
+
+    const entry = (path, type, text) => ({ path, type, data: new TextEncoder().encode(text).buffer });
+    worker.fixtureFiles = [
+      entry('index.html', 'text/html', '<!doctype html><html><head></head><body><main>Synthetic private home</main></body></html>'),
+      entry('lunarvow/index.html', 'text/html', '<!doctype html><head></head><main>Synthetic nested page</main>'),
+      entry('assets/example.css', 'text/css', '.synthetic-example{color:blue}'),
+    ];
+    vm.runInContext('files = receiveFiles(fixtureFiles)', worker);
+    for (const path of ['index.html', 'lunarvow/index.html']) {
+      const opened = await worker.handle({ method: 'GET' }, path);
+      const html = await opened.text();
+      assert.equal(opened.status, 200);
+      assert.equal(opened.headers.get('Cache-Control'), 'no-store');
+      assert.equal(html.split(uiScript).length - 1, 1, 'one versioned UI script per decrypted response');
+      assert.equal(html.split(sessionScript).length - 1, 1);
+      assert(html.indexOf(sessionScript) < html.indexOf(uiScript), 'session guard executes before UI enhancements');
+      assert(html.indexOf(uiScript) < html.indexOf('</head>'));
+      const head = await worker.handle({ method: 'HEAD' }, path);
+      assert.equal(await head.text(), '');
+    }
+    const css = await worker.handle({ method: 'GET' }, 'assets/example.css');
+    assert.equal(await css.text(), '.synthetic-example{color:blue}', 'non-HTML private files are unchanged');
+    const invitation = await worker.handle({ method: 'GET', mode: 'navigate' }, 'unlock.html');
+    assert.equal(invitation.headers.get('X-Portfolio-Locked'), '1');
+    assert(!(await invitation.text()).includes('protected-ui.js'), 'owner invitation gate stays separate');
+  });
+
+  test(`${relative}: public UI code and ciphertext cannot be shadowed by decrypted archive entries`, async () => {
+    const worker = loadWorker(relative), requests = [];
+    const publicBodies = {
+      'assets/protected-ui.js': '/* Synthetic public UI code */',
+      'protected-site.json': '{"ciphertext":"synthetic-public-ciphertext"}',
+    };
+    worker.fetch = async (request, options) => {
+      const url = new URL(request.url || request.href || request);
+      const name = url.pathname.slice(basePath.length);
+      requests.push({ name, cache: options?.cache });
+      assert(Object.hasOwn(publicBodies, name), 'only expected public fixture URLs may be requested');
+      return new Response(publicBodies[name]);
+    };
+    const request = name => new Request(origin + basePath + name + '?v=clarity-1');
+    for (const name of Object.keys(publicBodies)) {
+      const response = await worker.handle(request(name), name);
+      assert.equal(await response.text(), publicBodies[name], 'public bootstrap works while locked');
+    }
+    const privateAsset = await worker.handle(request('assets/private-example.js'), 'assets/private-example.js');
+    assert.equal(privateAsset.status, 401, 'allowing the UI helper does not expose neighbouring private assets');
+    assert.equal(privateAsset.headers.get('X-Portfolio-Locked'), '1');
+    worker.fixtureFiles = ['index.html', ...Object.keys(publicBodies)].map(path => ({
+      path, type: path.endsWith('.html') ? 'text/html' : 'text/plain',
+      data: new TextEncoder().encode('PRIVATE ARCHIVE ENTRY MUST NOT SHADOW BOOTSTRAP').buffer,
+    }));
+    vm.runInContext('files = receiveFiles(fixtureFiles)', worker);
+    for (const name of Object.keys(publicBodies)) {
+      const response = await worker.handle(request(name), name);
+      assert.equal(await response.text(), publicBodies[name], 'decrypted entries cannot replace public bootstrap files');
+    }
+    assert.equal(requests.length, 4);
+    assert(requests.every(request => request.cache === 'no-store'));
+  });
+
   test(`${relative}: directory links resolve and serve the nested index after unlock`, async () => {
     const worker = loadWorker(relative);
     for (const [route, expected] of [
@@ -72,6 +140,57 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
     assert.equal(worker.pathFor({ origin, pathname: '/lunarvow-united-other/' }), null);
   });
 }
+
+test('published worker matches its template except for the encrypted publication revision', () => {
+  const template = fs.readFileSync(path.join(root, 'protection/protected-worker.js'), 'utf8');
+  const published = fs.readFileSync(path.join(root, 'docs/protected-worker.js'), 'utf8');
+  assert.equal(published.replace(/\n\/\/ Publication: [a-f0-9]{64}\n$/, ''), template);
+});
+
+test('protected builds require and copy the nested public UI runtime without exposing source HTML', t => {
+  // Publication stages are renamed atomically from .private; keep this
+  // synthetic build on the same filesystem even when /tmp is another mount.
+  const privateRoot = path.join(root, '.private');
+  fs.mkdirSync(privateRoot, { recursive: true, mode: 0o700 });
+  const folder = fs.mkdtempSync(path.join(privateRoot, 'ui-build-test-'));
+  t.after(() => fs.rmSync(folder, { recursive: true, force: true }));
+  const sourceRoot = path.join(folder, 'private-source'), protectionRoot = path.join(folder, 'public-runtime');
+  const outputRoot = path.join(folder, 'output');
+  fs.mkdirSync(sourceRoot); fs.mkdirSync(protectionRoot);
+  const privateText = '<!doctype html><main>Synthetic private UI build fixture</main>';
+  fs.writeFileSync(path.join(sourceRoot, 'index.html'), privateText);
+  fs.writeFileSync(path.join(protectionRoot, 'index.html'), '<!doctype html><head><script src="__BASE_PATH__protected-unlock.js" defer></script></head><input type="password">');
+  for (const name of ['protected-worker.js', 'protected-session.js', 'protected-unlock.js']) fs.writeFileSync(path.join(protectionRoot, name), '/* Synthetic runtime fixture */');
+  const options = {
+    sourceRoot, protectionRoot, outputRoot, basePath,
+    accessConfig: { archiveId: 'synthetic-ui-build-fixture', archiveKeyB64: crypto.randomBytes(32).toString('base64'), authOrigin: 'https://synthetic-ui.workers.dev' },
+  };
+  assert.throws(() => prepareProtectedSite(options), /Protection runtime is incomplete/);
+  assert.equal(fs.existsSync(outputRoot), false, 'missing runtime fails before public output is written');
+  const uiCode = '/* Generic public UI fixture: no private content */';
+  fs.mkdirSync(path.join(protectionRoot, 'assets'));
+  fs.writeFileSync(path.join(protectionRoot, 'assets/protected-ui.js'), uiCode);
+  prepareProtectedSite(options);
+  assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/protected-ui.js'), 'utf8'), uiCode);
+  assert.equal(fs.existsSync(path.join(outputRoot, 'protected-ui.js')), false, 'helper is published only under assets for router compatibility');
+  const gate = fs.readFileSync(path.join(outputRoot, 'index.html'), 'utf8');
+  assert(gate.includes('type="password"'));
+  assert(!gate.includes('protected-ui.js'), 'UI runtime is injected by the unlocked worker, not by the gate');
+  const publicFiles = [];
+  function collect(folder) {
+    for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
+      const file = path.join(folder, entry.name);
+      if (entry.isDirectory()) collect(file);
+      else publicFiles.push(file);
+    }
+  }
+  collect(outputRoot);
+  for (const file of publicFiles) {
+    const text = fs.readFileSync(file, 'utf8');
+    assert(!text.includes(privateText), 'published output must not contain plaintext source HTML');
+    assert(!text.includes(options.accessConfig.archiveKeyB64), 'public runtime must not contain the synthetic archive key');
+  }
+});
 
 function fixture(t) {
   const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'lunarvow-recovery-test-'));
