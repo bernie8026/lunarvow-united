@@ -54,6 +54,7 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       assert.equal(opened.headers.get('Cache-Control'), 'no-store');
       assert.equal(html.split(uiScript).length - 1, 1, 'one versioned UI script per decrypted response');
       assert.equal(html.split(sessionScript).length - 1, 1);
+      assert(!html.includes('gate-video.js'), 'the gate video controller is never injected into private pages');
       assert(html.indexOf(sessionScript) < html.indexOf(uiScript), 'session guard executes before UI enhancements');
       assert(html.indexOf(uiScript) < html.indexOf('</head>'));
       const head = await worker.handle({ method: 'HEAD' }, path);
@@ -66,10 +67,11 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
     assert(!(await invitation.text()).includes('protected-ui.js'), 'owner invitation gate stays separate');
   });
 
-  test(`${relative}: public UI code and ciphertext cannot be shadowed by decrypted archive entries`, async () => {
+  test(`${relative}: public UI/video code and ciphertext cannot be shadowed by decrypted archive entries`, async () => {
     const worker = loadWorker(relative), requests = [];
     const publicBodies = {
       'assets/protected-ui.js': '/* Synthetic public UI code */',
+      'assets/gate-video.js': '/* Synthetic public video controller */',
       'protected-site.json': '{"ciphertext":"synthetic-public-ciphertext"}',
     };
     worker.fetch = async (request, options) => {
@@ -84,9 +86,11 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       const response = await worker.handle(request(name), name);
       assert.equal(await response.text(), publicBodies[name], 'public bootstrap works while locked');
     }
-    const privateAsset = await worker.handle(request('assets/private-example.js'), 'assets/private-example.js');
-    assert.equal(privateAsset.status, 401, 'allowing the UI helper does not expose neighbouring private assets');
-    assert.equal(privateAsset.headers.get('X-Portfolio-Locked'), '1');
+    for (const name of ['assets/private-example.js', 'assets/gate-video-private.js', 'assets/gate-video.js.map']) {
+      const privateAsset = await worker.handle(request(name), name);
+      assert.equal(privateAsset.status, 401, 'public helpers do not expose neighbouring private assets');
+      assert.equal(privateAsset.headers.get('X-Portfolio-Locked'), '1');
+    }
     worker.fixtureFiles = ['index.html', ...Object.keys(publicBodies)].map(path => ({
       path, type: path.endsWith('.html') ? 'text/html' : 'text/plain',
       data: new TextEncoder().encode('PRIVATE ARCHIVE ENTRY MUST NOT SHADOW BOOTSTRAP').buffer,
@@ -96,7 +100,7 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       const response = await worker.handle(request(name), name);
       assert.equal(await response.text(), publicBodies[name], 'decrypted entries cannot replace public bootstrap files');
     }
-    assert.equal(requests.length, 4);
+    assert.equal(requests.length, Object.keys(publicBodies).length * 2);
     assert(requests.every(request => request.cache === 'no-store'));
   });
 
@@ -147,7 +151,7 @@ test('published worker matches its template except for the encrypted publication
   assert.equal(published.replace(/\n\/\/ Publication: [a-f0-9]{64}\n$/, ''), template);
 });
 
-test('protected builds require and copy the nested public UI runtime without exposing source HTML', t => {
+test('protected builds require and copy nested public runtimes without exposing source HTML', t => {
   // Publication stages are renamed atomically from .private; keep this
   // synthetic build on the same filesystem even when /tmp is another mount.
   const privateRoot = path.join(root, '.private');
@@ -170,8 +174,12 @@ test('protected builds require and copy the nested public UI runtime without exp
   const uiCode = '/* Generic public UI fixture: no private content */';
   fs.mkdirSync(path.join(protectionRoot, 'assets'));
   fs.writeFileSync(path.join(protectionRoot, 'assets/protected-ui.js'), uiCode);
+  assert.throws(() => prepareProtectedSite(options), /Protection runtime is incomplete/, 'a missing gate video controller must fail the build');
+  const videoCode = '/* Public video controller fixture: no authentication */';
+  fs.writeFileSync(path.join(protectionRoot, 'assets/gate-video.js'), videoCode);
   prepareProtectedSite(options);
   assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/protected-ui.js'), 'utf8'), uiCode);
+  assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/gate-video.js'), 'utf8'), videoCode);
   assert.equal(fs.existsSync(path.join(outputRoot, 'protected-ui.js')), false, 'helper is published only under assets for router compatibility');
   const gate = fs.readFileSync(path.join(outputRoot, 'index.html'), 'utf8');
   assert(gate.includes('type="password"'));
@@ -190,6 +198,9 @@ test('protected builds require and copy the nested public UI runtime without exp
     assert(!text.includes(privateText), 'published output must not contain plaintext source HTML');
     assert(!text.includes(options.accessConfig.archiveKeyB64), 'public runtime must not contain the synthetic archive key');
   }
+  fs.writeFileSync(path.join(protectionRoot, 'assets/unexpected-helper.html'), '<main>Must not become a public helper</main>');
+  assert.throws(() => prepareProtectedSite(options), /Reserved protection runtime path: assets\/unexpected-helper\.html/);
+  assert.equal(fs.readFileSync(path.join(outputRoot, 'index.html'), 'utf8'), gate, 'a rejected helper preserves the prior publication');
 });
 
 function fixture(t) {

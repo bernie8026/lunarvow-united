@@ -116,7 +116,7 @@ async function main(){
       if(/\.(png|jpe?g|webp|woff2?|svg)$/i.test(name))assert.equal(sha(Buffer.from(entry.data,'base64')),sha(fs.readFileSync(path.join(snapshot,name))),'original visual assets survive encryption');
     }
     for(const file of filesIn(path.join(root,'docs'))){
-      assert(file.endsWith('.html')||['protected-worker.js','protected-unlock.js','protected-session.js','assets/protected-ui.js','protected-site.json','robots.txt','.nojekyll'].includes(file),'public deployment contains only public runtime, ciphertext and shell routes');
+      assert(file.endsWith('.html')||['protected-worker.js','protected-unlock.js','protected-session.js','assets/protected-ui.js','assets/gate-video.js','protected-site.json','robots.txt','.nojekyll'].includes(file),'public deployment contains only public runtime, ciphertext and shell routes');
       assert(!/\.(?:zip|tar|gz|map|bak|password)$/i.test(file),'deployment has no plaintext backup, source map, or password artifact');
       const publicText=fs.readFileSync(path.join(root,'docs',file),'utf8');
       for(const secret of [password,access.archiveKeyB64,access.ipHmacKeyB64,access.adminToken]){
