@@ -94,8 +94,13 @@ workflow remain in place.
 `protection/assets/protected-ui.js` is a small, generic presentation module.
 The worker injects it after the session guard only into decrypted HTML; the
 published mirror is `docs/assets/protected-ui.js`. Its `assets/` URL remains
-compatible with the portfolio router's asset validation. The module reveals
-the existing translated desktop navigation labels, derives the persistent
+compatible with the portfolio router's asset validation. On hover-capable desktops the module reserves an 84px numeric rail and expands
+it to 224px on pointer hover or visible keyboard focus. Expansion overlays the
+page without changing its width or reading position; labels keep their accessible
+link names while clipped. The selected language and theme control remain available
+when collapsed; all language choices appear on expansion. Wide touch devices retain
+the full rail, and mobile keeps its existing menu. Reduced motion removes the
+width transition. The module also derives the persistent
 homepage introduction from current page content, promotes the existing
 selected-work section, and corrects recognised three-language wording in
 Lunar project descriptions. Carousel controls and the three story indexes

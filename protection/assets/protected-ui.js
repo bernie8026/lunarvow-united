@@ -38,6 +38,33 @@ body[data-portfolio-clarity] .portfolio-identity-link:focus-visible{outline:3px 
   body[data-page][data-portfolio-clarity] .reading-progress{left:var(--portfolio-rail-width);width:calc(100% - var(--portfolio-rail-width))}
   body[data-page][data-portfolio-clarity] .skip{left:calc(var(--portfolio-rail-width) + 16px)}
 }
+/* A hover-capable desktop reserves a slim rail. Expansion overlays the page,
+   so reading position and content width stay fixed while the menu opens. */
+@media(min-width:1001px) and (hover:hover) and (pointer:fine){
+  html[data-portfolio-clarity]{--portfolio-rail-width:84px}
+  body[data-page][data-portfolio-clarity] .masthead{width:84px;transition:width .22s ease,box-shadow .22s ease}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)){width:224px;box-shadow:12px 0 32px #07172420}
+  body[data-page][data-portfolio-clarity] .brand{min-height:40px;padding-inline:4px;overflow:hidden}
+  body[data-page][data-portfolio-clarity] .brand strong{max-width:48px;font-size:11px;line-height:1.25;letter-spacing:-.25px;overflow-wrap:normal}
+  body[data-page][data-portfolio-clarity] .brand small{display:none}
+  body[data-page][data-portfolio-clarity] .main-nav>a{position:relative;grid-template-columns:26px;gap:0;min-height:44px;padding:10px 8px}
+  body[data-page][data-portfolio-clarity] .main-nav .nav-index{margin:0;text-align:center}
+  body[data-page][data-portfolio-clarity] .masthead .main-nav>a>span[data-i18n]{position:absolute;width:1px;max-width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;opacity:0;pointer-events:none}
+  body[data-page][data-portfolio-clarity] .header-tools{flex-direction:column;flex-wrap:nowrap;align-items:center;gap:8px}
+  body[data-page][data-portfolio-clarity] .languages{flex:0 0 auto;flex-direction:column;flex-wrap:nowrap;width:40px;padding:4px;align-items:center}
+  body[data-page][data-portfolio-clarity] .languages button[aria-pressed=false]{display:none}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .brand strong{max-width:none;font-size:17px;line-height:1.05;letter-spacing:-.5px}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .brand small{display:block}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .main-nav>a{grid-template-columns:26px minmax(0,1fr);gap:10px}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .main-nav>a>span[data-i18n]{position:static;width:auto;max-width:100%;height:auto;overflow:visible;clip-path:none;white-space:normal;pointer-events:auto}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .main-nav>a>span[data-i18n]:not([data-nav-glass-covered]){opacity:1}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .header-tools{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:10px}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .languages{flex:1 1 140px;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;align-items:stretch;width:auto}
+  body[data-page][data-portfolio-clarity] .masthead:is(:hover,:has(:focus-visible)) .languages button{display:block}
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-page][data-portfolio-clarity] .masthead{transition:none!important}
+}
 @media print{
   body[data-page][data-portfolio-clarity]{padding-left:0!important}
   body[data-page][data-portfolio-clarity] .masthead,body[data-page][data-portfolio-clarity] .reading-progress{display:none!important}
