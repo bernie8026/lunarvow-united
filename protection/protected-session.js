@@ -7,6 +7,8 @@
   const workerPath = new URL("protected-worker.js", base).pathname;
   const replayed = new WeakSet();
   let checking = null, redirecting = false, clickSequence = 0;
+  let heartbeatTimer = null, pageActive = true, lifecycleRevision = 0, pendingTarget = null;
+  const endedMarker = "portfolio-protected-ended";
   const sessionCopy={
     'zh-HK':{checking:'驗證網站存取權限',locked:'網站已鎖定',ended:'網站已鎖定，請重新解鎖。',reload:'重新載入',lock:'鎖定網站'},
     en:{checking:'Checking access',locked:'Portfolio locked',ended:'Your session ended. Reload to unlock.',reload:'Reload',lock:'Lock site'},
@@ -59,27 +61,66 @@
         if (error) reject(error); else resolve(value);
       }
       channel.port1.onmessage = event => {
-        if (!event.data?.ok) finish(new Error("Session unavailable"));
+        if (controller() !== worker) finish(new Error("Protected controller changed"));
+        else if (!event.data?.ok) finish(new Error("Session unavailable"));
         else finish(null, event.data);
       };
       try { worker.postMessage({type}, [channel.port2]); } catch (error) { finish(error); }
     });
   }
 
-  function returnToGate() {
+  function stopHeartbeat() {
+    if (heartbeatTimer !== null) clearTimeout(heartbeatTimer);
+    heartbeatTimer = null;
+  }
+
+  function scheduleHeartbeat() {
+    if (heartbeatTimer !== null || redirecting || !pageActive || document.hidden) return;
+    // Mitigate ordinary idle eviction while a visitor reads the foreground
+    // page. Browsers may still terminate the worker; no state is restored.
+    heartbeatTimer = setTimeout(() => {
+      heartbeatTimer = null;
+      if (pageActive && !document.hidden && !redirecting) verify();
+    }, 15000);
+  }
+
+  function invalidateCheck(forgetTarget = false) {
+    lifecycleRevision++;
+    checking = null;
+    stopHeartbeat();
+    if (forgetTarget) { pendingTarget = null; clickSequence++; }
+  }
+
+  function returnToGate(target = pendingTarget, ended = true) {
+    stopHeartbeat();
     cover();
     if (redirecting) return;
     redirecting = true;
+    let destination = new URL(location.href);
+    try {
+      const candidate = new URL(target || location.href, location.href);
+      if (scoped(candidate)) destination = candidate;
+    } catch {}
+    // Persist only a short explanation, time and path. The destination's
+    // query/hash stay in navigation; no credentials or full URLs are stored.
+    try {
+      if (ended) sessionStorage.setItem(endedMarker, JSON.stringify({reason:"ended", time:Date.now(), path:destination.pathname}));
+      else sessionStorage.removeItem(endedMarker);
+    } catch {}
+    const navigate = () => {
+      if (destination.href === location.href) location.reload();
+      else location.replace(destination.pathname + destination.search + destination.hash);
+    };
     // No credentials are stored. This timestamp only prevents an automatic
     // reload loop if a host accidentally serves the wrong bootstrap document.
     const key = "portfolio-protected-recovery";
     let recent = false;
     try {
       const last = JSON.parse(sessionStorage.getItem(key) || "null");
-      recent = last?.path === location.pathname && Date.now() - last.time < 10000;
-      sessionStorage.setItem(key, JSON.stringify({path:location.pathname, time:Date.now()}));
+      recent = last?.path === destination.pathname && Date.now() - last.time < 10000;
+      sessionStorage.setItem(key, JSON.stringify({path:destination.pathname, time:Date.now()}));
     } catch {}
-    if (!recent) { location.reload(); return; }
+    if (!recent) { navigate(); return; }
     // Keep any old private DOM hidden while offering an explicit recovery.
     const panel = document.createElement("div");
     panel.setAttribute("role", "alertdialog");
@@ -94,7 +135,7 @@
     button.style.cssText = "font:inherit;color:#070d18;background:#65ddff;border:0;padding:12px 24px;cursor:pointer";
     button.addEventListener("click", () => {
       try { sessionStorage.removeItem(key); } catch {}
-      location.reload();
+      navigate();
     });
     panel.append(text, button);
     document.documentElement.classList.add("portfolio-session-recovery");
@@ -103,18 +144,25 @@
   }
 
   async function verify(hidden = false) {
-    if (redirecting) return false;
     if (hidden) cover();
-    if (!checking) checking = ask("STATE").then(state => {
-      if (state.unlocked !== true) { returnToGate(); return false; }
-      try { sessionStorage.removeItem("portfolio-protected-recovery"); } catch {}
-      uncover();
-      return true;
-    }).catch(() => { returnToGate(); return false; }).finally(() => { checking = null; });
+    if (redirecting || !pageActive || document.hidden) return false;
+    if (!checking) {
+      const revision = lifecycleRevision;
+      const current = () => revision === lifecycleRevision && pageActive && !document.hidden && !redirecting;
+      const check = ask("STATE").then(state => {
+        if (!current()) return false;
+        if (state.unlocked !== true) { returnToGate(); return false; }
+        try { sessionStorage.removeItem("portfolio-protected-recovery"); } catch {}
+        uncover();
+        scheduleHeartbeat();
+        return true;
+      }).catch(() => { if (current()) returnToGate(); return false; }).finally(() => { if (checking === check) checking = null; });
+      checking = check;
+    }
     return checking;
   }
 
-  function scoped(url) { return url.origin === base.origin && url.pathname.startsWith(base.pathname); }
+  function scoped(url) { return url.origin === base.origin && url.pathname.startsWith(base.pathname) && !url.username && !url.password; }
 
   // The capture listener runs before the existing router. Only a confirmed
   // unlocked worker gets the original click path, including its page motion.
@@ -128,8 +176,10 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     const ticket = ++clickSequence;
+    pendingTarget = url.href;
     verify().then(ok => {
       if (!ok || ticket !== clickSequence || !link.isConnected) return;
+      pendingTarget = null;
       const click = new MouseEvent("click", {bubbles:true, cancelable:true, view:window, button:0, detail:event.detail});
       replayed.add(click);
       link.dispatchEvent(click);
@@ -140,6 +190,7 @@
     if (replayed.has(event)) return;
     event.stopImmediatePropagation();
     const ticket = ++clickSequence;
+    pendingTarget = null;
     verify().then(ok => {
       if (!ok || ticket !== clickSequence) return;
       const pop = new PopStateEvent("popstate", {state:event.state});
@@ -147,12 +198,15 @@
       window.dispatchEvent(pop);
     });
   }, true);
-  window.addEventListener("pagehide", cover);
-  window.addEventListener("pageshow", () => { verify(true); });
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) verify(true); });
-  navigator.serviceWorker?.addEventListener("controllerchange", () => { verify(true); });
+  window.addEventListener("pagehide", () => { pageActive = false; invalidateCheck(true); cover(); });
+  window.addEventListener("pageshow", () => { pageActive = true; invalidateCheck(); verify(true); });
+  document.addEventListener("visibilitychange", () => {
+    invalidateCheck(document.hidden);
+    if (!document.hidden) verify(true);
+  });
+  navigator.serviceWorker?.addEventListener("controllerchange", () => { invalidateCheck(); verify(true); });
   navigator.serviceWorker?.addEventListener("message", event => {
-    if (event.source === controller() && event.data?.type === "LOCKED") returnToGate();
+    if (event.source === controller() && event.data?.type === "LOCKED") returnToGate(null, false);
   });
   const originalFetch = window.fetch;
   window.fetch = function(...args) {
@@ -176,9 +230,10 @@
     }
     async function lock() {
       button.disabled = true;
+      invalidateCheck(true);
       cover();
       try { await ask("LOCK"); } catch {}
-      returnToGate();
+      returnToGate(null, false);
     }
     group.append(button);
     render();
