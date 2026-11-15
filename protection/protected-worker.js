@@ -4,7 +4,7 @@
 // locked again; neither a key nor a decrypted response enters persistent storage.
 const base = new URL(self.registration.scope);
 const bootstrap = new Set([
-  "protected-worker.js", "protected-unlock.js", "protected-session.js",
+  "protected-worker.js", "protected-unlock.js", "protected-session.js", "assets/protected-ui.js",
   "protected-site.json", ".nojekyll", "robots.txt"
 ]);
 const shells = new Set([
@@ -150,7 +150,8 @@ async function handle(request, path) {
     let body = file.data;
     if (/\.html$/i.test(path) || /^text\/html(?:;|$)/i.test(file.type)) {
       const source = new TextDecoder("utf-8", {fatal:true}).decode(body);
-      const script = `<script src="${new URL("protected-session.js", base).pathname}?v=foreground-1" defer></script>`;
+      const script = `<script src="${new URL("protected-session.js", base).pathname}?v=foreground-1" defer></script>` +
+        `<script src="${new URL("assets/protected-ui.js", base).pathname}?v=clarity-1" defer></script>`;
       body = /<\/head\s*>/i.test(source) ? source.replace(/<\/head\s*>/i, script + "</head>") : script + source;
     }
     return response(body, 200, file.type, head);

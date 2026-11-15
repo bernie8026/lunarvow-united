@@ -31,3 +31,25 @@ jobs:
       - name: Check protected routes, archive recovery and authentication
         # Fixtures create temporary keys and passwords; no production access.
         run: node --test scripts/test/*.test.cjs cloudflare/test/*.test.mjs
+
+  ui:
+    name: UI clarity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install pinned browser test dependency
+        run: npm install --prefix "$RUNNER_TEMP/portfolio-ui-deps" --ignore-scripts --no-package-lock --no-audit --no-fund --save-exact playwright@1.62.1
+      - name: Install Chromium and browser dependencies
+        run: node "$RUNNER_TEMP/portfolio-ui-deps/node_modules/playwright/cli.js" install chromium --with-deps
+      - name: Check UI clarity across layouts and languages
+        # Generic local fixtures only; no credentials or live website access.
+        run: NODE_PATH="$RUNNER_TEMP/portfolio-ui-deps/node_modules" node scripts/verify-ui-clarity.cjs

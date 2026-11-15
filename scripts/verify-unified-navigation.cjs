@@ -9,7 +9,7 @@ const base = new URL(process.env.PORTFOLIO_BASE_URL || 'http://127.0.0.1:8766/lu
 const password = fs.readFileSync(path.resolve(root, process.env.PORTFOLIO_PASSWORD_FILE || '../lunarvow-private/access-password.txt'), 'utf8').trim();
 const output = path.join(root, '.private', 'navigation-qa');
 const routes = ['index','about','experience','education','skills','projects','photography','equipment','stem','contact','sitemap'];
-const destinations = routes.slice(1,9), languages = ['zh-HK','en','zh-CN'];
+const destinations = routes.slice(1,9), languages = ['zh-HK','en','zh-CN','ja','ko','th','ru'];
 const errors = [], results = [];
 const pendingRequests = new Map();
 let browser;
@@ -117,8 +117,8 @@ async function rail(page,name,language='zh-HK') {
   await page.locator('.theme-toggle').evaluate(node=>Promise.all(node.getAnimations().map(animation=>animation.finished.catch(()=>{}))));
   const geometry=await rectsAndControls(page);
   assert.equal(geometry.position,'fixed','desktop uses a fixed left rail');assert.equal(geometry.header.x,0);assert.equal(geometry.header.y,0);
-  assert.equal(geometry.header.width,68);assert.equal(geometry.header.height,geometry.height);assert.equal(geometry.padding,68);
-  assert(geometry.main.x>=68-1,'main content clears the left rail');
+  assert.equal(geometry.header.width,224);assert.equal(geometry.header.height,geometry.height);assert.equal(geometry.padding,224);
+  assert(geometry.main.x>=224-1,'main content clears the labelled left rail');
   assert(geometry.brand.bottom<=geometry.nav.y,'logo and numbered links do not overlap');
   assert(geometry.nav.bottom<=geometry.tools.y,'numbered links and bottom controls do not overlap');
   assert.equal(await page.locator('.menu-toggle').isVisible(),false,'desktop menu button is hidden');
@@ -134,16 +134,19 @@ async function rail(page,name,language='zh-HK') {
   styles.find(([selector])=>selector==='.header-tools')[1].marginTop='auto';
   return {header:geometry.header,nav:geometry.nav,brand:geometry.brand,tools:geometry.tools,styles};
 }
-async function tooltips(page) {
+async function visibleLabels(page) {
+  await page.mouse.move(700,5);await page.locator('main#main').focus();await frames(page);
   for (const link of await page.locator('.main-nav > a').all()) {
-    const label=link.locator('span').last();
-    await link.hover();await page.waitForFunction(node=>Number(getComputedStyle(node).opacity)>0.99,await label.elementHandle());
-    assert(await label.evaluate(node=>node.getBoundingClientRect().left>=68 && node.getBoundingClientRect().width>0),'hover exposes the chapter name beside the rail');
-    await page.mouse.move(150,5);await page.keyboard.press('Tab');await link.focus();
-    await page.waitForFunction(node=>node.parentElement.matches(':focus-visible') && Number(getComputedStyle(node).opacity)>0.99,await label.elementHandle());
-    assert((await label.textContent()).trim(),'keyboard focus exposes a named chapter');
+    await link.scrollIntoViewIfNeeded();
+    const label=link.locator(':scope > span[data-i18n]');
+    assert(await label.evaluate(node=>{
+      const style=getComputedStyle(node),rect=node.getBoundingClientRect(),link=node.parentElement.getBoundingClientRect();
+      return style.position==='static' && Number(style.opacity)>0.99 && rect.width>0 && rect.height>0 &&
+        rect.left>=link.left-1 && rect.right<=link.right+1;
+    }),'every chapter name is readable without hover and wraps within its own link');
+    assert((await label.textContent()).trim(),'each chapter retains its translated label');
   }
-  await page.locator('main#main').focus();await page.mouse.move(150,5);
+  await page.locator('main#main').focus();await page.mouse.move(700,5);
 }
 async function mobileMenu(page,name,language) {
   await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await frames(page);
@@ -182,14 +185,14 @@ async function main() {
         if(!baseline)baseline=actual;else assert.deepEqual(actual,baseline,'shared rail styles and geometry are identical on '+name);
         if(height===960 && theme==='light' && ['index','about','experience'].includes(name))await capture(page,name+'-1440.png');
       }
-      await tooltips(page);
+      await visibleLabels(page);
     });
-    await test('All eleven routes keep usable menus at 900, 768, 390 and 360 pixels in three languages',async()=>{
+    await test('All eleven routes keep usable menus at 900, 768, 390 and 360 pixels in seven languages',async()=>{
       await themeTo(page,'light');
       for(const width of [900,768,390,360]) {
         await page.setViewportSize({width,height:844});
         for(const name of routes) {await load(page,name);for(const language of languages){await languageTo(page,language);await mobileMenu(page,name,language);}}
-        console.log(`CHECK ${width}px menus: all eleven routes and three languages complete`);
+        console.log(`CHECK ${width}px menus: all eleven routes and seven languages complete`);
         if(width===390){await load(page,'about');await capture(page,'about-390.png');}
       }
     });
