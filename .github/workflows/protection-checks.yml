@@ -56,3 +56,6 @@ jobs:
       - name: Check cinematic gate layouts and isolated video controls
         # Real public gate; synthetic status/player replies and no sign-in.
         run: NODE_PATH="$RUNNER_TEMP/portfolio-ui-deps/node_modules" node scripts/verify-gate-cinematic.cjs
+      - name: Check real reference media and chapter controls
+        # Public reference assets and synthetic unlocked markup; no sign-in.
+        run: NODE_PATH="$RUNNER_TEMP/portfolio-ui-deps/node_modules" node scripts/verify-reference-media.cjs

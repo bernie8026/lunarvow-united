@@ -1,0 +1,101 @@
+{
+  "photo-gaze": {
+    "file": "cosplay-sword-portrait.webp",
+    "title": "Cosplayer with sword",
+    "author": "taymtaym",
+    "source": "https://commons.wikimedia.org/wiki/File:Cosplayer_with_sword.jpg",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0/",
+    "changes": "Resized and converted from JPEG to WebP; original watermark retained."
+  },
+  "photo-prop": {
+    "file": "cosplay-keqing-prop.webp",
+    "title": "Cosplay of Keqing with sword (ICIC, 2022)",
+    "author": "Leiem",
+    "source": "https://commons.wikimedia.org/wiki/File:Cosplay_of_Keqing_with_sword_(ICIC,_2022).jpg",
+    "license": "CC BY-SA 4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "changes": "Resized and converted from JPEG to WebP. Image adaptation remains CC BY-SA 4.0."
+  },
+  "photo-costume": {
+    "file": "cosplay-raiden-costume.webp",
+    "title": "Comikaze 2015 - Raiden (22467977698)",
+    "author": "RyC - Behind The Lens",
+    "source": "https://commons.wikimedia.org/wiki/File:Comikaze_2015_-_Raiden_(22467977698).jpg",
+    "license": "CC BY 2.0",
+    "license_url": "https://creativecommons.org/licenses/by/2.0/",
+    "changes": "Resized and converted from JPEG to WebP."
+  },
+  "studio-photo": {
+    "file": "studio-lighting.webp",
+    "title": "Behind the Scene Production of a Video Content",
+    "author": "MART PRODUCTION",
+    "source": "https://www.pexels.com/photo/behind-the-scene-production-of-a-video-content-7335420/",
+    "license": "Pexels License",
+    "license_url": "https://www.pexels.com/license/",
+    "changes": "Resized and converted from JPEG to WebP."
+  },
+  "studio-video": {
+    "file": "studio-lighting-demo.mp4",
+    "title": "Professional Portrait Photoshoot Behind the Scenes",
+    "author": "Airam Dato-on",
+    "source": "https://www.pexels.com/video/professional-portrait-photoshoot-behind-the-scenes-31512161/",
+    "license": "Pexels License",
+    "license_url": "https://www.pexels.com/license/",
+    "changes": "Resized to 960x540, encoded H.264, audio omitted, entire 8.51 second footage retained. Poster extracted at 3 seconds."
+  },
+  "tello": {
+    "file": "tello-reference.jpg",
+    "title": "Ryze Tello",
+    "author": "SimonWaldherr",
+    "source": "https://commons.wikimedia.org/wiki/File:Ryze_Tello.jpg",
+    "license": "CC BY-SA 4.0",
+    "changes": "Resized to 1280px via Wikimedia thumbnail; otherwise unaltered.",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "classroom": {
+    "file": "tello-classroom.jpg",
+    "title": "Ryze Tello and Tello EDUs (1-19-2026)",
+    "author": "ZLEA",
+    "source": "https://commons.wikimedia.org/wiki/File:Ryze_Tello_and_Tello_EDUs_(1-19-2026).jpg",
+    "license": "CC BY-SA 4.0",
+    "changes": "Resized to 1280px via Wikimedia thumbnail; otherwise unaltered.",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "components": {
+    "file": "drone-components.jpg",
+    "title": "S5go topview",
+    "author": "SKsiddhartthan",
+    "source": "https://commons.wikimedia.org/wiki/File:S5go_topview.jpg",
+    "license": "CC BY-SA 4.0",
+    "changes": "Resized to 1280px via Wikimedia thumbnail; otherwise unaltered.",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "programming": {
+    "file": "drone-programming.jpg",
+    "title": "Autonomous Quadcopter Project 01",
+    "author": "Mais Jamal, Youshaa Murhij, Zain Alabiden Ali",
+    "source": "https://commons.wikimedia.org/wiki/File:Autonomous_Quadcopter_Project_01.jpg",
+    "license": "CC BY-SA 4.0",
+    "changes": "Resized to 1280px via Wikimedia thumbnail; otherwise unaltered.",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "hover": {
+    "file": "drone-hover.mp4",
+    "title": "Quadcopter 20200202",
+    "author": "Project Kei (Keita.Honda)",
+    "source": "https://commons.wikimedia.org/wiki/File:Quadcopter_20200202.webm",
+    "license": "CC BY-SA 4.0",
+    "changes": "Converted WebM to H.264 MP4 at 960x540; original 10.243s retained; audio removed; no frame synthesis.",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "hover-poster": {
+    "file": "drone-hover-poster.jpg",
+    "title": "Quadcopter 20200202 — poster frame",
+    "author": "Project Kei (Keita.Honda)",
+    "source": "https://commons.wikimedia.org/wiki/File:Quadcopter_20200202.webm",
+    "license": "CC BY-SA 4.0",
+    "changes": "Still frame extracted at 3s; resized 1280x720.",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+  }
+}

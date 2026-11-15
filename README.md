@@ -225,15 +225,40 @@ archive needs its original password, supplied with `--password-file` or
 
 Pages 06–08 add `photography.html`, `equipment.html` and `stem.html` to the shared
 navigation, homepage directory, grouped footer and sitemap. Photography presents
-composition and lighting studies as explicitly labelled diagrams; no supplied
-photograph is invented. Equipment retains the existing official Nikon/Godox
-images, verified specifications and source links. STEM presents Aerovate as a
-student concept with Tello EDU as a reference, not an owned prototype. Original
+composition, costume and prop studies using credited real cosplay photography.
+Equipment retains the existing official Nikon/Godox images, verified specifications
+and source links, with a real studio photograph and behind-the-scenes clip.
+STEM presents Aerovate as a student concept alongside real Tello, classroom and
+DIY hardware references and a genuine quadcopter hover clip. Original
 Projects content and anchors remain available. Each page has seven-language copy,
 its own visual layout and motion, with reduced-motion and pause support.
 The rail compacts at short desktop heights so eight entries fit beside languages.
-Only encrypted content and public login gates are published.
+Private portfolio content stays encrypted; public reference media and generic runtime
+files are published alongside the login gates.
 
 Quick preview after unlocking: [06 Photography](https://bernie8026.github.io/lunarvow-united/photography.html?lang=zh-HK),
 [07 Equipment](https://bernie8026.github.io/lunarvow-united/equipment.html?lang=zh-HK) and
 [08 STEM Lab](https://bernie8026.github.io/lunarvow-united/stem.html?lang=zh-HK).
+
+The public `protected-media.js` presentation helper runs only after unlock on
+the three recognised top-level chapter routes. The Photography and STEM chapters
+use new media layouts; Equipment replaces only the recognised light-studio region.
+Original nodes stay connected and hidden for existing controllers and are restored
+on disposal. Shared navigation and the Nikon/Godox viewer remain in place. The
+worker permits only exact public asset filenames; authentication, archive ciphertext
+and private asset rules are unchanged. Fold this presentation layer into the
+canonical private source when the complete current source is available.
+
+Public reference files are self-hosted in `protection/assets/references/` and mirrored
+in `docs/assets/references/`. Each chapter includes author, source, licence and
+adaptation credits; `sources.json` records the same metadata. Wikimedia CC BY /
+CC BY-SA and Pexels assets are clearly external references, not the portfolio owner's
+photographs, hardware build or flight record. MP4 clips use H.264, native controls,
+muted inline playback, offscreen/hidden-page pause and reduced-motion support.
+
+Run `node scripts/verify-reference-media.cjs` for real media decoding, controls,
+cleanup, soft navigation, source boundaries and 84 responsive language/theme cases.
+The suite uses synthetic unlocked fixtures based on documented current selectors;
+it explicitly reports `actualEncryptedMarkupTested: false`. It does not sign in or
+substitute for reviewing the current decrypted production pages. Set
+`PLAYWRIGHT_CHROMIUM_CHANNEL=chrome` to use installed Chrome for local checks.

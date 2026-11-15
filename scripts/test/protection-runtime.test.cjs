@@ -54,6 +54,7 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       assert.equal(opened.headers.get('Cache-Control'), 'no-store');
       assert.equal(html.split(uiScript).length - 1, 1, 'one versioned UI script per decrypted response');
       assert.equal(html.split(sessionScript).length - 1, 1);
+      assert.equal(html.split('assets/protected-media.js?v=references-1').length - 1, 1, 'reference media loads only after unlock');
       assert(!html.includes('gate-video.js') && !html.includes('gate-background.js'), 'the gate video controller is never injected into private pages');
       assert(html.indexOf(sessionScript) < html.indexOf(uiScript), 'session guard executes before UI enhancements');
       assert(html.indexOf(uiScript) < html.indexOf('</head>'));
@@ -73,6 +74,13 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       'assets/protected-ui.js': '/* Synthetic public UI code */',
       'assets/gate-video.js': '/* Synthetic public video controller */',
       'assets/gate-background.js': '/* Synthetic public background controller */',
+      'assets/protected-media.js': '/* Synthetic reference media runtime */',
+      'assets/reference-media.css': '/* Synthetic reference styles */',
+      'assets/reference-photography.js': '/* Synthetic photo module */',
+      'assets/reference-equipment.js': '/* Synthetic equipment module */',
+      'assets/reference-stem.js': '/* Synthetic STEM module */',
+      'assets/references/cosplay-sword-portrait.webp': 'synthetic-public-photo',
+      'assets/references/drone-hover.mp4': 'synthetic-public-flight-video',
       'assets/anfield-anthem.mp4': 'synthetic-public-video',
       'assets/anfield-anthem.jpg': 'synthetic-public-poster',
       'protected-site.json': '{"ciphertext":"synthetic-public-ciphertext"}',
@@ -89,7 +97,7 @@ for (const relative of ['protection/protected-worker.js', 'docs/protected-worker
       const response = await worker.handle(request(name), name);
       assert.equal(await response.text(), publicBodies[name], 'public bootstrap works while locked');
     }
-    for (const name of ['assets/private-example.js', 'assets/gate-video-private.js', 'assets/gate-video.js.map', 'assets/private.mp4', 'assets/anfield-anthem-private.mp4', 'assets/anfield-anthem.mp4.map']) {
+    for (const name of ['assets/private-example.js', 'assets/gate-video-private.js', 'assets/gate-video.js.map', 'assets/private.mp4', 'assets/anfield-anthem-private.mp4', 'assets/anfield-anthem.mp4.map', 'assets/references/private.jpg', 'assets/reference-private.js']) {
       const privateAsset = await worker.handle(request(name), name);
       assert.equal(privateAsset.status, 401, 'public helpers do not expose neighbouring private assets');
       assert.equal(privateAsset.headers.get('X-Portfolio-Locked'), '1');
@@ -184,6 +192,8 @@ test('protected builds require and copy nested public runtimes without exposing 
   fs.writeFileSync(path.join(protectionRoot, 'assets/gate-background.js'), videoCode);
   fs.writeFileSync(path.join(protectionRoot, 'assets/anfield-anthem.mp4'), 'synthetic-video');
   fs.writeFileSync(path.join(protectionRoot, 'assets/anfield-anthem.jpg'), 'synthetic-poster');
+  assert.throws(() => prepareProtectedSite(options), /Protection runtime is incomplete/, 'reference chapter runtimes must also be present');
+  for (const name of ['protected-media.js','reference-media.css','reference-photography.js','reference-equipment.js','reference-stem.js']) fs.writeFileSync(path.join(protectionRoot, 'assets', name), '/* Synthetic reference runtime */');
   prepareProtectedSite(options);
   assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/protected-ui.js'), 'utf8'), uiCode);
   assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/gate-video.js'), 'utf8'), videoCode);
