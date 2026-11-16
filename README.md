@@ -271,3 +271,13 @@ The suite uses synthetic unlocked fixtures based on documented current selectors
 it explicitly reports `actualEncryptedMarkupTested: false`. It does not sign in or
 substitute for reviewing the current decrypted production pages. Set
 `PLAYWRIGHT_CHROMIUM_CHANNEL=chrome` to use installed Chrome for local checks.
+
+The About hero removes terminal punctuation from its two title spans after
+locale rendering. The original translated spans and motion attributes stay in
+place. The requested red Liverpool Liver bird replaces the header mark, About
+identity image and favicon, with the portrait caption crediting Liverpool FC.
+Its official source is https://stadion-edge.liverpoolfc.com/images/lfc.svg, as
+used by the Liverpool FC homepage. Editable red SVG and provenance metadata live
+in `protection/assets/liverpool-liver-bird-*` and their `docs/assets/` mirrors.
+The helper embeds the same public SVG in a data URI so already-unlocked browsers
+can display the emblem with their existing worker's asset boundary.

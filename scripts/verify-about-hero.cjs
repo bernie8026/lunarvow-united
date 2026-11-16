@@ -17,6 +17,8 @@ const copy = {
   th: ['เกี่ยวกับฉัน', 'สวัสดี ฉันคือ', 'ALEX EXAMPLE.', 'นักเรียนในฮ่องกงที่เรียนรู้เทคโนโลยีผ่านเว็บไซต์ การถ่ายภาพ และโครงการที่ลงมือทำจริง', 'มาสร้างผลงานด้วยกัน', 'อ่านเรื่องราวของฉัน', 'ออกแบบเว็บไซต์', 'ถ่ายภาพคอสเพลย์', 'โครงการ STEM'],
   ru: ['ОБО МНЕ', 'Привет, я', 'ALEX EXAMPLE.', 'Я учусь в Гонконге и исследую технологии через создание сайтов, фотографию и практические проекты.', 'Давайте работать вместе', 'Узнать мою историю', 'ВЕБ-ДИЗАЙН', 'КОСПЛЕЙ-ФОТОГРАФИЯ', 'STEM-ПРОЕКТЫ']
 };
+const expectedHello = { 'zh-HK':'你好，我係', en:'Hello, I’m', 'zh-CN':'你好，我是', ja:'こんにちは', ko:'안녕하세요', th:'สวัสดี ฉันคือ', ru:'Привет, я' };
+const monogram = 'data:image/svg+xml;base64,' + Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="760" height="620"><rect width="760" height="620" fill="#0879bb"/><text x="380" y="350" text-anchor="middle" font-size="180" fill="white">AX</text></svg>').toString('base64');
 function fixture() {
   const original = fs.readFileSync(path.join(root, 'scripts/test/fixtures/portfolio-ui.html'), 'utf8');
   const head = original.slice(0, original.indexOf('<main ')).replace('data-page="index"', 'data-page="about"');
@@ -28,23 +30,71 @@ function fixture() {
   .about-apple-number{position:absolute;top:24px;right:28px;opacity:.15}.about-apple-kicker{position:relative;left:var(--about-ink-offset,0px);font:12px/1.7 monospace;letter-spacing:.14em;margin:0 0 24px}
   .about-apple-hero h1{width:960px;max-width:960px;font-size:76px;line-height:1.06;margin:0 auto 32px;font-weight:750;letter-spacing:-.05em}.about-apple-hero h1>span{display:block;position:relative;left:var(--about-ink-offset,0px)}.about-apple-hero h1>span:first-child{font-size:42.56px}.about-apple-gradient{color:var(--signal)}
   .about-apple-tagline{max-width:760px;font-size:19px;line-height:1.8;margin:0 auto 32px}.about-apple-actions{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin:0 auto 40px}.about-apple-actions>a{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:46px;padding:12px 20px;border:1px solid var(--line);line-height:1.5}.about-apple-button{background:var(--signal);color:var(--signal-ink)}
-  .about-apple-disciplines{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font:12px/1.8 monospace;letter-spacing:.08em}.about-apple-disciplines i{width:3px;height:3px;border-radius:50%;background:currentColor}.about-fixture-story{padding:48px}.about-fixture-story h2{font-size:36px}
+  .about-apple-disciplines{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font:12px/1.8 monospace;letter-spacing:.08em}.about-apple-disciplines i{width:3px;height:3px;border-radius:50%;background:currentColor}.about-fixture-story{padding:48px}.about-fixture-story h2{font-size:36px}.about-apple-portrait{margin:0;overflow:hidden}.about-apple-portrait img{display:block;width:100%;height:auto}.about-apple-portrait figcaption{text-align:center}
   @media(max-width:1000px){.about-apple-hero{padding-top:64px;min-height:650px}}
   </style>`;
-  const main = `<main id="main" class="about-apple-page" tabindex="-1"><section class="about-apple-hero" aria-labelledby="about-apple-title"><span class="about-apple-number" aria-hidden="true">01</span><p class="about-apple-kicker" data-i18n="t033" style="--about-ink-offset:0.77px"></p><h1 id="about-apple-title" data-motion="title"><span data-i18n="aboutHello" style="--about-ink-offset:7.53px"></span><span class="about-apple-gradient" data-i18n="aboutName" style="--about-ink-offset:10.3px"></span></h1><p class="about-apple-tagline"></p><div class="about-apple-actions"><a class="about-apple-button" href="contact.html?lang=zh-HK" data-internal data-i18n="t044"></a><a class="about-apple-link" href="#my-story"><span data-i18n="aboutDiscover"></span><span aria-hidden="true">↓</span></a></div><div class="about-apple-disciplines"><span></span><i aria-hidden="true"></i><span></span><i aria-hidden="true"></i><span></span></div></section><section class="about-fixture-story" id="my-story"><h2>Unchanged story fixture</h2><p>Content outside the hero remains connected and unchanged.</p><a href="experience.html?lang=zh-HK" data-internal>Experience</a></section></main>`;
+  const main = `<main id="main" class="about-apple-page" tabindex="-1"><section class="about-apple-hero" aria-labelledby="about-apple-title"><span class="about-apple-number" aria-hidden="true">01</span><p class="about-apple-kicker" data-i18n="t033" style="--about-ink-offset:0.77px"></p><h1 id="about-apple-title" data-motion="title"><span data-i18n="aboutHello" style="--about-ink-offset:7.53px"></span><span class="about-apple-gradient" data-i18n="aboutName" style="--about-ink-offset:10.3px"></span></h1><p class="about-apple-tagline"></p><div class="about-apple-actions"><a class="about-apple-button" href="contact.html?lang=zh-HK" data-internal data-i18n="t044"></a><a class="about-apple-link" href="#my-story"><span data-i18n="aboutDiscover"></span><span aria-hidden="true">↓</span></a></div><div class="about-apple-disciplines"><span></span><i aria-hidden="true"></i><span></span><i aria-hidden="true"></i><span></span></div></section><section class="about-fixture-story" id="my-story"><h2>Unchanged story fixture.</h2><p>Content outside the hero remains connected and unchanged.</p><a href="experience.html?lang=zh-HK" data-internal>Experience</a></section><figure class="about-apple-portrait"><img src="${monogram}" alt="Original synthetic AX monogram" width="760" height="620" decoding="async"><figcaption>AX / ORIGINAL IDENTITY.</figcaption></figure></main>`;
   const script = `<script>
   const copy=${JSON.stringify(copy)};
   window.__aboutAuthReads=[];const trap=name=>{window.__aboutAuthReads.push(name);throw Error('Private API read '+name)};
   for(const name of ['localStorage','sessionStorage'])Object.defineProperty(window,name,{get(){return trap(name)}});
   Object.defineProperty(document,'cookie',{get(){return trap('cookie')}});Object.defineProperty(navigator,'credentials',{get(){return trap('credentials')}});window.fetch=()=>trap('fetch');window.XMLHttpRequest=function(){trap('XMLHttpRequest')};
-  window.__heroOriginalNodes=[...document.querySelector('.about-apple-hero').querySelectorAll('*')];window.__storyOriginal=document.querySelector('#my-story').outerHTML;
+  window.__heroOriginalNodes=[...document.querySelector('.about-apple-hero').querySelectorAll('*')];window.__storyOriginal=document.querySelector('#my-story').outerHTML;window.__brandOriginalNodes=[...document.querySelector('.brand').children];window.__portraitOriginalImage=document.querySelector('.about-apple-portrait img');window.__portraitOriginalCaption=document.querySelector('.about-apple-portrait figcaption');
   window.__renderAbout=lang=>{document.documentElement.lang=lang;const c=copy[lang];for(const [selector,index] of [['.about-apple-kicker',0],['[data-i18n=aboutHello]',1],['[data-i18n=aboutName]',2],['.about-apple-tagline',3],['[data-i18n=t044]',4],['[data-i18n=aboutDiscover]',5]])document.querySelector(selector).textContent=c[index];document.querySelectorAll('.about-apple-disciplines>span').forEach((n,i)=>n.textContent=c[i+6]);document.querySelectorAll('[data-language]').forEach(n=>n.setAttribute('aria-pressed',String(n.dataset.language===lang)));document.querySelectorAll('a[data-internal]').forEach(n=>{const u=new URL(n.href);u.searchParams.set('lang',lang);n.href=u.href});for(const [selector,value] of [['.about-apple-kicker',.77],['[data-i18n=aboutHello]',7.53],['[data-i18n=aboutName]',10.3]])document.querySelector(selector).style.setProperty('--about-ink-offset',value+'px');document.dispatchEvent(new CustomEvent('portfolio:language',{detail:{language:lang}}));};
   document.querySelectorAll('[data-language]').forEach(n=>n.onclick=()=>window.__renderAbout(n.dataset.language));document.querySelector('.theme-toggle').onclick=()=>document.body.dataset.theme=document.body.dataset.theme==='dark'?'light':'dark';document.querySelector('.menu-toggle').onclick=e=>{const on=e.currentTarget.getAttribute('aria-expanded')!=='true';e.currentTarget.setAttribute('aria-expanded',String(on));document.querySelector('#main-nav').dataset.open=String(on)};window.__renderAbout('zh-HK');
   </script>`;
-  return head.replace('</head>', css + '</head>') + main + footer + script + '</body></html>';
+  return head.replace('</head>', '<link rel="icon" href="'+monogram+'">' + css + '</head>') + main + footer + script + '</body></html>';
 }
 const frame = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 const waitWidth = (page, width) => page.waitForFunction(width => Math.abs(document.querySelector('.masthead').getBoundingClientRect().width - width) < .25, width);
+async function headlines(page, hello, name, label) {
+  assert.equal(await page.locator('[data-i18n="aboutHello"]').textContent(),hello,label+' greeting has no trailing punctuation');
+  assert.equal(await page.locator('[data-i18n="aboutName"]').textContent(),name,label+' name has no trailing punctuation');
+  assert.equal(await page.locator('#about-apple-title').getAttribute('data-motion'),'title');
+  assert.equal(await page.locator('#about-apple-title > span').count(),2);
+  assert.equal(await page.locator('#about-apple-title > .about-apple-gradient[data-i18n="aboutName"]').count(),1);
+  assert(await page.evaluate(()=>window.__heroOriginalNodes.every(n=>n.isConnected)),label+' translation and motion nodes remain connected');
+}
+async function liverbird(page, label) {
+  const mark=page.locator('.brand > img.portfolio-liverbird[data-portfolio-bird-mark]');
+  assert.equal(await mark.count(),1);
+  await page.locator('.brand img[data-portfolio-bird-mark],.about-apple-portrait img').evaluateAll(nodes=>Promise.all(nodes.map(node=>node.decode())));
+  const state=await page.evaluate(()=>{
+    const mark=document.querySelector('.brand > img[data-portfolio-bird-mark]'),brand=mark.closest('.brand'),old=brand.querySelector('.brand-mark'),image=document.querySelector('.about-apple-portrait img'),caption=document.querySelector('.about-apple-portrait figcaption'),r=image.getBoundingClientRect(),m=mark.getBoundingClientRect();
+    return{src:mark.src,portrait:image.src,icon:document.querySelector('link[rel~=icon]')?.href,alt:mark.alt,hidden:mark.getAttribute('aria-hidden'),brandMarker:brand.hasAttribute('data-portfolio-bird'),brandName:brand.querySelector('strong').textContent,brandHref:brand.href,oldConnected:window.__brandOriginalNodes.every(n=>n.isConnected),oldHidden:getComputedStyle(old).display==='none',portraitSame:window.__portraitOriginalImage===image,captionSame:window.__portraitOriginalCaption===caption,portraitMarker:!!image.closest('[data-portfolio-bird-portrait]'),caption:caption.textContent,portraitAlt:image.alt,objectFit:getComputedStyle(image).objectFit,natural:[mark.naturalWidth,mark.naturalHeight,image.naturalWidth,image.naturalHeight],portraitBox:{left:r.left,right:r.right,height:r.height},markBox:{left:m.left,right:m.right,height:m.height},width:innerWidth};
+  });
+  assert(/^data:image\/svg\+xml[;,]/.test(state.src),label+' header uses embedded SVG without a new network asset');
+  assert(state.src===state.portrait,label+' header and portrait use the same Liver bird');assert(state.src===state.icon,label+' favicon uses the same Liver bird');
+  assert.equal(state.alt,'');assert.equal(state.hidden,'true');assert(state.brandMarker);
+  assert.equal(state.brandName,'ALEX EXAMPLE');assert.equal(new URL(state.brandHref).pathname,'/index.html');
+  assert((await page.locator('.brand').ariaSnapshot()).includes('ALEX EXAMPLE'),label+' collapsed brand link retains its accessible name');
+  assert(state.oldConnected&&state.oldHidden,label+' old mark remains connected and hidden');
+  assert(state.portraitSame&&state.captionSame&&state.portraitMarker,label+' original portrait nodes are reused');
+  assert.equal(state.caption,'LIVER BIRD / LIVERPOOL FC');assert(state.portraitAlt.trim()&&!state.portraitAlt.includes('AX'));
+  if(await page.locator('html').getAttribute('lang')==='zh-HK')assert.equal(state.portraitAlt,'利物浦 Liver bird 標誌');
+  assert.equal(state.objectFit,'contain');assert(state.natural.every(value=>value>0),label+' both SVG images decode');
+  assert(state.portraitBox.left>=-1&&state.portraitBox.right<=state.width+1,label+' portrait stays inside viewport');
+  assert(state.portraitBox.height>=299&&state.portraitBox.height<=561,label+' portrait keeps bounded display height');
+  assert(state.markBox.left>=-1&&state.markBox.right<=state.width+1&&state.markBox.height>0,label+' header logo stays visible');
+}
+async function headlineRerenders(page) {
+  const cases=[
+    ['zh-HK','你好，我係，','ALEX EXAMPLE。','你好，我係'],
+    ['en','Hello, I’m...','ALEX EXAMPLE.','Hello, I’m'],
+    ['zh-CN','你好，我是。','ALEX EXAMPLE！','你好，我是'],
+    ['ja','こんにちは、','ALEX EXAMPLE。','こんにちは'],
+    ['ko','안녕하세요,','ALEX EXAMPLE.','안녕하세요'],
+    ['th','สวัสดี ฉันคือ,','ALEX EXAMPLE.','สวัสดี ฉันคือ'],
+    ['ru','Привет, я!','ALEX EXAMPLE.','Привет, я']
+  ];
+  for(const [lang,hello,name,expected] of cases){
+    await page.evaluate(lang=>window.__renderAbout(lang),lang);await frame(page);
+    // A source controller may re-render the title without a locale event.
+    await page.evaluate(({hello,name})=>{document.querySelector('[data-i18n=aboutHello]').textContent=hello;document.querySelector('[data-i18n=aboutName]').textContent=name;},{hello,name});
+    await frame(page);await headlines(page,expected,'ALEX EXAMPLE','independent re-render/'+lang);await centered(page,'independent re-render/'+lang);
+  }
+  return cases.length;
+}
 async function centered(page, label) {
   const state = await page.evaluate(() => {
     const hero = document.querySelector('.about-apple-hero'), h = hero.getBoundingClientRect(), style = getComputedStyle(hero);
@@ -92,8 +142,9 @@ async function run() {
     await page.goto(base+'/about.html',{waitUntil:'load'});await page.locator('body[data-portfolio-clarity]').waitFor();
     for(const theme of ['dark','light'])for(const [width,height] of [[3840,2160],[1440,960],[1001,540],[390,844],[320,740]]){
       await page.setViewportSize({width,height});await page.mouse.move(width-2,height-2);await page.evaluate(theme=>{document.body.dataset.theme=theme;document.activeElement?.blur()},theme);
-      for(const lang of locales){await page.evaluate(lang=>window.__renderAbout(lang),lang);await frame(page);await centered(page,theme+'/'+width+'/'+lang);cases++;}
+      for(const lang of locales){await page.evaluate(lang=>window.__renderAbout(lang),lang);await frame(page);await headlines(page,expectedHello[lang],'ALEX EXAMPLE',theme+'/'+width+'/'+lang);await centered(page,theme+'/'+width+'/'+lang);await liverbird(page,theme+'/'+width+'/'+lang);cases++;}
     }
+    const headlineCases=await headlineRerenders(page);
     await navigationSmoke(page);
     await page.emulateMedia({reducedMotion:'reduce'});await frame(page);await centered(page,'reduced-motion/390px');
     if(process.env.ABOUT_HERO_SCREENSHOTS){
@@ -104,7 +155,7 @@ async function run() {
       }
     }
     assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
-    console.log(JSON.stringify({cases,locales,viewports:[3840,1440,1001,390,320],themes:['dark','light'],observedHeroDOMContract:true,syntheticCopyAndBaseCSS:true,actualAuthenticatedPageTested:false,productionLogin:false,navigationSmoke:true,reducedMotion:true}));
+    console.log(JSON.stringify({cases,headlineCases,locales,viewports:[3840,1440,1001,390,320],themes:['dark','light'],observedHeroDOMContract:true,syntheticCopyAndBaseCSS:true,actualAuthenticatedPageTested:false,productionLogin:false,navigationSmoke:true,reducedMotion:true}));
   }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
 }
 if(require.main===module)run().catch(error=>{console.error(error.stack);process.exitCode=1});

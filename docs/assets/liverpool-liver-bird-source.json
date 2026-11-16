@@ -1,0 +1,40 @@
+{
+  "title": "Liverpool FC Liver bird and L.F.C. emblem",
+  "rightsHolder": "Liverpool Football Club",
+  "sourcePage": "https://www.liverpoolfc.com/",
+  "sourceAsset": "https://stadion-edge.liverpoolfc.com/images/lfc.svg",
+  "officialContext": "https://www.liverpoolfc.com/news/liverpool-fc-use-liver-bird-across-digital-platforms",
+  "retrievedAt": "2026-11-16",
+  "sourceEvidence": "Official homepage image-link siteHeader_logo image src is sourceAsset with alt=\"Liverpool FC Logo\".",
+  "original": {
+    "filename": "liverpool-liver-bird-original.svg",
+    "bytes": 27668,
+    "sha256": "edb7af00fb3475cb16f6c5d77be2b366fd0c60fd79743733525b0b9e102b764a",
+    "fill": "white"
+  },
+  "normalized": {
+    "filename": "liverpool-liver-bird-red.svg",
+    "bytes": 27728,
+    "sha256": "ecfd7f2a219b4367dcb770f7e8f2093217d9481fac76ab7bf3badd9c002ded89",
+    "fill": "#C8102E",
+    "changes": [
+      "Replaced visible path fill white with #C8102E; clip geometry kept unchanged.",
+      "Added accessible title; serialized SVG with standard namespace."
+    ],
+    "viewBox": "0 0 34 61",
+    "width": 34,
+    "height": 61
+  },
+  "validation": {
+    "paths": 1,
+    "scripts": 0,
+    "externalResources": 0,
+    "eventHandlers": 0,
+    "foreignObjects": 0,
+    "images": 0,
+    "clipPath": "local #clip0_5384_18277 only",
+    "rendered": "Chromium via Playwright channel chrome; visually inspected preview with correct red Liver bird + L.F.C., no clipping or missing geometry.",
+    "preview": "liverpool-liver-bird-red-preview.png"
+  },
+  "rights": "Official club emblem; Liverpool FC trademark/brand artwork. No open-content license was supplied by official download."
+}
