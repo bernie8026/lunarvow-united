@@ -281,3 +281,8 @@ used by the Liverpool FC homepage. Editable red SVG and provenance metadata live
 in `protection/assets/liverpool-liver-bird-*` and their `docs/assets/` mirrors.
 The helper embeds the same public SVG in a data URI so already-unlocked browsers
 can display the emblem with their existing worker's asset boundary.
+
+The public unlock shell embeds the same Liver bird in its header, loading orbit
+and favicon. All public HTML route aliases are rendered from the gate template;
+the embedded image works with already-installed locked workers without adding
+a bootstrap asset or changing authentication.
