@@ -80,7 +80,7 @@ body[data-page=about][data-portfolio-clarity] .about-apple-actions>a{min-width:0
 }
 body[data-portfolio-clarity] .brand[data-portfolio-bird]{display:flex;align-items:center;gap:10px}
 body[data-portfolio-clarity] .brand[data-portfolio-bird]>.brand-mark{display:none!important}
-body[data-portfolio-clarity] .brand[data-portfolio-bird]>.portfolio-liverbird{display:block;flex:0 0 30px;width:30px;height:44px;object-fit:contain}
+body[data-portfolio-clarity] .brand[data-portfolio-bird]>.portfolio-liverbird{display:block;position:relative;z-index:5;flex:0 0 30px;width:30px;height:44px;object-fit:contain}
 body[data-portfolio-clarity] .brand[data-portfolio-bird]>span:not(.brand-mark){min-width:0}
 body[data-page=about][data-portfolio-clarity] .about-apple-portrait[data-portfolio-bird-portrait]{background:#f4f7fb}
 body[data-page=about][data-portfolio-clarity] .about-apple-portrait img.portfolio-liverbird-portrait{display:block;width:100%;height:clamp(300px,38vw,560px);max-width:100%;padding:clamp(32px,4vw,64px);box-sizing:border-box;object-fit:contain;background:#f4f7fb;filter:none}

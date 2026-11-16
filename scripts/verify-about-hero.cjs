@@ -120,6 +120,17 @@ async function navigationSmoke(page) {
   const geometry=()=>page.evaluate(()=>{const r=document.querySelector('.about-apple-hero').getBoundingClientRect();return{left:r.left,width:r.width,padding:getComputedStyle(document.body).paddingLeft,scrollY}});
   const before=await geometry();assert.equal(before.padding,'84px');
   await page.locator('.masthead').hover({position:{x:42,y:40}});await waitWidth(page,224);assert.deepEqual(await geometry(),before);
+  // The live brand's existing glass pane sits at z-index 4 and does not copy
+  // images. Reproduce that overlap so it cannot wash out the new bird.
+  const overlay=await page.locator('.brand').evaluate(brand=>{
+    brand.style.position='relative';
+    const lens=document.createElement('div');lens.className='navigation-lens';lens.setAttribute('aria-hidden','true');lens.inert=true;
+    lens.style.cssText='position:absolute;inset:0;z-index:4;background:rgba(240,250,255,.9)';brand.append(lens);
+    const mark=brand.querySelector('[data-portfolio-bird-mark]'),r=mark.getBoundingClientRect(),p=lens.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2;
+    return{covered:x>=p.left&&x<=p.right&&y>=p.top&&y<=p.bottom,topIsBird:document.elementFromPoint(x,y)===mark};
+  });
+  assert(overlay.covered,'fixture glass pane covers the logo position');assert(overlay.topIsBird,'bird remains clear above the existing navigation glass');
+  await page.locator('.brand > .navigation-lens').evaluate(node=>node.remove());
   await page.mouse.move(1438,958);await waitWidth(page,84);
   await page.locator('.brand').focus();await page.keyboard.press('Tab');await waitWidth(page,224);
   await page.locator('main').evaluate(n=>n.focus({preventScroll:true}));await waitWidth(page,84);assert.deepEqual(await geometry(),before);
