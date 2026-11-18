@@ -68,6 +68,26 @@ Touch taps and the existing language drag selection remain available.
 Keyboard focus has the same optical feedback. Reduced motion and pause keep
 static magnification without the spring movement.
 
+Language dragging uses both pointer coordinates and the current button rectangles,
+so every option remains reachable when the expanded rail wraps into another row
+or column. Geometry is refreshed during a drag as the rail expands. Selection
+still commits on release; Escape and release outside the control cancel it.
+The encrypted archive contains this correction. For older local source backups,
+apply `scripts/patches/language-glass-2d.patch` from the directory containing
+`assets/language-glass.js` before rebuilding. The private canonical source also
+receives the same correction.
+
+Run the isolated mouse/touch regression against a private or recovered script:
+
+```sh
+node scripts/verify-language-drag.cjs /path/to/assets/language-glass.js
+```
+
+The browser suite uses synthetic labels and covers wrapped rows, columns,
+single-axis layouts, all seven direct selections and cancellation without login.
+It requires Playwright and Chromium; set `PLAYWRIGHT_CHROMIUM_CHANNEL=chrome`
+to use installed Chrome.
+
 The eight main navigation destinations remain direct links. The Projects entry
 has no added arrow or category drawer. Every page has the same always-visible
 five-column footer directory, following the grouped sitemap layout of Queen's

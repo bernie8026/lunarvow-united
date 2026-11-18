@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Language drag fixture</title>
+<style>
+body{margin:32px}.languages{position:relative;display:grid;grid-template-columns:repeat(4,54px);gap:4px;width:max-content;touch-action:none}
+.languages button{display:grid;width:54px;height:38px;place-items:center;user-select:none}.languages svg,.language-lens{position:absolute;pointer-events:none}.language-lens{top:0;left:0}.language-lens-sheet{position:absolute}.language-lens-sheet span{display:none}
+.languages[data-layout=row]{display:flex;flex-direction:row}.languages[data-layout=column]{display:flex;flex-direction:column}.languages[data-layout=two-columns]{grid-auto-flow:column;grid-template-columns:repeat(2,54px);grid-template-rows:repeat(4,38px)}
+</style>
+<header class="masthead"><nav class="main-nav"></nav><div class="languages" aria-label="Language"></div></header>
+<script>
+const group=document.querySelector('.languages');
+group.dataset.layout=new URLSearchParams(location.search).get('layout')||'grid';
+window.commits=[];
+for(const locale of ['zh-HK','en','zh-CN','ja','ko','th','ru']){
+  const b=document.createElement('button');b.dataset.language=locale;b.textContent=locale;b.setAttribute('aria-pressed',String(locale==='zh-HK'));group.append(b);
+  b.addEventListener('click',()=>{window.commits.push(locale);for(const opt of group.querySelectorAll('button'))opt.setAttribute('aria-pressed',String(opt===b));document.dispatchEvent(new Event('portfolio:language'));});
+}
+window.PORTFOLIO_PAGES={register:(name,url,fn)=>fn({on:(target,event,handler,options)=>target.addEventListener(event,handler,options),cleanup:()=>{},requestAnimationFrame:window.requestAnimationFrame.bind(window),cancelAnimationFrame:window.cancelAnimationFrame.bind(window),ResizeObserver:window.ResizeObserver})};
+</script><script src="implementation.js"></script></html>
