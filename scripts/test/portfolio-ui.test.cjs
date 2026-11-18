@@ -230,8 +230,8 @@ test('identity reuses current private DOM, prioritises whole project, and preser
   assert.deepEqual(ui.hero.querySelectorAll('[data-slide-to]').map(node => node.getAttribute('data-slide-to')), ['0', '1', '2']);
   assert.equal(ui.hero.querySelector('[data-carousel-status]').textContent, '1 / 3');
   const links = intro.querySelectorAll('a[data-internal]');
-  assert.deepEqual(links.map(link => link.textContent), ['PROJECTS', 'ABOUT']);
-  assert.deepEqual(links.map(link => link.getAttribute('href')), [base + 'projects.html?lang=en', base + 'about.html?lang=en']);
+  assert.deepEqual(links.map(link => link.textContent), ['PROJECTS', 'PHOTOGRAPHY', 'ABOUT']);
+  assert.deepEqual(links.map(link => link.getAttribute('href')), [base + 'projects.html?lang=en', base + 'photography.html?lang=en', base + 'about.html?lang=en']);
   assert.equal(ui.registrations[0].src, script, 'router identity retains the exact versioned script URL');
 });
 
