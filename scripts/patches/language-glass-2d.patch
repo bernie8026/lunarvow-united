@@ -1,0 +1,72 @@
+--- a/assets/language-glass.js
++++ b/assets/language-glass.js
+@@ -38,17 +38,26 @@
+   let drag = null, hover = null, focus = null, frame = 0, previousTime = 0, suppressUntil = 0, committing = false, initialized = false;
+   const still = () => reduced.matches || document.body.classList.contains("motion-paused");
+   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+-  function measure() {
+-    const rect = group.getBoundingClientRect(); boxes.clear(); labels.clear(); sheet.replaceChildren();
++  function measure(force = true) {
++    const rect = group.getBoundingClientRect();
++    const positions = buttons.map(button => {
++      const r = button.getBoundingClientRect();
++      return {x:r.left - rect.left - group.clientLeft + r.width / 2, y:r.top - rect.top - group.clientTop + r.height / 2, w:r.width, h:r.height};
++    });
++    if (!force && positions.every((box, index) => {
++      const old = boxes.get(buttons[index]);
++      return old && box.x === old.x && box.y === old.y && box.w === old.w && box.h === old.h;
++    })) return rect;
++    boxes.clear(); labels.clear(); sheet.replaceChildren();
+     sheet.style.width = group.clientWidth + "px"; sheet.style.height = group.clientHeight + "px";
+-    for (const button of buttons) {
+-      const r = button.getBoundingClientRect(), style = getComputedStyle(button);
+-      const box = {x:r.left - rect.left - group.clientLeft + r.width / 2, y:r.top - rect.top - group.clientTop + r.height / 2, w:r.width, h:r.height};
++    for (const [index, button] of buttons.entries()) {
++      const box = positions[index], style = getComputedStyle(button);
+       boxes.set(button, box);
+       const label = document.createElement("span"); label.textContent = button.textContent;
+       Object.assign(label.style, {left:box.x - box.w / 2 + "px",top:box.y - box.h / 2 + "px",width:box.w + "px",height:box.h + "px",font:style.font,letterSpacing:style.letterSpacing});
+       sheet.append(label); labels.set(button, label);
+     }
++    return rect;
+   }
+   function preview(button) {
+     for (const option of buttons) {
+@@ -108,19 +117,30 @@
+     measure(); rest();
+   }
+   function update(clientX, clientY) {
+-    const rect = group.getBoundingClientRect(), vertical = getComputedStyle(group).flexDirection === "column";
++    // The rail can expand and rewrap between pointerdown and pointerup.
++    const rect = measure(false);
+     const localX = clientX - rect.left - group.clientLeft, localY = clientY - rect.top - group.clientTop;
+     const valid = clientX >= rect.left - 22 && clientX <= rect.right + 22 && clientY >= rect.top - 18 && clientY <= rect.bottom + 18;
+-    let selected = null, distance = Infinity;
++    let selected = null, nearestEdge = Infinity, nearestCentre = Infinity;
++    let left = Infinity, right = -Infinity, top = Infinity, bottom = -Infinity;
+     for (const button of buttons) {
+-      const box = boxes.get(button), next = Math.abs((vertical ? localY - box.y : localX - box.x));
+-      if (next < distance) { selected = button; distance = next; }
++      const box = boxes.get(button);
++      if (!box.w || !box.h || button.disabled) continue;
++      left = Math.min(left, box.x); right = Math.max(right, box.x);
++      top = Math.min(top, box.y); bottom = Math.max(bottom, box.y);
++      const dx = Math.abs(localX - box.x), dy = Math.abs(localY - box.y);
++      const edge = Math.max(0, dx - box.w / 2) ** 2 + Math.max(0, dy - box.h / 2) ** 2;
++      const centre = dx * dx + dy * dy;
++      if (edge < nearestEdge || (edge === nearestEdge && centre < nearestCentre)) {
++        selected = button; nearestEdge = edge; nearestCentre = centre;
++      }
+     }
+     if (drag) drag.selected = valid ? selected : null;
+     preview(valid ? selected : null);
+-    const box = boxes.get(selected), first = boxes.get(buttons[0]), last = boxes.get(buttons[buttons.length - 1]);
+-    target.x = vertical ? box.x : clamp(localX, first.x, last.x);
+-    target.y = vertical ? clamp(localY, first.y, last.y) : box.y;
++    if (!selected) return;
++    const box = boxes.get(selected), vertical = right === left && bottom > top;
++    target.x = clamp(localX, left, right);
++    target.y = clamp(localY, top, bottom);
+     target.w = box.w + (vertical ? 14 : 12); target.h = box.h + (vertical ? 12 : 10);
+     animate();
+   }
