@@ -123,7 +123,10 @@ async function desktopRail(page,width,height,label){
         assert.equal(content.order[2],'home-hero');
         assert.equal(content.overflow,false,`${width}px ${locale} must not overflow`);
         for(const link of content.links){assert.equal(new URL(link.href).searchParams.get('lang'),locale);assert(link.label.length);}
-        assert.equal(content.links.length,2);
+        assert.deepEqual(content.links.map(link => new URL(link.href).pathname.split('/').pop()), ['projects.html', 'photography.html', 'about.html']);
+        const photoLink = page.locator('[data-identity-page="photography"]');
+        assert.equal(await photoLink.textContent(), await page.locator('#main-nav a[href*="photography.html"] span[data-i18n]').textContent());
+        assert((await photoLink.boundingBox()).height >= 44, 'photography keeps a touch-sized target');
         for(const r of content.controls){assert(r.w>0&&r.h>0&&r.left>=-1&&r.right<=width+1&&r.top>=-1&&r.bottom<=height+1,`${width}px ${locale} controls stay onscreen: ${JSON.stringify(r)}`);}
         for(let a=0;a<content.controls.length;a++)for(let b=a+1;b<content.controls.length;b++){
           const x=content.controls[a],y=content.controls[b];
