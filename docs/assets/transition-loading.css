@@ -1,0 +1,131 @@
+/* The loader owns timing, decoding, progress and recovery. These are three
+   presentations of its real states, scoped away from the everyday page shell. */
+@media screen {
+  html.page-loading-pending::after {
+    background:linear-gradient(90deg,transparent 0 31%,#efcf49 31% 69%,transparent 69%) center calc(50% + 2.3rem)/6rem 2px no-repeat,#191d19;
+    color:#f1f0e3;
+  }
+  html body[data-page] .boot-screen.boot-screen--cinematic[data-mode] {
+    --loader-ivory:#f4f0e3;--loader-muted:#c3c8b8;--loader-rule:#68715e;--loader-yellow:#efcf49;
+    --paper:var(--loader-ivory);--signal:var(--loader-yellow);box-sizing:border-box;color:var(--loader-ivory);
+    background:#191d19;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__masthead {
+    color:var(--loader-muted);font:600 .75rem/1.4 var(--iu-mono,monospace);letter-spacing:.1em;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__phase {
+    color:var(--loader-ivory);font:650 clamp(.95rem,1.5vw,1.2rem)/1.45 var(--iu-type,system-ui);
+    letter-spacing:0;overflow-wrap:anywhere;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__percentage {
+    color:var(--loader-yellow);font:600 clamp(1.65rem,4vw,3rem)/1 var(--iu-mono,monospace);
+    font-variant-numeric:tabular-nums;letter-spacing:-.07em;flex:none;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__status {
+    display:block;min-width:0;max-width:none;color:var(--loader-muted);font:500 .875rem/1.6 var(--iu-type,system-ui);
+    overflow-wrap:anywhere;white-space:normal;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__bar {
+    position:relative;isolation:isolate;overflow:hidden;height:.45rem;width:100%;
+    box-sizing:border-box;background:#41483d;box-shadow:none;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__bar>span {
+    background:var(--loader-yellow);box-shadow:none;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__bar::after {
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(90deg,transparent 0 calc(12.5% - 2px),#191d19 calc(12.5% - 2px) 12.5%);
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__actions {display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] :is(.boot-screen__retry,.boot-screen__skip-animation) {
+    box-sizing:border-box;min-height:44px;min-width:0;max-width:100%;border-radius:0;
+    padding:.55rem 1.05rem;white-space:normal;overflow-wrap:anywhere;font:650 .91rem/1.45 var(--iu-type,system-ui);
+    background:transparent;color:var(--loader-ivory);border:1px solid #969e87;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__retry {
+    color:#191c14;background:var(--loader-yellow);border-color:var(--loader-yellow);
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] button:focus-visible {outline:3px solid var(--loader-yellow);outline-offset:2px}
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode] [hidden] {display:none!important}
+  body[data-page] .boot-screen.boot-screen--cinematic[data-phase="failed"] .boot-screen__status {color:#ffc6b3}
+  /* First entry: draw the real resource ring over a camera aperture. */
+  html body[data-page] .boot-screen.boot-screen--cinematic[data-mode="intro"] {
+    overflow:auto;padding:clamp(1.1rem,4vw,4.6rem);gap:.5rem;
+    background:linear-gradient(110deg,#181c18 4%,#242b22 60%,#171b17);
+  }
+  html body[data-page] .boot-screen.boot-screen--cinematic[data-mode="intro"]::before {
+    background:repeating-linear-gradient(90deg,transparent 0 71px,#e9ecd809 71px 72px);
+  }
+  html body[data-page] .boot-screen.boot-screen--cinematic[data-mode="intro"]::after {display:none}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__cinema {gap:1rem;min-width:0}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__ambient,
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__particles {display:none}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__visual {isolation:isolate}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__moon {
+    animation:none;border-radius:50%;box-shadow:inset 0 0 0 1px #849171;
+    background:repeating-conic-gradient(from 30deg,#424c3c 0deg 38deg,#2c3429 38deg 58deg,#929b7f 58deg 60deg);
+    mask-image:radial-gradient(circle,transparent 0 25%,#000 26%);opacity:.8;
+  }
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__orbit--outer {animation:none;border:1px dashed #89917e;outline:0}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__orbit--outer::before,
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__orbit--outer::after {display:none}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__orbit--inner {border:1px solid #7c826d;animation:none}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__orbit--inner::before {display:none}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__ring circle {stroke:#a3ad914d}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__ring .boot-screen__ring-progress {stroke:var(--loader-yellow);stroke-width:2}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__visual .boot-screen__art {filter:none}
+  body[data-page] .boot-screen[data-mode="intro"] :is(.boot-screen__subtitle,.boot-screen__eyebrow) {
+    color:var(--loader-yellow);letter-spacing:.075em;line-height:1.45;
+  }
+  body[data-page] .boot-screen[data-mode="intro"] :is(.boot-screen__visual-code,.boot-screen__signature,.boot-screen__poem) {color:var(--loader-muted)}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__title {font-weight:780;text-shadow:none;color:var(--loader-ivory)}
+  body[data-page] .boot-screen[data-mode="intro"] .boot-screen__console {border-top:1px solid var(--loader-rule);padding-top:1rem}
+  /* Arrival: calibrated ruler above a measured bar. Departure: no byte count
+     is available before the new document arrives, so show a transfer shuttle. */
+  html body[data-page] .boot-screen.boot-screen--cinematic:is([data-mode="page"],[data-mode="departure"]) {
+    padding:clamp(5.1rem,10vh,8rem) clamp(1rem,7vw,6rem) 2rem;
+    background:linear-gradient(123deg,#191d19 0 69%,#242922 69% 69.12%,#191d19 69.12%);
+  }
+  html body[data-page] .boot-screen.boot-screen--cinematic:is([data-mode="page"],[data-mode="departure"])::before {display:none}
+  body[data-page] .boot-screen.boot-screen--cinematic:is([data-mode="page"],[data-mode="departure"]) .boot-screen__console {
+    position:relative;display:block;min-width:0;width:min(100%,34rem);margin-inline:auto;padding:2.15rem 0 0!important;
+    border:0;border-top:1px solid #87917b;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic:is([data-mode="page"],[data-mode="departure"]) .boot-screen__console::before {
+    content:"";position:absolute;inset:0 0 auto;display:block;width:auto;height:.6rem;
+    aspect-ratio:auto;border:0;border-radius:0;transform:none;background:repeating-linear-gradient(90deg,#89957f 0 1px,transparent 1px 5%);
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode="page"] .boot-screen__console::after {
+    content:"";position:absolute;inset:-.23rem auto auto 0;width:2.4rem;height:.4rem;aspect-ratio:auto;
+    border:0;border-radius:0;background:var(--loader-yellow);transform:none;animation:none;
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode="departure"] .boot-screen__console::after {
+    content:"";position:absolute;inset:-.3rem auto auto 0;width:10%;height:.5rem;aspect-ratio:auto;
+    border:0;border-radius:0;transform:none;animation:none;background:var(--loader-yellow);clip-path:polygon(0 0,82% 0,100% 50%,82% 100%,0 100%);
+  }
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode="departure"] :is(.boot-screen__percentage,.boot-screen__bar) {display:none}
+  body[data-page] .boot-screen.boot-screen--cinematic[data-mode="departure"] .boot-screen__status {margin-top:.5rem}
+  @media(prefers-reduced-motion:no-preference) {
+    body[data-page]:not(.motion-paused) .boot-screen.boot-screen--cinematic[data-mode="departure"] .boot-screen__console::after {
+      animation:portfolio-transfer-shuttle 1.65s ease-in-out infinite alternate;
+    }
+    @keyframes portfolio-transfer-shuttle {to{transform:translateX(900%)}}
+    body[data-page]:not(.motion-paused) .boot-screen[data-mode="intro"] .boot-screen__moon {
+      animation:portfolio-aperture-index 1s ease-out both;
+    }
+    @keyframes portfolio-aperture-index {from{transform:rotate(-20deg) scale(.93)}to{transform:rotate(0) scale(1)}}
+  }
+  @media(max-width:700px), (max-height:560px) {
+    body[data-page] .boot-screen[data-mode="intro"] .boot-screen__copy {text-align:start}
+    body[data-page] .boot-screen[data-mode="intro"] .boot-screen__subtitle {margin-top:.4rem;font-size:.94rem}
+    body[data-page] .boot-screen[data-mode="intro"] .boot-screen__title {font-size:clamp(2.15rem,8vw,3.65rem)}
+    body[data-page] .boot-screen[data-mode="intro"] .boot-screen__cinema {min-height:min-content;gap:.5rem}
+    body[data-page] .boot-screen[data-mode="intro"] .boot-screen__visual {min-height:clamp(6rem,21svh,12rem)}
+  }
+  @media(forced-colors:active) {
+    body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__bar {border:1px solid CanvasText}
+    body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__bar>span,
+    body[data-page] .boot-screen.boot-screen--cinematic:is([data-mode="page"],[data-mode="departure"]) .boot-screen__console::after {background:Highlight;forced-color-adjust:none}
+    body[data-page] .boot-screen.boot-screen--cinematic[data-mode] .boot-screen__bar::after {display:none}
+  }
+}

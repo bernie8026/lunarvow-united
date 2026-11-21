@@ -155,6 +155,31 @@
       for (const item of buttons) item.setAttribute("aria-pressed", String(item === button));
       for (const marker of markers) marker.setAttribute("data-active", String(marker.getAttribute("data-stem-marker") === selected));
     });
+    // The reference chapter replaces the older interactive STEM markup. Mount
+    // the workshop in the document visitors actually see, on each route visit.
+    const lab = window.PORTFOLIO_FLIGHT_LAB;
+    if (lab && typeof lab.mount === "function") {
+      const section = document.createElement("section");
+      section.id = "flight-lab";
+      chapter.querySelector(".ref-hero").after(section);
+      try {
+        const dispose = lab.mount(section);
+        if (typeof dispose !== "function") throw new Error("Workshop unavailable");
+        ctx.cleanup(dispose);
+        const jump = document.createElement("a");
+        jump.className = "ref-button flight-workshop-jump"; jump.href = "#flight-lab";
+        jump.setAttribute("data-ref-copy", "openWorkshop");
+        const labels = {"zh-HK":"編程試飛","zh-CN":"编程试飞",en:"Program a flight",ja:"飛行をプログラム",ko:"비행 프로그래밍",th:"เขียนโปรแกรมการบิน",ru:"Запрограммировать полёт"};
+        for (const locale of Object.keys(labels)) dictionaries[locale].openWorkshop = labels[locale];
+        chapter.querySelector(".ref-stem-tags").after(jump);
+        // A direct link can reach this page before the reference module mounts.
+        if (location.hash === jump.hash) requestAnimationFrame(() => {
+          if (section.isConnected && location.hash === jump.hash) section.scrollIntoView({block:"start",behavior:"instant"});
+        });
+      } catch {
+        section.remove(); // Existing photographs and chapter controls still work.
+      }
+    }
     ctx.bindCopy(chapter, dictionaries);
     const credits = ctx.credits(["tello", "classroom", "components", "hover"]);
     if (credits) chapter.append(credits);

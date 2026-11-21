@@ -241,5 +241,5 @@ async function run() {
   } finally { if (browser) await browser.close(); await new Promise(resolve => server.close(resolve)); }
 }
 // Run the late-loading theme and gate checks in the same CI browser job.
-if (require.main === module) run().then(() => require('./verify-industrial.cjs').run()).catch(error => { console.error(error.stack); process.exitCode = 1; });
+if (require.main === module) run().then(() => require('./verify-industrial.cjs').run()).then(() => require('./verify-flight-workshop.cjs').run()).catch(error => { console.error(error.stack); process.exitCode = 1; });
 module.exports = { oldMain, fixture };

@@ -72,6 +72,22 @@
     Object.assign(dictionary[locale],passkeyCopy[locale]);
     Object.assign(loadingCopy[locale],passkeyCopy[locale]);
   }
+  // Labels describe real transitions from prepareArchive/decrypt/openArchive.
+  // Registration is a separate ceremony, so it never marks archive steps complete.
+  const loaderStages = { downloading:0, authenticating:1, passkeyWaiting:1, decrypting:2, unpacking:3, opening:4 };
+  const loaderLabels = {
+    'zh-HK':['載入作品集','下載','驗證','解密','解壓','開啟','正在核實存取權限…'],
+    'zh-CN':['加载作品集','下载','验证','解密','解压','打开','正在核实访问权限…'],
+    en:['Loading portfolio','Download','Verify','Decrypt','Unpack','Open','Checking access permissions…'],
+    ja:['ポートフォリオを読み込み中','受信','認証','復号','展開','表示','アクセス権を確認しています…'],
+    ko:['포트폴리오 불러오는 중','다운로드','인증','복호화','압축 풀기','열기','접근 권한을 확인하는 중…'],
+    th:['กำลังโหลดแฟ้มผลงาน','ดาวน์โหลด','ตรวจสอบ','ถอดรหัส','แตกไฟล์','เปิด','กำลังตรวจสอบสิทธิ์การเข้าถึง…'],
+    ru:['Загрузка портфолио','Загрузка','Проверка','Расшифровка','Распаковка','Открытие','Проверка прав доступа…']
+  };
+  const stepList = document.getElementById('gate-loading-steps');
+  const loaderTitle = document.getElementById('gate-loading-title');
+  const stages = Array.from(document.querySelectorAll('[data-loader-step]'));
+  let lastTrack='';
   const noPasskeys={
     'zh-HK':'目前未登記通行密鑰。請使用密碼，或用擁有人提供嘅邀請登記。',
     en:'No passkey is registered yet. Use the password, or register with an invitation from the owner.',
@@ -145,11 +161,25 @@
     if(!loading)return;
     const text=loadingCopy[language];
     const downloading=state==='downloading',known=downloading&&download.total>0;
+    const labels=loaderLabels[language], index=loaderStages[state];
     loading.dataset.phase=state;
-    const phase=text[state]||text.opening;
+    const group=language+':'+(index??state);
+    // Download chunks can arrive rapidly. Repaint the phase rail only on a
+    // transition or language change, leaving the live status quiet between them.
+    if(group!==lastTrack) {
+      lastTrack=group;
+      if(loaderTitle) loaderTitle.textContent=state==='registering'?dictionary[language].setupTitle:labels[0];
+      if(stepList) stepList.hidden=index===undefined;
+      stages.forEach((step,i)=>{
+        step.textContent=labels[i+1];
+        step.dataset.state=i===index?'current':i<index?'done':'pending';
+        if(i===index)step.setAttribute('aria-current','step');else step.removeAttribute('aria-current');
+      });
+    }
+    const phase=state==='authenticating'?labels[6]:(text[state]||text.opening);
     if(loadingStatus.textContent!==phase)loadingStatus.textContent=phase;
     loadingBar.dataset.determinate=String(known);
-    loadingBar.setAttribute('aria-label',text.download);
+    loadingBar.setAttribute('aria-label',downloading?text.download:phase);
     if(known){
       const percent=Math.min(100,Math.floor(download.loaded/download.total*100));
       loadingBar.setAttribute('aria-valuenow',String(percent));
@@ -157,7 +187,9 @@
       loadingAmount.textContent=percent+'%';
     }else{
       loadingBar.removeAttribute('aria-valuenow');
-      loadingAmount.textContent=downloading?`${(download.loaded/1048576).toFixed(1)} MB`:'';
+      loadingAmount.textContent=downloading ? (download.loaded>=1000000
+        ? (download.loaded/1000000).toFixed(1)+' MB' : download.loaded>=1000
+          ? Math.floor(download.loaded/1000)+' kB' : download.loaded+' B') : '';
     }
   }
   function render() {

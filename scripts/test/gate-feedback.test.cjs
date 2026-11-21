@@ -16,7 +16,7 @@ const response = (status, body) => new Response(JSON.stringify(body), {
 
 // Run the complete published gate with synthetic DOM/network boundaries. No
 // production credentials, authentication requests or browser storage are used.
-async function gate({ language = 'en', statusReply, archiveReply, authenticate, credentialError, passkeys = true, sessionMarker } = {}) {
+async function gate({ language = 'en', statusReply, archiveReply, authenticate, credentialError, passkeys = true, sessionMarker, withLoader = false } = {}) {
   const sessionValues = new Map(), intervals = new Set();
   if (sessionMarker !== undefined) sessionValues.set('portfolio-protected-ended', typeof sessionMarker === 'string' ? sessionMarker : JSON.stringify(sessionMarker));
   function element(extra = {}) {
@@ -24,10 +24,14 @@ async function gate({ language = 'en', statusReply, archiveReply, authenticate, 
       disabled: true, value: '', type: '', textContent: '', dataset: {}, attributes: {}, handlers: {},
       addEventListener(name, fn) { this.handlers[name] = fn; },
       setAttribute(name, value) { this.attributes[name] = value; },
+      removeAttribute(name) { delete this.attributes[name]; },
+      style: { setProperty() {} },
       focus() {}, ...extra,
     };
   }
   const elements = Object.fromEntries(['unlock-form', 'site-password', 'unlock-button', 'show-password', 'gate-status', 'passkey-button', 'passkey-register-button', 'passkey-setup', 'passkey-note'].map(id => [id, element()]));
+  const steps = withLoader ? Array.from({length:5}, () => element()) : [];
+  if (withLoader) for (const suffix of ['', '-title', '-status', '-amount', '-progress', '-steps']) elements['gate-loading' + suffix] = element();
   elements['site-password'].type = 'password';
   const copies = ['intro', 'footer'].map(gateCopy => element({ dataset: { gateCopy } }));
   const languageButtons = ['zh-HK', 'en', 'zh-CN', 'ja', 'ko', 'th', 'ru'].map(gateLanguage => element({ dataset: { gateLanguage } }));
@@ -53,7 +57,7 @@ async function gate({ language = 'en', statusReply, archiveReply, authenticate, 
       documentElement: {},
       getElementById: id => elements[id] || null,
       querySelector: () => ({ content: 'https://fixture-auth.workers.dev' }),
-      querySelectorAll: selector => selector === '[data-gate-copy]' ? copies : selector === '[data-gate-language]' ? languageButtons : [],
+      querySelectorAll: selector => selector === '[data-loader-step]' ? steps : selector === '[data-gate-copy]' ? copies : selector === '[data-gate-language]' ? languageButtons : [],
     },
     navigator: {
       serviceWorker: { controller, register: async () => ({}), ready: Promise.resolve() },
@@ -82,7 +86,7 @@ async function gate({ language = 'en', statusReply, archiveReply, authenticate, 
   const flush = async () => { for (let i = 0; i < 12; i++) await new Promise(setImmediate); };
   await flush();
   return {
-    elements, copies, languageButtons, context, flush, sessionValues,
+    elements, copies, languageButtons, context, flush, sessionValues, steps,
     dispose: () => { for (const id of intervals) clearInterval(id); intervals.clear(); },
     status: () => elements['gate-status'].textContent,
     passkey: () => elements['passkey-button'].handlers.click(),
@@ -95,6 +99,42 @@ async function gate({ language = 'en', statusReply, archiveReply, authenticate, 
 
 test('published and template gate runtimes stay synchronised', () => {
   assert.equal(fs.readFileSync(path.join(root, 'docs/protected-unlock.js'), 'utf8'), source);
+});
+
+test('the access display follows actual transfer bytes and never invents an authentication percentage', async () => {
+  const payload = Buffer.from(JSON.stringify({version:2, cipher:'AES-256-GCM', compression:'gzip', archiveId:'test-steps',
+    iv:Buffer.alloc(12).toString('base64'), ciphertext:Buffer.alloc(32).toString('base64')}));
+  for (const known of [false,true]) {
+    let stream, reply, requested;
+    const requestedAccess=new Promise(resolve=>{requested=resolve;});
+    const until=async pred=>{
+      const end=Date.now()+2000;
+      while(!pred() && Date.now()<end) await new Promise(resolve=>setTimeout(resolve,5));
+      assert(pred(),'timed out waiting for a real download update');
+    };
+    const access = new Promise(resolve => {reply=resolve;});
+    const page = await gate({withLoader:true, language:'zh-HK', authenticate:()=>{requested();return access;}, archiveReply:()=>new Response(
+      new ReadableStream({start(c){stream=c;c.enqueue(payload.subarray(0,21));}}),
+      {headers:known?{'Content-Length':String(payload.length)}:{}}
+    )});
+    try {
+      const attempt=page.password();
+      const e=page.elements, bar=e['gate-loading-progress'], amount=e['gate-loading-amount'];
+      await until(()=>amount.textContent===(known?Math.floor(2100/payload.length)+'%':'21 B'));
+      assert.equal(e['gate-loading'].hidden,false);
+      assert.equal(e['gate-loading-title'].textContent,'載入作品集');
+      assert.equal(page.steps[0].attributes['aria-current'],'step');
+      assert.equal(amount.textContent,known?Math.floor(2100/payload.length)+'%':'21 B');
+      assert.equal(bar.attributes['aria-valuenow'],known?String(Math.floor(2100/payload.length)):undefined);
+      stream.enqueue(payload.subarray(21));stream.close();await requestedAccess;
+      assert.equal(page.steps[0].dataset.state,'done');assert.equal(page.steps[1].attributes['aria-current'],'step');
+      assert.equal(e['gate-loading-status'].textContent,'正在核實存取權限…');
+      assert.equal(bar.attributes['aria-valuenow'],undefined);
+      assert.equal(amount.textContent,'');
+      reply(response(401,{ok:false,code:'invalid_password'}));await attempt;
+      assert.equal(e['gate-loading'].hidden,true);
+    } finally { page.dispose(); }
+  }
 });
 
 test('initial status failures are visible instead of claiming the service is ready', async () => {

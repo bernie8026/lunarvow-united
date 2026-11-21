@@ -1,0 +1,89 @@
+/* Flight recorder: a dark plotting surface paired with a readable instruction
+   strip. The two tracks collapse based on usable space, including the site rail. */
+body[data-page="stem"] .flight-lab {
+  --fl-paper:var(--iu-bg,#171a17); --fl-key:var(--iu-panel,#262a25);
+  --fl-ink:var(--iu-ink,#f1f1e5); --fl-soft:var(--iu-muted,#bbc0b4);
+  --fl-line:var(--iu-line,#666d5d); --fl-focus:var(--iu-accent,#efcf49);
+  --fl-mono:var(--iu-mono,ui-monospace,monospace);
+  min-inline-size:0; max-inline-size:96rem; margin-inline:auto;
+  padding:clamp(2.4rem,5vw,5.6rem) clamp(1rem,4.5vw,4.75rem);
+  border-block-start:1px solid var(--fl-line); color:var(--fl-ink); background:var(--fl-paper);
+  container-type:inline-size; container-name:flight-bench;
+}
+.flight-lab *, .flight-lab *::before, .flight-lab *::after {box-sizing:border-box}
+.flight-lab [hidden] {display:none!important}
+.flight-lab .flight-lab-head {display:grid;gap:.7rem;align-items:end;margin-block-end:1.4rem;min-width:0}
+.flight-lab .flight-lab-head .ref-eyebrow {margin:0!important;width:fit-content}
+.flight-lab .flight-lab-head h2 {margin:0;max-width:23ch;font-size:clamp(1.85rem,3.7vw,3.6rem);line-height:1.12;font-weight:740;letter-spacing:-.035em}
+.flight-lab .flight-lab-intro {margin:0;max-inline-size:62ch;color:var(--fl-soft);font-size:1rem;line-height:1.65;text-wrap:pretty}
+.flight-lab .flight-lab-deck {display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:1.3rem}
+.flight-lab .flight-lab-stage {min-width:0;margin:0;overflow:hidden;background:#141a17;color:#eff1e4;border-block:2px solid #6d776a}
+.flight-lab .flight-lab-stage figcaption {padding:.55rem .8rem;color:#cdd5c7;font:500 .85rem/1.5 var(--fl-mono)}
+.flight-lab .flight-lab-map {display:block;width:100%;max-width:100%;height:auto;max-height:min(60svh,36rem);margin:auto;background:#151d19}
+.flight-lab-map .flight-lab-field {fill:#1b251f;stroke:#586b59;stroke-width:1}
+.flight-lab-map .flight-lab-grid {fill:none;stroke:#425745;stroke-width:.75}
+.flight-lab-map .flight-lab-axis {fill:none;stroke:#859887;stroke-width:1;vector-effect:non-scaling-stroke}
+.flight-lab-map .flight-lab-side {fill:#dbe1cc;stroke:none;font-family:var(--fl-mono);font-weight:550}
+.flight-lab-map .flight-lab-planned,.flight-lab-map .flight-lab-trail {fill:none;stroke-linecap:round;stroke-linejoin:round}
+.flight-lab-map .flight-lab-planned {stroke:#a2b7aa;stroke-width:1.8;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}
+.flight-lab-map .flight-lab-trail {stroke:#ffdc5a;stroke-width:3;vector-effect:non-scaling-stroke}
+.flight-lab-map .flight-lab-start {fill:#222f26;stroke:#d1dfc8;stroke-width:2;vector-effect:non-scaling-stroke}
+.flight-lab-map .flight-lab-craft {fill:#ffdc5a;stroke:#172019;stroke-width:1.5;stroke-linejoin:round}
+.flight-lab .flight-lab-readout {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,6.25rem),1fr));margin:0;padding:.75rem 1rem;gap:.7rem 1rem;background:#222b24;border-block-start:1px solid #626e60}
+.flight-lab-readout>div {min-width:0}
+.flight-lab .flight-lab-readout dt {color:#c7d0be;font:550 .78rem/1.45 var(--fl-mono);overflow-wrap:anywhere}
+.flight-lab .flight-lab-readout dd {margin:.2rem 0 0;color:#fff8d9;font:650 clamp(.94rem,1.7vw,1.18rem)/1.42 var(--fl-mono);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.flight-lab .flight-lab-workbench {container:flight-strip / inline-size;min-width:0;border-top:3px solid var(--fl-ink);padding-top:.85rem}
+.flight-lab .flight-lab-workbench h3 {margin:0 0 .7rem;max-width:none;font-size:clamp(1.25rem,2vw,1.65rem);font-weight:700}
+.flight-lab .flight-lab-program {margin:0;padding:0;list-style:none}
+.flight-lab .flight-lab-row {
+  display:grid;grid-template-columns:minmax(1.15rem,max-content) minmax(0,1fr) minmax(3.35rem,4.65rem) max-content;align-items:center;
+  gap:.4rem .45rem;margin:0;padding:.55rem .25rem .55rem .5rem;min-width:0;
+  border-block-start:1px solid var(--fl-line);border-inline-start:3px solid transparent;
+}
+.flight-lab .flight-lab-line {color:var(--fl-soft);font:650 .8rem/1.3 var(--fl-mono);font-variant-numeric:tabular-nums}
+.flight-lab .flight-lab-row[aria-current="step"] {border-inline-start-color:var(--fl-focus);background:var(--fl-key)}
+.flight-lab .flight-lab-row[aria-current="step"] .flight-lab-line {color:var(--fl-focus)}
+.flight-lab .flight-lab-row-tools {grid-column:2/-1}
+.flight-lab .flight-lab-row-tools,.flight-lab .flight-lab-controls,.flight-lab .flight-lab-transport {display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;min-width:0}
+.flight-lab .flight-lab-row-tools {justify-content:flex-end}
+.flight-lab .flight-lab-controls {margin:.3rem 0 .7rem}
+.flight-lab .flight-lab-transport {border-block-start:1px solid var(--fl-line);padding-block-start:.65rem}
+.flight-lab :is(button,select,input) {max-width:100%;min-width:0;border:1px solid var(--fl-line);border-radius:2px;color:var(--fl-ink);background:var(--fl-key);font:600 .93rem/1.4 var(--iu-type,system-ui,sans-serif)}
+.flight-lab :is(.flight-lab-op,.flight-lab-value) {display:block;width:100%;min-height:44px;padding:.35rem .4rem;font-size:1rem}
+.flight-lab .flight-lab-value {text-align:center;font-family:var(--fl-mono);font-variant-numeric:tabular-nums}
+.flight-lab .flight-lab-unit {color:var(--fl-soft);font:.82rem/1.4 var(--fl-mono);overflow-wrap:anywhere}
+.flight-lab button {min-height:44px;padding:.4rem .7rem;white-space:normal;overflow-wrap:anywhere}
+.flight-lab .flight-lab-row-tools button {min-width:44px;min-height:44px;padding:.3rem .5rem}
+.flight-lab .flight-lab-transport button:first-child {background:var(--iu-action,#efcf49);color:var(--iu-signal-ink,#191b13);border-color:#bca834}
+.flight-lab :is(button,select,input):focus-visible {outline:3px solid var(--fl-focus);outline-offset:2px}
+.flight-lab :is(button,select,input):disabled {opacity:.55;cursor:not-allowed}
+@media(hover:hover) {.flight-lab button:not(:disabled):hover {border-color:var(--fl-focus);box-shadow:inset 0 -2px var(--fl-focus)}}
+.flight-lab [data-flight-status] {color:var(--fl-soft);line-height:1.6;min-height:1.6em;margin:.75rem 0 0;overflow-wrap:anywhere}
+.flight-lab [role="alert"]:not(:empty) {padding:.45rem .65rem;border-inline-start:3px solid var(--fl-focus);color:var(--fl-ink);background:var(--fl-key)}
+@container flight-strip (min-width:30.5rem) {
+  .flight-lab .flight-lab-row {grid-template-columns:minmax(1.15rem,max-content) minmax(0,1fr) 4.65rem max-content max-content}
+  .flight-lab .flight-lab-row-tools {grid-column:auto;flex-wrap:nowrap}
+}
+@container flight-bench (min-width:52rem) {
+  .flight-lab .flight-lab-head {grid-template-columns:minmax(0,1fr) minmax(15rem,.75fr);column-gap:clamp(1.4rem,3vw,4rem)}
+  .flight-lab .flight-lab-head .ref-eyebrow {grid-column:1/-1}
+  .flight-lab .flight-lab-deck {grid-template-columns:minmax(0,1.18fr) minmax(20rem,.96fr);gap:clamp(1.3rem,2.2vw,2.7rem)}
+}
+@media(prefers-reduced-motion:reduce) {.flight-lab *, .flight-lab *::before, .flight-lab *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active) {
+  .flight-lab .flight-lab-stage,.flight-lab .flight-lab-map,.flight-lab .flight-lab-readout {background:Canvas;color:CanvasText;border-color:CanvasText}
+  .flight-lab .flight-lab-readout :is(dt,dd),.flight-lab .flight-lab-stage figcaption {color:CanvasText}
+  .flight-lab-map :is(.flight-lab-field,.flight-lab-start) {fill:Canvas;stroke:CanvasText}
+  .flight-lab-map :is(.flight-lab-grid,.flight-lab-axis) {stroke:GrayText}
+  .flight-lab-map .flight-lab-side {fill:CanvasText}
+  .flight-lab-map .flight-lab-planned {stroke:CanvasText}
+  .flight-lab-map .flight-lab-trail {stroke:Highlight}
+  .flight-lab-map .flight-lab-craft {fill:Highlight;stroke:CanvasText}
+  .flight-lab .flight-lab-row[aria-current="step"] {border-inline-start-color:Highlight}
+  .flight-lab :is(button,select,input):focus-visible {outline-color:Highlight}
+}
+/* The public workshop opens directly as well as from the chapter cover. */
+body[data-page="stem"] #flight-lab {scroll-margin-block-start:calc(var(--masthead-height,0px) + 1rem)}
+body[data-page="stem"] .ref-stem .flight-workshop-jump {margin-block-start:1.15rem;border-color:#d9c75d;color:#fff1a4;background:#2c3129}
+body[data-page="stem"] .ref-stem .flight-workshop-jump:is(:hover,:focus-visible) {color:#1c2119;background:#efcf49}
