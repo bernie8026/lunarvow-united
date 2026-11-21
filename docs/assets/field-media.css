@@ -1,0 +1,202 @@
+/* A presentation stage, a photographic contact sheet and a lighting workbench.
+   The reference images remain uncropped on the two inspection stages. */
+@media screen {
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-hero {
+    padding:clamp(1.25rem,4vw,4rem) clamp(1rem,4vw,4.5rem) clamp(2rem,5vw,5rem);
+  }
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-hero-grid {
+    display:grid; grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"name" "stage" "lead" "tags";
+    align-items:start; gap:1.15rem;
+  }
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-hero-grid>.field-air-cover {display:contents}
+  body[data-field-layout][data-page="stem"] .ref-stem .field-air-cover::after {display:none}
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-hero .ref-stem-hero-title {
+    grid-area:name;max-width:100%; margin:0;border-block-end:1px solid #72776b;
+    padding-block-end:.3em; font-size:clamp(2.3rem,6vw,6.6rem);
+  }
+  body[data-field-layout][data-page="stem"] .ref-stem .field-air-cover>.ref-lead {grid-area:lead; margin:0!important; max-width:54ch}
+  body[data-field-layout][data-page="stem"] .ref-stem .field-air-cover>.ref-stem-tags {
+    grid-area:tags; align-self:start; margin:0; flex-direction:column; align-items:flex-start;gap:.65rem;
+  }
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-product {
+    grid-area:stage; min-width:0; width:100%; max-width:none; padding:0; border:none;
+    color:#eae8dc; background:#222720; box-shadow:none;
+  }
+  body[data-field-layout][data-page="stem"] .field-air-screen {
+    position:relative; display:grid; min-width:0; place-items:stretch;
+    background:#eeeee9; border-block:1px solid #848b79;
+  }
+  body[data-field-layout][data-page="stem"] .field-air-screen img {
+    width:100%;height:clamp(13rem,36vw,29rem);object-fit:contain;aspect-ratio:auto;
+    background:#fff;object-position:center;
+  }
+  body[data-field-layout][data-page="stem"] .field-air-screen [data-air-view="drawing"] {background:#202723}
+  body[data-field-layout][data-page="stem"] .ref-stem .field-air-dock {
+    display:grid;align-items:center;grid-template-columns:minmax(0,1fr);gap:1rem;
+    margin:0;padding:1rem; border:0;
+  }
+  body[data-field-layout][data-page="stem"] .ref-stem .field-air-dock::before {display:none}
+  .field-air-buttons {display:flex;flex-wrap:wrap;gap:2px}
+  .field-air-buttons button {
+    flex:1 1 auto;min-height:44px;min-width:0;max-width:100%;padding:.55rem .75rem;
+    border:1px solid #7c8275;border-radius:0;background:#272d25;color:#f2f1e4;
+    font:600 .85rem/1.4 var(--iu-mono,monospace);overflow-wrap:anywhere;
+  }
+  .field-air-buttons button[aria-pressed="true"] {color:#191c13;background:#efcf49;border-color:#efcf49}
+  .field-air-buttons button:focus-visible {outline:2px solid #fff;outline-offset:2px}
+  .field-air-legend {font-size:.85rem;line-height:1.65;text-wrap:pretty;color:#d5d8ce}
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-mission-list li {border-block-start:1px solid var(--iu-line);align-content:start;}
+
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-hero {
+    display:grid;grid-template-columns:minmax(0,1fr);gap:1.1rem;
+    max-width:100rem;padding:clamp(1.2rem,3.3vw,3.5rem) clamp(1rem,4.5vw,5rem);
+  }
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-hero-copy {display:grid;gap:.85rem;align-content:start}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy :is(.ref-eyebrow,.ref-lead,.ref-photo-disclosure) {margin:0!important}
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-hero-copy h1 {
+    max-width:100%;font-size:clamp(2.25rem,5vw,5.25rem);line-height:1.06;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-photo-gallery {
+    display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"slide" "controls" "contact";
+    gap:.85rem;padding:clamp(.65rem,1.65vw,1.65rem);align-content:start;align-items:start;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery>.ref-photo-slide {grid-area:slide;min-width:0}
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery>.ref-photo-slide>img {
+    height:clamp(19rem,56vh,38rem);object-fit:contain;object-position:center;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery>.ref-photo-slide .ref-caption {
+    min-height:0;margin:0!important;padding:.9rem .1rem 0;color:#eeefe5;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-thumbs {
+    grid-area:contact;margin:0;align-items:stretch;align-self:start;gap:.45rem;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-controls {
+    grid-area:controls;align-self:center;margin:0;flex-wrap:wrap;gap:.45rem;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-controls button {
+    white-space:normal;min-width:44px;font-size:.875rem;min-height:44px;border-color:#7e8678;color:#f0efe4;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-controls button:hover {color:#191b13}
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-thumb {
+    display:grid;grid-template-columns:minmax(0,1fr);align-items:center;align-content:start;
+    gap:.32rem;min-width:0; padding:.32rem;min-height:44px;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-thumb img {
+    width:100%;height:clamp(2.7rem,9vw,5.25rem);object-fit:contain;background:#151713;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-thumb span {padding-inline:.15rem}
+  body[data-field-layout][data-page="photography"] .field-photo-compare-bench {display:grid;align-content:start;min-width:0}
+  body[data-field-layout][data-page="photography"] .field-photo-compare-bench .ref-photo-study {width:100%;margin:1.5rem 0 0}
+  body[data-field-layout][data-page="equipment"] .ref-equipment .field-studio {
+    display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "stage" "notes";
+    gap:clamp(1.2rem,3vw,3rem);width:100%;box-sizing:border-box;padding:clamp(1rem,4vw,4rem);
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-head {grid-area:intro;min-width:0}
+  body[data-field-layout][data-page="equipment"] .ref-equipment .field-studio-stage {
+    grid-area:stage; display:grid;grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"film" "still";gap:1.25rem;margin:0;align-content:start;
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-stage>figure:first-child {grid-area:still}
+  body[data-field-layout][data-page="equipment"] .field-studio-stage>figure:nth-child(2) {grid-area:film}
+  body[data-field-layout][data-page="equipment"] .field-studio-stage .ref-studio-photo {
+    max-height:20rem;height:auto;max-width:100%;object-fit:contain;object-position:left;background:var(--iu-panel);
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-sheet {grid-area:notes;min-width:0}
+  body[data-field-layout][data-page="equipment"] .field-studio-sheet .ref-light-notes {
+    display:grid;grid-template-columns:minmax(0,1fr);gap:.85rem;margin-top:1.1rem;
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-sheet article {
+    display:grid;grid-template-columns:2.2rem minmax(0,1fr);column-gap:.65rem;align-items:baseline;padding-block-start:.75rem;
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-sheet article .ref-eyebrow {
+    grid-row:1 / span 2;margin:0!important;font-variant-numeric:tabular-nums;
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-sheet article>p:last-child {grid-column:2;margin-block:.5rem}
+}
+@media screen and (min-width:960px) {
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-hero-grid {
+    grid-template-columns:minmax(0,2fr) minmax(13rem,.9fr);
+    grid-template-areas:"name name" "stage lead" "stage tags" "stage .";
+    grid-template-rows:auto auto auto 1fr;column-gap:clamp(1.4rem,3vw,3.4rem);
+  }
+  body[data-field-layout][data-page="stem"] .field-air-cover>.ref-lead {border-inline-start:2px solid #ddd490;padding-inline-start:1rem}
+  body[data-field-layout][data-page="stem"] .ref-stem .field-air-dock {grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-hardware-grid {
+    grid-template-columns:minmax(13rem,.65fr) minmax(0,1.65fr);gap:clamp(1.5rem,4vw,5rem);align-items:start;
+  }
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-hardware-grid>.ref-figure {grid-column:2;grid-row:1}
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-parts {grid-column:1;grid-row:1;align-self:center}
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-lab-grid {
+    display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(1rem,3vw,3rem);
+  }
+  body[data-field-layout][data-page="stem"] .ref-stem .ref-stem-mission-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:1rem}
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-hero-copy {
+    grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr);column-gap:clamp(1.8rem,5vw,5.8rem);
+    grid-template-areas:"mark info" "title disclosure";align-items:end;
+  }
+  body[data-field-layout][data-page="photography"] .ref-hero-copy .ref-eyebrow {grid-area:mark}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy h1 {grid-area:title;align-self:start}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy .ref-lead {grid-area:info}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy .ref-photo-disclosure {grid-area:disclosure;align-self:start}
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-photo-gallery {
+    grid-template-columns:minmax(0,1fr) minmax(10rem,.24fr);
+    grid-template-areas:"slide contact" "controls contact"; column-gap:clamp(1rem,2.75vw,3rem);
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-thumbs {
+    grid-template-columns:minmax(0,1fr);align-content:start;
+    padding:0 0 0 1rem;border-inline-start:1px solid #62685b;background:none;
+  }
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-thumb {padding:.5rem;gap:.5rem}
+  body[data-field-layout][data-page="photography"] .ref-photo-gallery .ref-photo-thumb img {height:clamp(4rem,9vh,6.5rem)}
+  body[data-field-layout][data-page="photography"] .field-photo-compare-bench {
+    grid-template-columns:minmax(0,.8fr) minmax(0,1.3fr);
+    grid-template-rows:auto auto auto 1fr;column-gap:clamp(1.5rem,5vw,5.5rem);
+  }
+  body[data-field-layout][data-page="photography"] .field-photo-compare-bench>:is(p,h2){grid-column:1}
+  body[data-field-layout][data-page="photography"] .field-photo-compare-bench .ref-photo-study {grid-area:1 / 2 / 5 / 3;margin:0}
+  body[data-field-layout][data-page="equipment"] .room-showcase {
+    display:grid;grid-template-columns:minmax(6.9rem,.45fr) minmax(0,1.7fr) minmax(11rem,.82fr);
+    column-gap:clamp(.8rem,2vw,2rem);align-items:start;
+  }
+  body[data-field-layout][data-page="equipment"] .room-showcase .room-product-side {display:contents}
+  body[data-field-layout][data-page="equipment"] .room-showcase .room-product-selector {
+    display:flex;flex-direction:column;align-items:stretch;position:static;
+    width:auto;max-width:100%;min-width:0;margin:0;padding:0;border:0;
+  }
+  body[data-field-layout][data-page="equipment"] .room-product-selector>button {
+    display:grid;align-content:center;gap:.5rem;text-align:start;min-width:0;padding:.8rem .65rem;
+    border:0;border-block-end:1px solid var(--iu-line);overflow-wrap:anywhere;white-space:normal;
+  }
+  body[data-field-layout][data-page="equipment"] .room-product-stage,
+  body[data-field-layout][data-page="equipment"] .room-detail-side {min-width:0;align-self:start;margin:0}
+  body[data-field-layout][data-page="equipment"] .room-showcase .room-product-stage {grid-column:2;grid-row:1}
+  body[data-field-layout][data-page="equipment"] .room-showcase .room-product-selector {grid-column:1;grid-row:1}
+  body[data-field-layout][data-page="equipment"] .room-showcase .room-stage-tools {grid-column:2;grid-row:2;min-width:0}
+  body[data-field-layout][data-page="equipment"] .room-showcase .room-detail-side {grid-column:3;grid-row:1 / span 2}
+  body[data-field-layout][data-page="equipment"] .ref-equipment .field-studio {
+    grid-template-columns:minmax(0,1.45fr) minmax(0,.75fr);
+    grid-template-areas:"intro notes" "stage notes"; align-items:start;
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-sheet {padding-inline-start:clamp(.8rem,2vw,2rem);border-inline-start:1px solid var(--iu-line)}
+  body[data-field-layout][data-page="equipment"] .field-studio-stage>.ref-figure:first-child {
+    display:grid;grid-template-columns:minmax(6rem,.6fr) minmax(0,1fr);align-items:end;gap:1rem;
+  }
+  body[data-field-layout][data-page="equipment"] .field-studio-stage .ref-studio-photo {max-height:15rem;justify-self:start}
+}
+@media screen and (max-width:959px) {
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-hero {grid-template-areas:"kicker" "title" "gallery" "story" "credit"}
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-hero-copy {display:contents}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy .ref-eyebrow {grid-area:kicker}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy h1 {grid-area:title}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy .ref-lead {grid-area:story}
+  body[data-field-layout][data-page="photography"] .ref-hero-copy .ref-photo-disclosure {grid-area:credit}
+  body[data-field-layout][data-page="photography"] .ref-photography .ref-photo-gallery {grid-area:gallery}
+}
+@media screen and (prefers-reduced-motion:no-preference) {
+  body[data-field-layout]:not(.motion-paused) .field-air-screen img:not([hidden]),
+  body[data-field-layout]:not(.motion-paused) .ref-photo-gallery>.ref-photo-slide:not([hidden])>img {
+    animation:field-expose .28s ease-out;
+  }
+  @keyframes field-expose {from{opacity:.5}to{opacity:1}}
+}
