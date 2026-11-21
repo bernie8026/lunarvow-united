@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#090608">
+<meta name="theme-color" content="#161918">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; connect-src 'self' __AUTH_ORIGIN__; worker-src 'self'; img-src 'self' data:; media-src 'self'; frame-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="portfolio-auth-origin" content="__AUTH_ORIGIN__">
 <title>受保護作品集 · Bernie Leung</title>
@@ -32,6 +32,154 @@ main{position:relative;width:100%;max-width:1500px;flex:1;display:grid;grid-temp
 .gate-video-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.65}.gate-cinema[data-video-visible=true] .gate-video-background{opacity:.9}.gate-cinema-shade{background:linear-gradient(90deg,#090608c7 0%,#12080b8c 44%,#090608b3 100%),linear-gradient(0deg,#090608cc,transparent 55%,#09060866)}.gate-cinema[data-video-visible=true] .gate-stadium-lines,.gate-cinema[data-video-visible=true] .gate-cinema-glow{opacity:0}.gate-video-credit{flex-basis:100%}@media(max-width:800px){.gate-cinema-shade{background:linear-gradient(180deg,#09060899,#0d070bb8 55%,#090608d9)}}
 </style>
 <script src="__BASE_PATH__protected-unlock.js?v=password-5-bg-1" defer></script>
+<style id="industrial-gate">
+/* United / access terminal. The original Liver Bird, stadium footage and
+   loading events remain the identity and state indicators of this entrance. */
+body[data-protected-gate] {
+  --gate-paper: #f4f1e7;
+  --gate-secondary: #c6c8bf;
+  --gate-rule: #676c63;
+  --gate-signal: #f0de46;
+  --gate-console: #222521;
+  --gate-night: #131612;
+  --gate-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --gold: var(--gate-signal);
+  --line: var(--gate-rule);
+  --muted: var(--gate-secondary);
+  color: var(--gate-paper);
+  background: var(--gate-night);
+  font-family: system-ui, "PingFang HK", "Microsoft JhengHei", sans-serif;
+}
+[data-protected-gate] ::selection { color: #151710; background: var(--gate-signal); }
+.gate-cinema { background: #171b19; }
+.gate-cinema-shade {
+  background: linear-gradient(90deg,#121511eb 0%,#171a16aa 45%,#1a1d1780 72%,#181b18c7),
+              linear-gradient(0deg,#101310d9,transparent 44%,#0e100c66);
+}
+.gate-cinema-glow { display: none; }
+.gate-stadium-lines { color: #ebead4; opacity: .14; }
+.gate-cinema::after {
+  border: 0;
+  background: linear-gradient(90deg,transparent calc(100% - 1px),#f7f6d907 1px) 0 0 / clamp(70px,9vw,152px) 100%;
+}
+.gate-header {
+  border-block-end: 1px solid #c9ccae45;
+  padding-block: clamp(.9rem,2vh,1.65rem);
+}
+.gate-brand-name { color: var(--gate-paper); font: 770 .96rem/1.2 system-ui,sans-serif; letter-spacing: .045em; }
+.gate-brand-name small { color: var(--gate-secondary); font: 500 .7rem/1.5 var(--gate-mono); letter-spacing: .09em; }
+.gate-languages {
+  border: 0; border-radius: 0; padding: 0; gap: 2px;
+  background: #171b17d9; backdrop-filter: none;
+}
+.gate-languages button { border: 0; border-radius: 0; color: var(--gate-paper); font-size: .81rem; font-weight: 600; }
+.gate-languages button:hover { background: #42463b; color: #fff; }
+.gate-languages button[aria-pressed="true"] {
+  background: var(--gate-signal); color: var(--gate-night); box-shadow: none;
+}
+.gate-intro { padding-inline-start: clamp(0rem,1.4vw,1.5rem); }
+.gate-label, .gate-form-mark, .gate-video-heading, .gate-loading-brand {
+  font: 600 .78rem/1.55 var(--gate-mono); letter-spacing: .105em;
+}
+.gate-label { color: var(--gate-signal); margin-block-end: clamp(1.25rem,4vh,3rem); }
+.gate-label::before { width: 1.9rem; height: .56rem; background: repeating-linear-gradient(117deg,var(--gate-signal) 0 3px,transparent 3px 6px); }
+.gate-intro h1 {
+  margin-block-end: .95rem; letter-spacing: -.055em; line-height: 1.07;
+  font-size: clamp(3rem,6.2vw,6.2rem); font-weight: 790; text-shadow: none;
+}
+.gate-intro-copy { max-width: 38ch; color: var(--gate-paper); line-height: 1.7; font-size: 1.05rem; }
+.gate-intro-rule {
+  width: clamp(6rem,16vw,13rem); height: .55rem; margin-block-start: 1.8rem;
+  border-block-start: 1px solid #cccdb38c;
+  background: repeating-linear-gradient(90deg,#cccdb38c 0 1px,transparent 1px 11px) 0 0 / 100% 4px no-repeat;
+}
+.gate-video-panel { padding-inline-start: clamp(0rem,1.4vw,1.5rem); border-block-start: none; }
+.gate-video-heading { color: var(--gate-secondary); letter-spacing: .055em; }
+.gate-video-heading::before { width: .64rem; height: .2rem; border-radius: 0; background: var(--gate-signal); box-shadow: none; flex: none; }
+.gate-video-controls button, .passkey-button, .passkey-setup button, .password-field button {
+  background: #272b25; color: var(--gate-paper); border: 1px solid var(--gate-rule); border-radius: 2px;
+}
+.gate-video-controls button { font-weight: 600; font-size: .875rem; }
+.gate-video-controls button:hover:enabled, .passkey-button:hover:enabled, .passkey-setup button:hover:enabled, .password-field button:hover:enabled {
+  background: #393d31; border-color: var(--gate-signal); color: var(--gate-paper);
+}
+.gate-video-controls button[aria-pressed="true"], .password-field button[aria-pressed="true"] { border-color: var(--gate-signal); color: var(--gate-signal); }
+.gate-video-credit, .gate-video-status, .gate-form .gate-session-note, .gate-form .gate-session-note:last-child, .passkey-note {
+  color: var(--gate-secondary); font-size: .813rem; line-height: 1.65;
+}
+.gate-form {
+  background: var(--gate-console); border: 1px solid #848878; border-radius: 2px;
+  box-shadow: 7px 7px 0 #10131085; backdrop-filter: none;
+}
+.gate-form::before {
+  inset: -1px auto auto -1px; width: 4.25rem; height: .36rem;
+  background: var(--gate-signal);
+}
+.gate-form-mark { color: var(--gate-signal); margin-block-end: 1rem; }
+.gate-form h2 { font-weight: 750; }
+.gate-form > p, .passkey-setup p { font-size: 1rem; line-height: 1.65; }
+.passkey-button, .unlock-button, .passkey-setup button { font-size: 1rem; }
+.passkey-symbol { color: var(--gate-signal); }
+.passkey-setup { background: #343729; border: 0; border-inline-start: 3px solid var(--gate-signal); border-radius: 0; }
+.gate-form label { color: var(--gate-paper); font-size: .9375rem; font-weight: 600; }
+.password-field { background: #151814; border-color: #8e9385; border-radius: 2px; box-shadow: none; }
+.password-field input { color: var(--gate-paper); }
+.password-field:focus-within { border-color: var(--gate-signal); outline: 2px solid var(--gate-signal); outline-offset: 2px; box-shadow: none; }
+.password-field button { font-size: .813rem; }
+.unlock-button {
+  border: 1px solid var(--gate-signal); border-radius: 2px; background: var(--gate-signal);
+  box-shadow: none; color: var(--gate-night); font-weight: 750;
+}
+.unlock-button:hover:enabled { border-color: #fbf6a9; background: #fbec70; box-shadow: none; }
+.gate-form .gate-status {
+  padding: .6rem 0 .6rem .875rem; background: transparent; border: 0; border-inline-start: 2px solid var(--gate-rule);
+  border-radius: 0; color: var(--gate-paper); min-height: 2.65rem; font-size: .9rem;
+}
+.gate-form .gate-status[data-kind="error"] { border-color: #fc8f76; background: #472a23; color: #ffe2d7; }
+.gate-form .gate-session-note { border-color: var(--gate-rule); }
+.gate-footer {
+  background: #171a16; border-color: #636657; color: var(--gate-secondary);
+  font: .75rem/1.55 var(--gate-mono); letter-spacing: .075em;
+}
+.gate-footer span:last-child { font: .813rem/1.65 system-ui,sans-serif; }
+/* A single dial and a linear travel gauge acknowledge real progress. */
+.gate-loading {
+  background: repeating-linear-gradient(90deg,transparent 0 59px,#f7f6d907 59px 60px),#171a16;
+}
+.gate-loading-brand, .gate-loading-amount { color: var(--gate-signal); }
+.gate-loading-status { color: var(--gate-paper); font-size: 1rem; }
+.gate-loading h2 { font-weight: 780; }
+.gate-loading-orbit { border: 1px solid #8e9385; border-radius: 0; box-shadow: 4px 4px #090c09; }
+.gate-loading-orbit::before { border-top-color: var(--gate-signal); border-right-color: #747657; }
+.gate-loading-orbit::after { border-top-color: #9b9e90; }
+.gate-loading-progress { height: 5px; border-radius: 0; background: #45483e; }
+.gate-loading-progress::before { background: var(--gate-signal); }
+[data-protected-gate] :is(button,a,input):focus-visible { outline-color: var(--gate-signal); }
+@media (prefers-reduced-motion:no-preference) {
+  .gate-intro-rule { transform-origin: left; animation: united-gate-calibrate .65s ease-out both; }
+  @keyframes united-gate-calibrate { from { transform: scaleX(.12); } to { transform: scaleX(1); } }
+}
+@media (max-width:800px) {
+  .gate-cinema-shade { background: linear-gradient(180deg,#111510b8,#141813a8 35%,#141713ed 75%); }
+  [data-protected-gate] main { grid-template-areas: "intro" "form" "video"; }
+  .gate-intro,.gate-video-panel { padding-inline-start: 0; }
+  .gate-intro h1 { font-size: clamp(2.625rem,9vw,4.5rem); }
+  .gate-intro-copy { font-size: 1rem; }
+  .gate-intro-rule { margin-block-start: 1rem; }
+}
+@media (max-width:540px) {
+  .gate-languages { display: flex; flex-wrap: wrap; width: 100%; gap: 2px; }
+  .gate-languages button { flex: 1 1 44px; min-width: 44px; }
+  .gate-form { padding: 1.5rem clamp(1rem,4.5vw,1.5rem); box-shadow: 3px 3px 0 #10131085; }
+}
+@media (forced-colors:active) {
+  .gate-label::before,.gate-intro-rule,.gate-form::before { display: none; }
+  .gate-loading-progress { border: 1px solid CanvasText; }
+  .gate-loading-progress::before { background: Highlight; forced-color-adjust: none; }
+  .gate-form,.gate-languages button,.unlock-button,.passkey-button,.password-field,.gate-video-controls button { border: 1px solid ButtonText; }
+  [data-protected-gate] :is(button,a,input):focus-visible { outline-color: Highlight; }
+}
+</style>
 </head>
 <body data-protected-gate>
 <div class="gate-cinema" id="gate-video-stage" aria-hidden="true">
