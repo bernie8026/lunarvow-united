@@ -40,6 +40,37 @@
     for(const [k,v] of Object.entries(attrs||{}))n.setAttribute(k,v);
     return n;
   };
+  function makeFlightCraft() {
+    const craft=svg('g',{class:'flight-lab-craft','data-flight-craft':'','aria-hidden':'true'});
+    const frame=svg('g',{fill:'none',stroke:'none','stroke-linejoin':'round','stroke-linecap':'round'});
+    craft.append(frame);
+    const dark='var(--fl-craft-dark,#15201e)', metal='var(--fl-craft-metal,#abc2bb)';
+    const light='var(--fl-craft-light,#ecf5ef)', gold='var(--fl-craft-gold,#ffda54)';
+    const path=(d,attrs)=>svg('path',{d,...attrs});
+    // Each rotor spins around its own (0,0). The motor's outer group carries its offset.
+    for (const [x,y,phase] of [[-9,-8,28],[9,-8,-28],[-9,8,-35],[9,8,35]]) {
+      const arm='M'+(Math.sign(x)*2)+' '+(Math.sign(y)*2)+' L'+x+' '+y;
+      frame.append(path(arm,{stroke:dark,'stroke-width':4}),path(arm,{stroke:metal,'stroke-width':2.3}));
+      const motor=svg('g',{transform:'translate('+x+' '+y+')'});
+      const phaseGroup=svg('g',{transform:'rotate('+phase+')'});
+      const prop=svg('g',{class:'flight-lab-prop','data-spin':x*y>0?'cw':'ccw'});
+      const blade='M-.48-.65Q1.9-2.1 4.9-1.9Q5.3-1.65 5.05-.95Q3.2.1 .6.55Z';
+      prop.append(path(blade,{fill:light}),path(blade,{fill:light,transform:'rotate(180)'}));
+      phaseGroup.append(prop);
+      motor.append(svg('circle',{r:5.7,fill:dark,stroke:metal,'stroke-width':.85}),phaseGroup,
+        svg('circle',{r:1.15,fill:gold,stroke:dark,'stroke-width':.42}));
+      frame.append(motor);
+    }
+    // The gold forward cowling and camera bar identify the nose; the stern carries the battery.
+    frame.append(path('M-4.6-5Q-4.6-7.3-2-7.3H2Q4.6-7.3 4.6-5L3.5 5.7Q3.2 7.2 1.9 7.2H-1.9Q-3.2 7.2-3.5 5.7Z',
+      {fill:metal,stroke:dark,'stroke-width':1}),
+      path('M-3.7-4.5Q-3.7-6.3-2.2-6.3H2.2Q3.7-6.3 3.7-4.5L2.8-1.6H-2.8Z',{fill:gold}),
+      svg('rect',{x:-2.25,y:-9.15,width:4.5,height:2.3,rx:.85,fill:dark,stroke:light,'stroke-width':.75}),
+      svg('circle',{cx:0,cy:-8,r:.65,fill:gold}),
+      svg('rect',{x:-2.1,y:.05,width:4.2,height:5.7,rx:.8,fill:dark}),
+      path('M-.95 1.7H.95M-.95 3.65H.95',{stroke:metal,'stroke-width':.65}));
+    return craft;
+  }
   const copy=(n,key)=>{n.dataset.flightCopy=key;return n;};
   const action=(name,cls='')=>make('button',cls,{'type':'button','data-flight-action':name});
   const square=()=>Array.from({length:4},()=>[{op:'forward',amount:4},{op:'right',amount:90}]).flat();
@@ -69,11 +100,14 @@
     const axis=svg('path',{class:'flight-lab-axis',d:'M20 160H300M160 20V300',fill:'none'});
     const preview=svg('polyline',{class:'flight-lab-planned',fill:'none'}),trail=svg('polyline',{class:'flight-lab-trail',fill:'none'});
     const origin=svg('circle',{class:'flight-lab-start',cx:160,cy:160,r:4});
-    const craft=svg('g',{class:'flight-lab-craft','data-flight-craft':''});craft.append(svg('path',{d:'M0 -9 7 7 0 4 -7 7Z'}));
-    map.append(mapTitle,defs,backdrop,grid,axis,preview,trail,origin,craft);
+    const footprint=svg('g',{'aria-hidden':'true'});
+    footprint.append(svg('ellipse',{class:'flight-lab-shadow',rx:10.2,ry:5.8}));
+    const craft=makeFlightCraft();
+    map.append(mapTitle,defs,backdrop,grid,axis,preview,trail,origin);
     for(const [x,y,label] of [[160,14,'N'],[306,163,'X'],[20,314,'−10'],[286,314,'+10']]){
       const t=svg('text',{class:'flight-lab-side',x,y,'text-anchor':label==='N'?'middle':'start'});t.textContent=label;map.append(t);
     }
+    map.append(footprint,craft);
     const legend=copy(make('figcaption','flight-lab-legend',{id:id+'-legend'}),'legend');
     const readout=make('dl','flight-lab-readout'), fields={};
     for(const key of ['x','y','heading','progress']){
@@ -101,7 +135,9 @@
     function draw(position) {
       const base=plan.states[cursor] || {x:0,y:0,heading:0}, pose=position||base;
       const [x,y]=coord(pose);
-      craft.setAttribute('transform','translate('+x+' '+y+') rotate('+pose.heading+')');
+      const location='translate('+x+' '+y+')';
+      footprint.setAttribute('transform',location);
+      craft.setAttribute('transform',location+' rotate('+pose.heading+')');
       trail.setAttribute('points',points(plan.states.slice(0,cursor+1).concat([pose])));
       for(const [key,text] of [['x',String(base.x)],['y',String(base.y)],['heading',base.heading+'°'],['progress',cursor+' / '+commands.length]]) {
         if(fields[key].textContent!==text)fields[key].textContent=text;
@@ -158,7 +194,7 @@
     }
     function updateCopy(){
       words=language();for(const el of host.querySelectorAll('[data-flight-copy]'))el.textContent=words[el.dataset.flightCopy];
-      mapTitle.textContent=words.map;showRows();draw();stateUI();
+      mapTitle.textContent=words.map;showRows();stateUI();
     }
     function pause(){
       if(state!=='playing')return;
