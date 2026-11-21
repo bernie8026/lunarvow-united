@@ -193,7 +193,7 @@ test('protected builds require and copy nested public runtimes without exposing 
   fs.writeFileSync(path.join(protectionRoot, 'assets/anfield-anthem.mp4'), 'synthetic-video');
   fs.writeFileSync(path.join(protectionRoot, 'assets/anfield-anthem.jpg'), 'synthetic-poster');
   assert.throws(() => prepareProtectedSite(options), /Protection runtime is incomplete/, 'reference chapter runtimes must also be present');
-  for (const name of ['industrial.css','field-layout.css','field-layout.js','field-home.css','field-media.css','field-chapters.css','field-drive.svg','stem-plate.svg','protected-media.js','reference-media.css','reference-photography.js','reference-equipment.js','reference-stem.js']) fs.writeFileSync(path.join(protectionRoot, 'assets', name), '/* Synthetic reference runtime */');
+  for (const name of ['industrial.css','stem-plate.svg','protected-media.js','reference-media.css','reference-photography.js','reference-equipment.js','reference-stem.js']) fs.writeFileSync(path.join(protectionRoot, 'assets', name), '/* Synthetic reference runtime */');
   prepareProtectedSite(options);
   assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/protected-ui.js'), 'utf8'), uiCode);
   assert.equal(fs.readFileSync(path.join(outputRoot, 'assets/gate-video.js'), 'utf8'), videoCode);
