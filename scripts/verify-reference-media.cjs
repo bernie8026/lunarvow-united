@@ -72,6 +72,69 @@ async function layout(page, label) {
   }
 }
 
+async function equipmentReadingSpace(page) {
+  // The published equipment guide starts beside a navigation rail. The fixture
+  // reserves the same space; all guide markup and styles come from the real assets.
+  const chapter = page.locator('.ref-equipment');
+  const summary = chapter.locator('.ref-credits summary');
+  await page.evaluate(() => window.__fixtureLanguage('zh-HK'));
+  const colours = {
+    dark: ['rgb(7, 14, 25)', 'rgb(240, 245, 250)', 'rgb(44, 208, 233)', 'rgb(7, 13, 24)'],
+    light: ['rgb(244, 248, 252)', 'rgb(16, 35, 51)', 'rgb(0, 110, 140)', 'rgb(242, 248, 252)'],
+  };
+  for (const [theme, expected] of Object.entries(colours)) {
+    await page.evaluate(theme => { document.body.dataset.theme = document.documentElement.dataset.theme = theme; }, theme);
+    await frame(page);
+    const actual = await chapter.evaluate(root => [getComputedStyle(root).backgroundColor,
+      getComputedStyle(root.querySelector('.ref-light-notes h4')).color,
+      getComputedStyle(root.querySelector('.ref-light-index')).color, getComputedStyle(document.body).backgroundColor,
+      getComputedStyle(document.querySelector('.masthead')).backgroundColor, getComputedStyle(document.querySelector('.footer')).backgroundColor]);
+    assert.deepEqual(actual, [...expected, 'rgb(247, 251, 255)', 'rgb(242, 248, 252)'], 'equipment preserves the original ' + theme + ' palette');
+  }
+  await summary.click();
+  for (const [width, cap] of [[320, null], [569, null], [1024, 500], [1440, null]]) {
+    await page.setViewportSize({width, height: 844});
+    await page.locator('main').evaluate((main, cap) => {
+      main.style.padding = '0';
+      main.style.marginInlineStart = '69px';
+      main.style.maxWidth = cap ? cap + 'px' : 'none';
+    }, cap);
+    await frame(page);
+    const result = await chapter.evaluate(root => {
+      const box = root.getBoundingClientRect();
+      const textBox = node => {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        return range.getBoundingClientRect();
+      };
+      const notes = [...root.querySelectorAll('.ref-light-notes > li')];
+      const lines = notes.map(row => {
+        const n = textBox(row.querySelector('.ref-light-index')), h = textBox(row.querySelector('h4'));
+        const p = row.querySelector('p'), desc = textBox(p);
+        return {left:h.left, top:h.top, bottom:desc.bottom,
+          headerAligned:n.right <= h.left && n.top < h.bottom && h.top < n.bottom,
+          bodyFits:desc.top >= h.bottom && parseFloat(getComputedStyle(p).fontSize) >= 16};
+      });
+      const reading = [...root.querySelectorAll('.ref-light-guide > h3,.ref-light-notes .ref-light-index,.ref-light-notes h4,.ref-light-notes p,.ref-credits summary,.ref-credits li')].map(textBox);
+      return {lines, inset:Math.min(...reading.map(t => Math.min(t.left - box.left, box.right - t.right))),
+        summaryHeight:root.querySelector('summary').getBoundingClientRect().height,
+        fits:document.documentElement.scrollWidth <= innerWidth + 1 && root.scrollWidth <= root.clientWidth + 1};
+    });
+    const label = 'equipment guide/' + width + (cap ? '/constrained' : '');
+    assert.equal(result.lines.length, 3, label + ' has three lighting notes');
+    assert(result.inset >= 15.5 && result.summaryHeight >= 44 && result.fits,
+      label + ' keeps text off the rail, fits open credits and offers a full-height disclosure');
+    assert(result.lines.every(l => l.bodyFits), label + ' gives descriptions readable space beneath their titles');
+    const [a, b, c] = result.lines;
+    if (width < 600 || cap) {
+      assert(result.lines.every(l => l.headerAligned), label + ' pairs each number with its title');
+      assert(b.top >= a.bottom + 16 && c.top >= b.bottom + 16, label + ' separates stacked notes');
+    } else assert(b.left > a.left && c.left > b.left, label + ' uses available width for adjacent notes');
+  }
+  await summary.click();
+  await page.locator('main').evaluate(main => { for (const prop of ['padding','margin-inline-start','max-width']) main.style.removeProperty(prop); });
+}
+
 async function retained(page, name) {
   const result = await page.evaluate(() => ({ old: window.__fixtureOldReferences.map(node => ({ connected: node.isConnected, hidden: node.hasAttribute('hidden'), marked: node.hasAttribute('data-reference-original'), visible: !!node.getClientRects().length })), header: document.querySelector('.masthead').outerHTML === window.__fixtureChrome.header, footer: document.querySelector('.footer').outerHTML === window.__fixtureChrome.footer, eq: document.querySelector('[data-eq-stage]')?.outerHTML }));
   assert(result.old.every(node => node.connected), name + ' original nodes remain connected');
@@ -219,6 +282,7 @@ async function run() {
       }
       assert.equal(languageContent.size, 7, name + ' has seven distinct translated versions');
       await page.setViewportSize({ width: 1440, height: 1000 });
+      if (name === 'equipment') await equipmentReadingSpace(page);
       if (name === 'photography') await photoInteractions(page);
       if (name === 'stem') await stemInteractions(page);
       await videoBehavior(page, name);

@@ -28,9 +28,21 @@
   api.register("equipment", ctx => {
     const root = document.createElement("section");
     root.className = "ref-equipment";
-    root.innerHTML = `<div class="ref-section"><p class="ref-eyebrow">LIGHT STUDIO / ON SET</p><h2 data-ref-copy="title"></h2><p class="ref-lead" data-ref-copy="intro"></p><div class="ref-grid"><figure class="ref-figure"><img class="ref-studio-photo" src="${ctx.asset("studio-lighting.webp")}" width="800" height="1200" loading="lazy" decoding="async" data-ref-alt="photo"><figcaption class="ref-caption" data-ref-copy="reference"></figcaption></figure><figure class="ref-figure"><video data-ref-video data-ref-autoplay controls muted playsinline loop preload="metadata" src="${ctx.asset("studio-lighting-demo.mp4")}" poster="${ctx.asset("studio-lighting-demo-poster.jpg")}" data-ref-label="film"></video><figcaption class="ref-caption" data-ref-copy="caption"></figcaption><p class="ref-caption" data-ref-copy="note"></p></figure></div><h3 class="ref-section-title" style="margin-top:48px" data-ref-copy="notes"></h3><div class="ref-light-notes">${[["01","softbox"],["02","reflector"],["03","camera"]].map(([n,key])=>`<article><p class="ref-eyebrow">${n}</p><h3 data-ref-copy="${key}"></h3><p data-ref-copy="${key}Copy"></p></article>`).join("")}</div></div>`;
+    root.innerHTML = `<div class="ref-section"><p class="ref-eyebrow">LIGHT STUDIO / ON SET</p><h2 data-ref-copy="title"></h2><p class="ref-lead" data-ref-copy="intro"></p><div class="ref-grid"><figure class="ref-figure"><img class="ref-studio-photo" src="${ctx.asset("studio-lighting.webp")}" width="800" height="1200" loading="lazy" decoding="async" data-ref-alt="photo"><figcaption class="ref-caption" data-ref-copy="reference"></figcaption></figure><figure class="ref-figure"><video data-ref-video data-ref-autoplay controls muted playsinline loop preload="metadata" src="${ctx.asset("studio-lighting-demo.mp4")}" poster="${ctx.asset("studio-lighting-demo-poster.jpg")}" data-ref-label="film"></video><figcaption class="ref-caption" data-ref-copy="caption"></figcaption><p class="ref-caption" data-ref-copy="note"></p></figure></div>
+      <section class="ref-light-guide" id="lighting-notes" aria-labelledby="lighting-notes-title">
+        <h3 id="lighting-notes-title" data-ref-copy="notes"></h3>
+        <ol class="ref-light-notes" role="list">${[["01","softbox"],["02","reflector"],["03","camera"]].map(([n,key]) =>
+          `<li><span class="ref-light-index" aria-hidden="true">${n}</span><h4 data-ref-copy="${key}"></h4><p data-ref-copy="${key}Copy"></p></li>`
+        ).join("")}</ol>
+      </section></div>`;
     root.append(ctx.credits(["studio-photo","studio-video"]));
     ctx.bindCopy(root, copy);
+    // The protected page can finish navigating before these notes are mounted.
+    if (location.hash === "#lighting-notes") requestAnimationFrame(() => {
+      if (root.isConnected && location.hash === "#lighting-notes") {
+        root.querySelector("#lighting-notes").scrollIntoView({block:"start",behavior:"instant"});
+      }
+    });
     return root;
   });
 })();
