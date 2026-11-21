@@ -38,7 +38,8 @@ async function run() {
   const pages=await runtimePages(), errors=[], offsite=[], missing=[];
   const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_CHANNEL ? {channel:process.env.PLAYWRIGHT_CHROMIUM_CHANNEL} : {})});
   try {
-    const page=await browser.newPage({viewport:{width:1366,height:920},reducedMotion:'reduce'});
+    const context=await browser.newContext({viewport:{width:1366,height:920},reducedMotion:'reduce'});
+    const page=await context.newPage();
     page.setDefaultTimeout(10000);
     page.on('pageerror',e=>errors.push(e.message));
     await page.route('**/*',async route=>{
