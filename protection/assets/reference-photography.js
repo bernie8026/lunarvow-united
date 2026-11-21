@@ -236,14 +236,14 @@
             <span class="ref-photo-position" aria-live="polite" aria-atomic="true">01 / 03</span>
             <button type="button" class="ref-button" data-ref-photo-direction="1"><span data-ref-copy="next"></span><span aria-hidden="true"> →</span></button>
           </div>
-          <div class="ref-photo-thumbs">
+          <div class="ref-photo-thumbs" role="group" aria-labelledby="ref-photo-gallery-label">
             <button type="button" class="ref-photo-thumb" data-ref-photo-select="0" aria-pressed="true"><img src="${ctx.asset("cosplay-sword-portrait.webp")}" width="39" height="46" alt="" decoding="async"><span data-ref-copy="thumb1"></span></button>
             <button type="button" class="ref-photo-thumb" data-ref-photo-select="1" aria-pressed="false"><img src="${ctx.asset("cosplay-raiden-costume.webp")}" width="39" height="46" alt="" loading="lazy" decoding="async"><span data-ref-copy="thumb2"></span></button>
             <button type="button" class="ref-photo-thumb" data-ref-photo-select="2" aria-pressed="false"><img src="${ctx.asset("cosplay-keqing-prop.webp")}" width="39" height="46" alt="" loading="lazy" decoding="async"><span data-ref-copy="thumb3"></span></button>
           </div>
         </div>
       </section>
-      <section class="ref-section" aria-labelledby="ref-photo-compare-title">
+      <section class="ref-section field-photo-compare-bench" aria-labelledby="ref-photo-compare-title">
         <p class="ref-eyebrow" data-ref-copy="compareTag"></p>
         <h2 id="ref-photo-compare-title" class="ref-section-title" data-ref-copy="compareTitle"></h2>
         <p class="ref-lead" data-ref-copy="compareIntro"></p>
