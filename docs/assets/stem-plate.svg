@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 486 166" fill="none">
+  <title>Exploded rotor study</title>
+  <defs>
+    <pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".65" fill="#6c756f"/></pattern>
+    <pattern id="ribs" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M1 0v5" stroke="#9caa9e" stroke-width=".8"/></pattern>
+    <g id="fastener"><ellipse rx="3.4" ry="1.6" fill="#17201d" stroke="#b8c0b2" stroke-width=".9"/></g>
+  </defs>
+  <rect width="486" height="166" fill="#202723"/>
+  <path fill="url(#dots)" d="M0 0h486v166H0z" opacity=".52"/>
+  <g stroke="#7b897f" stroke-width=".7" opacity=".8">
+    <path d="M15 9v148m456-148v148M10 18h10m446 0h10M10 148h10m446 0h10"/>
+    <path stroke-dasharray="4 5" d="M44 137l292-107M116 15l186 136m-90-138v143"/>
+    <path d="M343 112h101m-101 5h70m-70 5h86"/>
+  </g>
+  <!-- Lower mounting flange, shown separately from the motor. -->
+  <path d="m164 128 42-16 44 12 9 9-40 17-47-13z" fill="#2e3831" stroke="#aebbad"/>
+  <path d="m164 128 8 4 47 13 40-16m-40 16v5" stroke="#869585"/>
+  <g stroke="#b8c4b5" stroke-width="1">
+    <ellipse cx="213" cy="131" rx="19" ry="6.8" fill="#1b231f"/>
+    <ellipse cx="213" cy="131" rx="7" ry="2.5"/>
+  </g>
+  <use href="#fastener" x="176" y="128"/><use href="#fastener" x="216" y="142"/><use href="#fastener" x="246" y="128"/>
+  <!-- Finned stator casing and inner collar. -->
+  <path d="M183 88c0 6 13 11 29 11s29-5 29-11v15c0 6-13 11-29 11s-29-5-29-11z" fill="#344139" stroke="#b6c5b4"/>
+  <path d="M184 91c11 13 45 12 56 0v11c-5 12-48 14-56 0z" fill="url(#ribs)"/>
+  <ellipse cx="212" cy="88" rx="29" ry="10.5" fill="#38463b" stroke="#cbd6c6"/>
+  <ellipse cx="212" cy="87" rx="23" ry="7.7" stroke="#929f8e"/>
+  <ellipse cx="212" cy="87" rx="11" ry="3.8" fill="#19231c" stroke="#bfcaaf"/>
+  <path d="m198 92 2-2m12 4v-3m14 1-2-2m-30-5 4 1m34-1-4 1" stroke="#b4c2ac"/>
+  <path d="M194 72c2 8 34 8 36 0v5c-2 8-34 8-36 0z" fill="#8b9988" stroke="#c7d1ba"/>
+  <ellipse cx="212" cy="72" rx="18" ry="6" fill="#253229" stroke="#c7d1ba"/>
+  <ellipse cx="212" cy="72" rx="7" ry="2.5" stroke="#d7dfce"/>
+  <!-- Two swept propeller blades share a flanged central hub. -->
+  <path d="M203 51C175 44 130 36 91 32l-21 4c25 9 70 23 113 24l21-3z" fill="#465549" stroke="#e3e8d9" stroke-linejoin="round"/>
+  <path d="M71 36c34 7 78 18 123 19" stroke="#a9b8a3"/>
+  <path d="M219 49c43-4 88-2 127-11l17-8c-43 0-92 1-129 12l-17 7z" fill="#788a74" stroke="#e3e8d9" stroke-linejoin="round"/>
+  <path d="M223 48c45-8 87-8 137-17" stroke="#cbd5bd"/>
+  <path d="M200 50c1 5 23 5 24 0v4c-1 5-23 5-24 0z" fill="#636d5b" stroke="#d8e2cc"/>
+  <ellipse cx="212" cy="50" rx="12" ry="4.4" fill="#bdc8b0" stroke="#d8e2cc"/>
+  <ellipse cx="212" cy="50" rx="4" ry="1.6" fill="#263126"/>
+  <!-- Alignment axis and separate drawing leaders. No dimensional claims. -->
+  <g stroke="#eddf55" stroke-width="1.2">
+    <path d="M212 58v8m0 13v3m0 34v8" stroke-dasharray="2 2"/>
+    <path d="M274 45l22 15h85m-138 32 49-15h57m-102 56h48l19-9h16"/>
+    <circle cx="274" cy="45" r="1.8" fill="#eddf55"/><circle cx="243" cy="92" r="1.8" fill="#eddf55"/>
+    <circle cx="247" cy="133" r="1.8" fill="#eddf55"/>
+  </g>
+  <g fill="#eddf55"><path d="M385 58h13v4h-13zm-32 17h6v4h-6zm10 0h6v4h-6zm-29 47h5v4h-5zm8 0h5v4h-5zm8 0h5v4h-5z"/>
+    <path d="M29 18h17v2H29zm0 4h8v1h-8zm412 125h15v2h-15z"/>
+  </g>
+</svg>
