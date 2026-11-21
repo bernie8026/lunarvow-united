@@ -4,7 +4,8 @@
 // locked again; neither a key nor a decrypted response enters persistent storage.
 const base = new URL(self.registration.scope);
 const bootstrap = new Set([
-  "protected-worker.js", "protected-unlock.js", "protected-session.js", "assets/protected-ui.js", "assets/industrial.css", "assets/stem-plate.svg", "assets/gate-video.js", "assets/gate-background.js", "assets/anfield-anthem.mp4", "assets/anfield-anthem.jpg",
+  "protected-worker.js", "protected-unlock.js", "protected-session.js", "assets/protected-ui.js", "assets/industrial.css", "assets/transition-loading.css",
+  "assets/flight-lab.css", "assets/flight-engine.js", "assets/flight-lab.js", "assets/stem-plate.svg", "assets/gate-video.js", "assets/gate-background.js", "assets/anfield-anthem.mp4", "assets/anfield-anthem.jpg",
   "protected-site.json", ".nojekyll", "robots.txt",
   "assets/protected-media.js", "assets/reference-media.css", "assets/reference-photography.js", "assets/reference-equipment.js", "assets/reference-stem.js", "assets/references/sources.json", "assets/references/studio-lighting-demo.mp4", "assets/references/drone-hover-poster.jpg", "assets/references/tello-reference.jpg", "assets/references/studio-lighting-demo-poster.jpg", "assets/references/drone-hover.mp4", "assets/references/cosplay-sword-portrait.webp", "assets/references/cosplay-keqing-prop.webp", "assets/references/studio-lighting.webp", "assets/references/drone-programming.jpg", "assets/references/tello-classroom.jpg", "assets/references/cosplay-raiden-costume.webp", "assets/references/drone-components.jpg"
 ]);
@@ -151,9 +152,16 @@ async function handle(request, path) {
     let body = file.data;
     if (/\.html$/i.test(path) || /^text\/html(?:;|$)/i.test(file.type)) {
       const source = new TextDecoder("utf-8", {fatal:true}).decode(body);
-      const additions = `<link rel="stylesheet" href="${new URL("assets/industrial.css", base).pathname}">` +
+      const style = name => `<link rel="stylesheet" href="${new URL("assets/" + name, base).pathname}">`;
+      const script = file => `<script src="${new URL(file, base).pathname}" defer></script>`;
+      // The router prepares the destination's head before swapping content.
+      // Other chapters never download the simulator just to display a loader.
+      const workshop = path === "stem.html";
+      const additions = style("industrial.css") + style("transition-loading.css") +
+        (workshop ? style("flight-lab.css") : "") +
         `<script src="${new URL("protected-session.js", base).pathname}?v=foreground-1" defer></script>` +
         `<script src="${new URL("assets/protected-ui.js", base).pathname}?v=clarity-1" defer></script>` +
+        (workshop ? script("assets/flight-engine.js") + script("assets/flight-lab.js") : "") +
         `<script src="${new URL("assets/protected-media.js", base).pathname}?v=references-1" defer></script>`;
       body = /<\/head\s*>/i.test(source) ? source.replace(/<\/head\s*>/i, additions + "</head>") : additions + source;
     }

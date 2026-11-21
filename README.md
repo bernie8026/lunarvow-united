@@ -168,6 +168,17 @@ The encrypted archive uses AES-256-GCM with a fresh IV on every build and a
 random 256-bit archive key independent of login. The authentication service
 releases the key after validating the corresponding website password or a valid assertion from a registered passkey. Password verification and persistent IP limits run on the server. The password is not an offline archive key.
 
+The unlock screen reports the archive download, access check, decryption,
+unpacking and handoff separately. A percentage is shown only when the download
+has a usable total. After unlock, `assets/transition-loading.css` styles initial
+arrival, resource loading and departure using the existing loader state.
+
+The STEM chapter links to `stem.html#flight-lab`. Visitors arrange movement
+and turn instructions, preview the route and run or step through it on a grid.
+The program runs entirely in the browser and does not connect to a physical
+drone. The worker includes the editor, simulator and workshop styles only
+in the STEM document, including when the router opens it from another page.
+
 ## Login background video
 
 The login gate uses the supplied anthem MP4 as a full-screen, looping H.264/AAC
