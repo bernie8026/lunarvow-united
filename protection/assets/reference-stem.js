@@ -31,26 +31,14 @@
       <header class="ref-hero">
         <p class="ref-eyebrow">08 / AEROVATE — STEM STUDIES</p>
         <div class="ref-stem-hero-grid">
-          <div class="field-air-cover">
+          <div>
             <h1 class="ref-stem-hero-title" data-ref-copy="heroTitle"></h1>
             <p class="ref-lead" data-ref-copy="heroLead"></p>
             <div class="ref-stem-tags"><span data-ref-copy="conceptTag"></span><span data-ref-copy="referenceTag"></span></div>
           </div>
           <figure class="ref-stem-product">
-            <div class="field-air-screen" id="field-air-screen">
-              <img data-air-view="photo" data-stem-image="tello-reference.jpg" data-ref-alt="telloAlt" width="1280" height="853" fetchpriority="high" decoding="async">
-              <img data-air-view="drawing" data-ref-alt="drawingAlt" width="486" height="166" decoding="async" hidden>
-            </div>
-            <figcaption class="field-air-dock">
-              <div class="field-air-buttons" role="group" data-ref-label="viewerLabel">
-                <button type="button" data-air-select="photo" aria-pressed="true" aria-controls="field-air-screen"><span data-ref-copy="photoView"></span></button>
-                <button type="button" data-air-select="drawing" aria-pressed="false" aria-controls="field-air-screen"><span data-ref-copy="drawingView"></span></button>
-              </div>
-              <div class="field-air-legend" aria-live="polite" aria-atomic="true">
-                <span data-air-caption="photo" data-ref-copy="telloCaption"></span>
-                <span data-air-caption="drawing" data-ref-copy="drawingCaption" hidden></span>
-              </div>
-            </figcaption>
+            <img data-stem-image="tello-reference.jpg" data-ref-alt="telloAlt" width="1280" height="853" fetchpriority="high" decoding="async">
+            <figcaption data-ref-copy="telloCaption"></figcaption>
           </figure>
         </div>
       </header>
@@ -152,30 +140,6 @@
         flightTitle: "Реальный полёт крупным планом.", flightLead: "Передвигайте ползунок воспроизведения, чтобы изучить корпус и пропеллеры при зависании. Это сторонняя справочная съёмка.", videoLabel: "Справочное видео зависания квадрокоптера, автор Project Kei", flightCaption: "Зависание квадрокоптера · Project Kei. Это не испытание Tello или Aerovate."
       }
     };
-
-    // The drawing is an editorial study, clearly distinguished from the photographed model.
-    const viewerCopy = {
-      "zh-HK":["檢視模式","實物相","旋翼分解圖","旋翼組件嘅原創機械分解圖。","旋翼結構概念圖，並非 Tello 零件圖。"],
-      "zh-CN":["查看模式","实物照片","旋翼分解图","旋翼组件的原创机械分解图。","旋翼结构概念图，并非 Tello 零件图。"],
-      en:["Viewing mode","Product photo","Rotor drawing","Original exploded drawing of a rotor assembly.","Conceptual rotor study; not a Tello parts diagram."],
-      ja:["表示モード","実機写真","ローター分解図","ローター構造のオリジナル分解図。","ローターの概念図です。Tello の部品図ではありません。"],
-      ko:["보기 모드","제품 사진","로터 분해도","로터 조립체를 그린 자체 제작 분해도.","로터 구조 개념도이며 Tello의 실제 부품도는 아닙니다."],
-      th:["โหมดการแสดงผล","ภาพเครื่องจริง","ภาพแยกชิ้นส่วน","ภาพวาดแยกชิ้นส่วนชุดใบพัดที่สร้างขึ้นเอง","ภาพแนวคิดโครงสร้างใบพัด ไม่ใช่แผนผังชิ้นส่วนของ Tello"],
-      ru:["Режим просмотра","Фото модели","Схема ротора","Авторский рисунок ротора в разобранном виде.","Концептуальная схема ротора, а не чертёж деталей Tello."]
-    };
-    for (const [lang, [viewerLabel,photoView,drawingView,drawingAlt,drawingCaption]] of Object.entries(viewerCopy)) {
-      Object.assign(dictionaries[lang], {viewerLabel,photoView,drawingView,drawingAlt,drawingCaption});
-    }
-    const views = [...chapter.querySelectorAll("[data-air-view]")];
-    chapter.querySelector('[data-air-view="drawing"]').src = new URL("../stem-plate.svg", ctx.asset("tello-reference.jpg")).href;
-    const captions = [...chapter.querySelectorAll("[data-air-caption]")];
-    const switches = [...chapter.querySelectorAll("[data-air-select]")];
-    for (const button of switches) ctx.on(button, "click", () => {
-      const mode = button.dataset.airSelect;
-      views.forEach(node => { node.hidden = node.dataset.airView !== mode; });
-      captions.forEach(node => { node.hidden = node.dataset.airCaption !== mode; });
-      switches.forEach(node => node.setAttribute("aria-pressed", String(node === button)));
-    });
 
     for (const image of chapter.querySelectorAll("[data-stem-image]")) image.src = ctx.asset(image.getAttribute("data-stem-image"));
     const video = chapter.querySelector("video");
