@@ -122,6 +122,12 @@ async function run() {
         props.every((p,i)=>getComputedStyle(p).transform!==initial[i]);
     },idle);
     await action('run').click();await state('paused');
+    // A CSS pause can report playState='paused' before its pending hold time
+    // has reached the compositor. Compare the first committed paused frame.
+    await props.evaluateAll(async nodes => {
+      await Promise.all(nodes.flatMap(n => n.getAnimations()).map(a => a.ready));
+      await new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)));
+    });
     assert(await bladesAtRest(),'pausing freezes the rotors');
     const stopPose=await pose(), stopGraphic=await craft.getAttribute('transform');
     const stoppedBlades=await bladePoses();

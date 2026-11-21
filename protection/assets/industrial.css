@@ -11,18 +11,42 @@ body[data-page][data-theme="light"] {
   --iu-bg:#f2f0e6; --iu-panel:#e7e6da; --iu-ink:#20231d; --iu-muted:#52594d;
   --iu-line:#aeb1a1; --iu-accent:#695300; --iu-grid:rgba(52,59,44,.095);
 }
-html body[data-page],html body[data-page][data-theme] {
+/* The equipment catalogue keeps its original cool-blue tokens from the private
+   portfolio. Other chapters continue to map those tokens to industrial colours. */
+html body[data-page]:where(:not([data-page="equipment"])),
+html body[data-page][data-theme]:where(:not([data-page="equipment"])) {
   --bg:var(--iu-bg); --solid:var(--iu-panel); --panel:var(--iu-panel); --soft:var(--iu-panel);
   --ink:var(--iu-ink); --muted:var(--iu-muted); --line:var(--iu-line); --accent:var(--iu-accent);
   --accent-secondary:var(--iu-muted); --signal:var(--iu-action); --signal-ink:var(--iu-signal-ink);
   --sky:var(--iu-ink); --violet:var(--iu-accent); --mono:var(--iu-mono); --sans:var(--iu-type);
   --home-bg:var(--iu-bg); --home-line:var(--iu-line); --home-muted:var(--iu-muted);
   --home-signal:var(--iu-accent); --home-ink:var(--iu-ink);
+}
+html body[data-page],html body[data-page][data-theme] {
   background:var(--iu-bg); color:var(--iu-ink); font-family:var(--iu-type);
+}
+@media screen {
+  html body[data-page="equipment"] {
+    --iu-bg:#070d18;--iu-ink:#edf7ff;
+    --iu-panel:var(--solid,#0d1929);--iu-muted:var(--muted,#adbdcc);
+    --iu-line:var(--line,#accde22b);--iu-accent:var(--accent,#2cd0e9);
+    --iu-action:#00d5ff;--iu-signal-ink:#102238;--iu-grid:var(--iu-line);
+  }
+  html body[data-page="equipment"][data-theme="light"] {
+    --iu-bg:#f2f8fc;--iu-ink:#102238;
+    --iu-panel:var(--solid,#e8f0f7);--iu-muted:var(--muted,#435d72);
+    --iu-line:var(--line,#456c8a38);--iu-accent:var(--accent,#006e8c);
+  }
+  html body[data-page="equipment"] :is(.masthead,.footer) {
+    --console-bg:#f7fbff;--console-text:#102238;--console-panel:#e8f0f7;
+    --console-muted:#435d72;--console-line:#456c8a38;
+    --equipment-link:#006e8c;--equipment-hover:#e8f0f7;
+  }
+  html body[data-page="equipment"] .footer {--console-bg:#f2f8fc}
 }
 html body[data-page] ::selection { background:var(--iu-action);color:var(--iu-signal-ink) }
 body[data-page] :is(.skip,.button-primary,.toast) {background:var(--iu-action);color:var(--iu-signal-ink)}
-body[data-page] .button-primary:hover {background:#fae477;color:var(--iu-signal-ink)}
+body[data-page]:where(:not([data-page="equipment"])) .button-primary:hover {background:#fae477;color:var(--iu-signal-ink)}
 html body[data-page] .reading-progress {background:var(--iu-action);height:3px}
 html body[data-page] .route-progress {background:linear-gradient(90deg,transparent,var(--iu-action),transparent)}
 body[data-page] :is(.masthead,.footer) {
@@ -38,17 +62,17 @@ html body[data-page] .masthead .brand small {color:var(--console-muted);letter-s
 html body[data-page] .masthead .main-nav {background:var(--console-bg);border-color:var(--console-line);scrollbar-color:var(--console-line) var(--console-bg)}
 html body[data-page] .masthead .main-nav a {color:var(--console-muted);border-radius:0;text-shadow:none}
 html body[data-page] .masthead .main-nav a[aria-current="page"] {
-  color:#f8f6e8;background:linear-gradient(90deg,#e4c54222,transparent);border-radius:0;
+  color:var(--equipment-link,#f8f6e8);background:linear-gradient(90deg,var(--equipment-hover,#e4c54222),transparent);border-radius:0;
 }
 html body[data-page] .masthead .main-nav a[aria-current="page"]::after {background:var(--iu-action);border-radius:0}
-html body[data-page] .masthead .main-nav a:hover {color:white;background-color:#34382f}
+html body[data-page] .masthead .main-nav a:hover {color:var(--equipment-link,white);background-color:var(--equipment-hover,#34382f)}
 html body[data-page] .masthead .main-nav a .nav-index {font-family:var(--iu-mono);color:var(--console-muted);font-variant-numeric:tabular-nums}
-html body[data-page] .masthead .main-nav a[aria-current="page"] .nav-index {color:var(--iu-action)}
+html body[data-page] .masthead .main-nav a[aria-current="page"] .nav-index {color:var(--equipment-link,var(--iu-action))}
 html body[data-page] .masthead .languages {background:var(--console-panel);border:1px solid var(--console-line);border-radius:3px;box-shadow:none}
 html body[data-page] .masthead .languages button {color:var(--console-text);border-radius:2px}
 html body[data-page] .masthead .languages button[aria-pressed="true"] {background:var(--iu-action);color:var(--iu-signal-ink)}
 html body[data-page] .masthead :is(.theme-toggle,.menu-toggle) {color:var(--console-text);border:1px solid var(--console-line);border-radius:2px;background:var(--console-panel)}
-html body[data-page] .masthead :is(.navigation-lens,.language-lens) {
+html body[data-page]:where(:not([data-page="equipment"])) .masthead :is(.navigation-lens,.language-lens) {
   border-radius:4px;border-color:#e2d594;box-shadow:inset 0 0 0 1px #3c3d32;
   background:linear-gradient(145deg,#f9f5dbe6,#d6cc9dea);color:#202117;
 }
@@ -78,13 +102,14 @@ html body[data-page] main .page-heading .page-number {display:none}
 body[data-page] .footer .footer-directory {border-color:var(--console-line)}
 html body[data-page] .footer :is(h2,.footer-brand,.footer-brand em) {color:var(--console-text)}
 html body[data-page] .footer :is(a,.footer-brand small,.footer-note,.motion-replay,.ambient-toggle,.back-top) {color:var(--console-muted);border-color:var(--console-line)}
-html body[data-page] .footer :is(a,button):is(:hover,:focus-visible) {color:var(--iu-action);outline-color:var(--iu-action);border-color:var(--iu-action)}
+html body[data-page] .footer :is(a,button):is(:hover,:focus-visible) {color:var(--equipment-link,var(--iu-action));outline-color:currentColor;border-color:currentColor}
 body[data-page] .footer .footer-directory-group h2::before {
   content:"";display:inline-block;width:.75rem;height:2px;vertical-align:middle;margin-inline-end:.55rem;background:var(--iu-action);
 }
-html body[data-page] .ref-chapter {
+html body[data-page] .ref-chapter {font-family:var(--iu-type)}
+html body[data-page] .ref-chapter:where(:not(.ref-equipment)) {
   --ref-bg:var(--iu-bg);--ref-card:var(--iu-panel);--ref-ink:var(--iu-ink);--ref-muted:var(--iu-muted);
-  --ref-line:var(--iu-line);--ref-accent:var(--iu-accent);font-family:var(--iu-type);
+  --ref-line:var(--iu-line);--ref-accent:var(--iu-accent);
 }
 html body[data-page] .ref-chapter .ref-eyebrow {font:650 .78rem/1.6 var(--iu-mono)}
 html body[data-page] .ref-chapter .ref-button:is(:hover,[aria-pressed="true"]) {background:var(--iu-action);color:var(--iu-signal-ink);border-color:var(--iu-action)}
@@ -251,8 +276,7 @@ body[data-page] .boot-screen:is([data-mode="page"],[data-mode="departure"]) .boo
   body[data-page="equipment"] .room-product-selector button { border-radius:0; color:var(--iu-muted); }
   body[data-page="equipment"] .room-product-selector button[aria-pressed=true] { background:var(--iu-action); color:var(--iu-signal-ink); box-shadow:none; }
   body[data-page="equipment"] .room-product-viewport { border-radius:0; border-block:2px solid var(--iu-line); box-shadow:none; }
-  body[data-page="equipment"] .room-glass-button { border-radius:2px; background:#252923ed; color:#faf9ef; border-color:#777d71; }
-  body[data-page="equipment"] .room-hotspot[aria-pressed=true] { background:#f1d642; color:#1b1e19; }
+  body[data-page="equipment"] .room-glass-button { border-radius:2px; }
   body[data-page="equipment"] .room-feature-number { font-family:var(--mono,monospace); font-variant-numeric:tabular-nums; }
 
   /* Contact form: ruled blanks on a contrasting writing surface. */
@@ -313,11 +337,69 @@ body[data-page="photography"] .ref-photography .ref-photo-observations .ref-card
 body[data-page="photography"] .ref-photography .ref-photo-observations .ref-card :is(h3,p) {padding-inline:0}
 body[data-page="photography"] .ref-photography input[type="range"] {accent-color:var(--iu-accent)}
 body[data-page="photography"] .ref-photography .ref-hero h1 {font-weight:760;letter-spacing:-.045em}
-body[data-page="equipment"] .ref-equipment {
-  background:var(--iu-panel);border:0;border-block:2px solid var(--iu-line);
+/* The studio keeps the original reference palette in both themes.
+   Let the usable chapter width, including any navigation rail, set the layout. */
+body[data-page="equipment"] #main .ref-equipment {
+  --studio-gutter:clamp(1rem,5%,4.5rem);
+  inline-size:100%;min-inline-size:0;box-sizing:border-box;container:lighting-studio / inline-size;
+  background:var(--ref-bg);color:var(--ref-ink);
+  border:0;border-block:1px solid var(--ref-line);
 }
-body[data-page="equipment"] .ref-equipment .ref-light-notes article {border-block-start:2px solid var(--iu-line)}
-body[data-page="equipment"] .ref-equipment .ref-figure figcaption {border-inline-start:3px solid var(--iu-accent);padding-inline-start:.75rem;}
+body[data-page="equipment"] #main .ref-equipment > :is(.ref-section,.ref-credits) {
+  box-sizing:border-box;inline-size:100%;max-inline-size:84rem;margin-inline:auto;
+  padding-inline:var(--studio-gutter);
+}
+body[data-page="equipment"] #main .ref-equipment > .ref-section {
+  padding-block:clamp(2rem,5cqi,4.5rem) clamp(1.5rem,3cqi,3rem);
+}
+body[data-page="equipment"] #main .ref-equipment .ref-figure figcaption {
+  border:0;color:var(--ref-muted);
+}
+body[data-page="equipment"] #main .ref-light-guide {
+  min-inline-size:0;margin-block-start:clamp(2.5rem,6cqi,5rem);
+  scroll-margin-block-start:calc(var(--masthead-height,0px) + 1rem);
+}
+body[data-page="equipment"] #main .ref-light-guide > h3 {
+  margin:0 0 clamp(1.25rem,3cqi,2.25rem);
+  color:var(--ref-ink);font-size:clamp(1.35rem,2.7cqi,2rem);line-height:1.4;text-wrap:balance;
+}
+body[data-page="equipment"] #main .ref-light-notes {
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0;
+  margin:0;padding:0;list-style:none;border-top:1px solid var(--ref-line);
+}
+body[data-page="equipment"] #main .ref-light-notes > li {
+  display:grid;grid-template-columns:max-content minmax(0,1fr);align-content:start;align-items:baseline;
+  column-gap:clamp(.75rem,2cqi,1.25rem);row-gap:.5rem;padding-block:clamp(1.125rem,2.6cqi,2rem);
+}
+body[data-page="equipment"] #main .ref-light-notes > li + li {border-top:1px solid var(--ref-line)}
+body[data-page="equipment"] #main .ref-light-index {
+  color:var(--ref-accent);font:650 .875rem/1.5 var(--iu-mono);font-variant-numeric:tabular-nums;
+}
+body[data-page="equipment"] #main .ref-light-notes h4 {
+  margin:0;color:var(--ref-ink);font:650 clamp(1.125rem,2.1cqi,1.375rem)/1.45 var(--iu-type);
+  overflow-wrap:anywhere;
+}
+body[data-page="equipment"] #main .ref-light-notes p {
+  grid-column:2;margin:0;max-inline-size:52ch;color:var(--ref-muted);
+  font-size:1rem;line-height:1.75;overflow-wrap:anywhere;
+}
+body[data-page="equipment"] #main .ref-equipment > .ref-credits {
+  border:0;border-block-start:1px solid var(--ref-line);
+  padding-block:.75rem 1.5rem;color:var(--ref-muted);font-size:.9375rem;
+}
+body[data-page="equipment"] #main .ref-equipment .ref-credits summary {
+  min-block-size:44px;padding-block:.75rem;line-height:1.5;color:var(--ref-ink);
+}
+@container lighting-studio (max-width:22rem) {
+  body[data-page="equipment"] #main .ref-light-notes p {grid-column:1/-1}
+}
+@container lighting-studio (min-width:58rem) {
+  body[data-page="equipment"] #main .ref-light-notes {
+    grid-template-columns:repeat(3,minmax(0,1fr));column-gap:clamp(2rem,4cqi,4rem);
+  }
+  body[data-page="equipment"] #main .ref-light-notes > li + li {border:0}
+  body[data-page="equipment"] #main .ref-light-notes p {grid-column:1/-1}
+}
 
 /* Aerovate: an instrument cover, a photographic parts index and a flight reel. */
 body[data-page="stem"] .ref-chapter.ref-stem {
